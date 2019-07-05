@@ -4,6 +4,7 @@
 #include "vesavga.h"
 #include "common.h"
 #include "multiboot.h"
+#include "timer.h"
 	
 extern void beep( u16int freq );
 extern void vga43(void);
@@ -16,10 +17,12 @@ volatile int foobar = 0;
 
 extern "C" 
 {
+	
+extern void enable_interrupts(void);
 
 int kmain(unsigned long magic, multiboot_info_t *mboot_ptr)
 {
-	init_descriptor_tables();
+	
 	set_foreground_color( BLUE );
 	set_background_color( LTGRAY );
 	monitor_clear();
@@ -29,11 +32,15 @@ int kmain(unsigned long magic, multiboot_info_t *mboot_ptr)
 	// All our initialisation calls will go in here.
 	// helloWorld();
 	// vga43();
-	monitor_write("Hello World!!!\n");
-	__asm volatile("int $0x3");
-	__asm volatile("int $0x4");
+	// monitor_write("Hello World!!!\n");
+	//__asm volatile("int $0x3");
+	//__asm volatile("int $0x4");
+	init_descriptor_tables();
+	enable_interrupts();
+	
+	init_timer(50);
 
-	return 0xDEADBABA;
+	return 0;
 }
 
 }

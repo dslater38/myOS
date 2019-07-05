@@ -27,8 +27,8 @@ extern "C" {
 
 void outb(u16int port, u8int value);
 void outw(u16int port, u16int value);
-void memcpy(u8int *dest, const u8int *src, u32int len);
-void memset(u8int *dest, u8int val, u32int len);
+void memcpy(void *dest, const void *src, u32int len);
+void memset(void *dest, u8int val, u32int len);
 
 u8int inb(u16int port);
 u16int inw(u16int port);

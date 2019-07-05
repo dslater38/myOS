@@ -1,5 +1,4 @@
 
-
 template<class T>
 void memcpy(T *src, T *dst, size_t count )
 {
@@ -9,3 +8,4 @@ void memcpy(T *src, T *dst, size_t count )
 	}
 }
 
+void memset(void *dest, u8int val, u32int size);
