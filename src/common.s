@@ -3,6 +3,9 @@
 [GLOBAL outw]
 [GLOBAL inb]
 [GLOBAL inw]
+[GLOBAL idle_loop]
+[GLOBAL set_page_directory]
+[GLOBAL get_fault_addr]
 
 outb:
 	mov edx, [esp+4]
@@ -25,4 +28,22 @@ inb:
 inw:
 	mov edx, [esp+4]
 	in ax, dx
+	ret
+
+idle_loop:
+loop:
+	hlt
+	jmp loop
+
+
+set_page_directory:
+	mov eax, [esp+4]
+	mov	cr3, eax
+	mov eax, cr0
+	or eax,80000000h
+	mov cr0, eax
+	ret
+
+get_fault_addr:
+	mov eax, cr2
 	ret

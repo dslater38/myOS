@@ -35,10 +35,24 @@ typedef struct registers
 #define IRQ14 46
 #define IRQ15 47
 
+
+#define PIC1		0x20		/* IO base address for master PIC */
+#define PIC2		0xA0		/* IO base address for slave PIC */
+#define MASTER_PIC_COMMAND	PIC1
+#define MASTER_PIC_DATA	(PIC1+1)
+#define SLAVE_PIC_COMMAND	PIC2
+#define SLAVE_PIC_DATA	(PIC2+1)
+
+#define PIC_RESET_COMMAND 0x20
+
+#define PIC_EOI		0x20		/* End-of-interrupt command code */
+
 // Enables registration of callbacks for interrupts or IRQs.
 // For IRQs, to ease confusion, use the #defines above as the
 // first parameter.
 typedef void (*isr_t)(registers_t);
 void register_interrupt_handler(u8int n, isr_t handler);
+
+extern isr_t interrupt_handlers[256] ;
 
 #endif // ISR_H_INCLUDED

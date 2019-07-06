@@ -11,6 +11,15 @@ void memcpy(void *dest, const void *src, u32int len)
 // Write len copies of val into dest.
 void memset(void *vdest, u8int val, u32int len)
 {
+#ifndef  FAST_MEMCPY
+	u8int *ptr,*pEnd;
+	for( ptr = (u8int *)vdest, pEnd = ptr + len;
+		ptr<pEnd;
+		++ptr )
+	{
+		*ptr = val;
+	}
+#else
 	u8int *dest = (u8int *)vdest;
 	u32int slen,dlen;
 	
@@ -21,7 +30,7 @@ void memset(void *vdest, u8int val, u32int len)
 		u32int v = ((val<<24)|(val<<16)|(val<<8)|val);
 		u32int *ptr = (u32int *)dest;
 		dest = (u8int *)(ptr + dlen);
-		for( ;ptr < dest; ++ptr )
+		for( ;ptr < (u32int *)dest; ++ptr )
 		{
 			*ptr = v;
 		}
@@ -34,7 +43,7 @@ void memset(void *vdest, u8int val, u32int len)
 		u16int v = ((val<<8)|val);
 		u16int *ptr = (u16int *)dest;
 		dest = (u8int *)(ptr + slen);
-		for( ;ptr < dest; ++ptr )
+		for( ;ptr < (u16int *)dest; ++ptr )
 		{
 			*ptr = v;
 		}
@@ -51,4 +60,5 @@ void memset(void *vdest, u8int val, u32int len)
 		}
 		
 	}
+#endif
 }

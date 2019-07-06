@@ -1,13 +1,7 @@
 [BITS 32]
 
-[GLOBAL enable_interrupts]
-	enable_interrupts:
-		sti
-		ret
-
-
 %macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
-  global isr%1        ; %1 accesses the first parameter.
+  [GLOBAL isr%1]        ; %1 accesses the first parameter.
   isr%1:
     cli
     push byte 0
@@ -16,12 +10,66 @@
 %endmacro
 
 %macro ISR_ERRCODE 1
-  global isr%1
+  [GLOBAL isr%1]
   isr%1:
     cli
     push byte %1
     jmp isr_common_stub
 %endmacro
+
+; This macro creates a stub for an IRQ - the first parameter is
+; the IRQ number, the second is the ISR number it is remapped to.
+%macro IRQ 2
+  [GLOBAL irq%1]
+  irq%1:
+	cli
+	push byte 0
+	push byte %2
+	jmp irq_common_stub
+%endmacro
+
+
+%macro COMMON_STUB 2
+[EXTERN %2]
+
+%1:
+	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+
+	mov ax, ds               ; Lower 16-bits of eax = ds.
+	push eax                 ; save the data segment descriptor
+
+	mov ax, 0x10  ; load the kernel data segment descriptor
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+
+	call %2
+
+	pop ebx        ; reload the original data segment descriptor
+	mov ds, bx
+	mov es, bx
+	mov fs, bx
+	mov gs, bx
+
+	popa                     ; Pops edi,esi,ebp...
+	add esp, 8     ; Cleans up the pushed error code and pushed ISR number
+	sti
+	iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+%endmacro
+
+
+[GLOBAL enable_interrupts]
+	enable_interrupts:
+		sti
+		ret
+
+
+[GLOBAL disable_interrupts]
+	disable_interrupts:
+		cli
+		ret
+
 
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
@@ -57,16 +105,6 @@ ISR_NOERRCODE 30
 ISR_NOERRCODE 31
 
 
-; This macro creates a stub for an IRQ - the first parameter is
-; the IRQ number, the second is the ISR number it is remapped to.
-%macro IRQ 2
-  [GLOBAL irq%1]
-  irq%1:
-	cli
-	push byte 0
-	push byte %2
-	jmp irq_common_stub
-%endmacro
 
 IRQ   0,    32
 IRQ   1,    33
@@ -85,67 +123,71 @@ IRQ   13,    45
 IRQ   14,    46
 IRQ   15,    47
 
+COMMON_STUB isr_common_stub, isr_handler
+COMMON_STUB irq_common_stub, irq_handler
+
+
 ; In isr.c
-[EXTERN isr_handler]
+; [EXTERN isr_handler]
 
 ; This is our common ISR stub. It saves the processor state, sets
 ; up for kernel mode segments, calls the C-level fault handler,
 ; and finally restores the stack frame.
-isr_common_stub:
-	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+; isr_common_stub:
+	; pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
 
-	mov ax, ds               ; Lower 16-bits of eax = ds.
-	push eax                 ; save the data segment descriptor
+	; mov ax, ds               ; Lower 16-bits of eax = ds.
+	; push eax                 ; save the data segment descriptor
 
-	mov ax, 0x10  ; load the kernel data segment descriptor
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
+	; mov ax, 0x10  ; load the kernel data segment descriptor
+	; mov ds, ax
+	; mov es, ax
+	; mov fs, ax
+	; mov gs, ax
 
-	call isr_handler
+	; call isr_handler
 
-	pop eax        ; reload the original data segment descriptor
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
+	; pop eax        ; reload the original data segment descriptor
+	; mov ds, ax
+	; mov es, ax
+	; mov fs, ax
+	; mov gs, ax
 
-	popa                     ; Pops edi,esi,ebp...
-	add esp, 8     ; Cleans up the pushed error code and pushed ISR number
-	sti
-	iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+	; popa                     ; Pops edi,esi,ebp...
+	; add esp, 8     ; Cleans up the pushed error code and pushed ISR number
+	; sti
+	; iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
    
 
 
 ; In isr.c
-[EXTERN irq_handler]
+; [EXTERN irq_handler]
 
 ; This is our common IRQ stub. It saves the processor state, sets
 ; up for kernel mode segments, calls the C-level fault handler,
 ; and finally restores the stack frame. 
-irq_common_stub:
-	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+; irq_common_stub:
+	; pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
 
-	mov ax, ds               ; Lower 16-bits of eax = ds.
-	push eax                 ; save the data segment descriptor
+	; mov ax, ds               ; Lower 16-bits of eax = ds.
+	; push eax                 ; save the data segment descriptor
 
-	mov ax, 0x10  ; load the kernel data segment descriptor
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
+	; mov ax, 0x10  ; load the kernel data segment descriptor
+	; mov ds, ax
+	; mov es, ax
+	; mov fs, ax
+	; mov gs, ax
 
-	call irq_handler
+	; call irq_handler
 
-	pop ebx        ; reload the original data segment descriptor
-	mov ds, bx
-	mov es, bx
-	mov fs, bx
-	mov gs, bx
+	; pop ebx        ; reload the original data segment descriptor
+	; mov ds, bx
+	; mov es, bx
+	; mov fs, bx
+	; mov gs, bx
 
-	popa                     ; Pops edi,esi,ebp...
-	add esp, 8     ; Cleans up the pushed error code and pushed ISR number
-	sti
-	iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+	; popa                     ; Pops edi,esi,ebp...
+	; add esp, 8     ; Cleans up the pushed error code and pushed ISR number
+	; sti
+	; iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 

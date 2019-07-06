@@ -1,5 +1,6 @@
 #include "common.h"
 #include "descriptor_tables.h"
+#include "isr.h"
 
 // Lets us access our ASM functions from our C code.
 
@@ -33,6 +34,7 @@ extern "C"
 		// Initialise the global descriptor table.
 		init_gdt();
 		init_idt();
+		memset(&interrupt_handlers, 0, sizeof(isr_t)*256);
 	}
 }
 
@@ -56,11 +58,26 @@ static void gdt_set_gate(s32int num, u32int base, u32int limit, u8int access, u8
 	gdt_entries[num].set(base, limit, access, gran);
 }
 
+/* reinitialize the PIC controllers, giving them specified vector offsets
+   rather than 8h and 70h, as configured by default */
+ 
+#define ICW1_ICW4	0x01		/* ICW4 (not) needed */
+#define ICW1_SINGLE	0x02		/* Single (cascade) mode */
+#define ICW1_INTERVAL4	0x04		/* Call address interval 4 (8) */
+#define ICW1_LEVEL	0x08		/* Level triggered (edge) mode */
+#define ICW1_INIT	0x10		/* Initialization - required! */
+ 
+#define ICW4_8086	0x01		/* 8086/88 (MCS-80/85) mode */
+#define ICW4_AUTO	0x02		/* Auto (normal) EOI */
+#define ICW4_BUF_SLAVE	0x08		/* Buffered mode/slave */
+#define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
+#define ICW4_SFNM	0x10		/* Special fully nested (not) */
+ 
 static void remap_pics()
 {
 	// Remap the irq table.
-	outb(0x20, 0x11);
-	outb(0xA0, 0x11);
+	outb(MASTER_PIC_COMMAND, ICW1_INIT | ICW1_ICW4);
+	outb(SLAVE_PIC_COMMAND, ICW1_INIT | ICW1_ICW4);
 	outb(0x21, 0x20);
 	outb(0xA1, 0x28);
 	outb(0x21, 0x04);
@@ -73,8 +90,7 @@ static void remap_pics()
 
 static void init_irqs()
 {
-	remap_pics();
-	
+
 	idt_set_gate(32, (u32int)irq0, 0x08, 0x8E);
 	idt_set_gate(33, (u32int)irq1, 0x08, 0x8E);
 	idt_set_gate(34, (u32int)irq2, 0x08, 0x8E);
@@ -93,16 +109,9 @@ static void init_irqs()
 	idt_set_gate(47, (u32int)irq15, 0x08, 0x8E);
 }
 
-static void init_idt()
+
+static void init_isrs()
 {
-	idt_ptr.limit() = sizeof(idt_entry_t) * 256 -1;
-	idt_ptr.base()  = (u32int)&idt_entries;
-
-
-	// memset((u8int *) &idt_entries, 0, sizeof(idt_entry_t)*256);
-
-	
-	
 	idt_set_gate( 0, (u32int)isr0 , 0x08, 0x8E);
 	idt_set_gate( 1, (u32int)isr1 , 0x08, 0x8E);	
 	idt_set_gate( 2, (u32int)isr2 , 0x08, 0x8E);
@@ -136,6 +145,20 @@ static void init_idt()
 	idt_set_gate( 30, (u32int)isr30 , 0x08, 0x8E);
 	idt_set_gate( 31, (u32int)isr31 , 0x08, 0x8E);
 
+}
+
+static void init_idt()
+{
+	idt_ptr.limit() = sizeof(idt_entry_t) * 256 -1;
+	idt_ptr.base()  = (u32int)&idt_entries;
+
+
+	memset(&idt_entries, 0, sizeof(idt_entry_t)*256);
+	
+	// Remap the irq table.
+	remap_pics();
+	
+	init_isrs();
 	init_irqs();
 
 	idt_flush((u32int)&idt_ptr);

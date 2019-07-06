@@ -5,6 +5,7 @@
 #include "common.h"
 #include "multiboot.h"
 #include "timer.h"
+#include "paging.h"
 	
 extern void beep( u16int freq );
 extern void vga43(void);
@@ -17,11 +18,11 @@ volatile int foobar = 0;
 
 extern "C" 
 {
-	
-extern void enable_interrupts(void);
 
 int kmain(unsigned long magic, multiboot_info_t *mboot_ptr)
 {
+	char buffer[128];
+	init_descriptor_tables();
 	
 	set_foreground_color( BLUE );
 	set_background_color( LTGRAY );
@@ -35,10 +36,25 @@ int kmain(unsigned long magic, multiboot_info_t *mboot_ptr)
 	// monitor_write("Hello World!!!\n");
 	//__asm volatile("int $0x3");
 	//__asm volatile("int $0x4");
-	init_descriptor_tables();
-	enable_interrupts();
+	//enable_interrupts();
 	
-	init_timer(50);
+    initialise_paging();
+    monitor_write("Hello, paging world!\n");	
+	
+    
+	
+    u32int *ptr = (u32int*)0xA0000000;
+    
+    sprintf(buffer,"About to access %08.8x\n", (u32int)ptr);
+    monitor_write(buffer);
+    
+    u32int do_page_fault = *ptr;
+	
+	monitor_write_dec(do_page_fault);
+	
+	monitor_write("After page fault!\n");
+	
+//	init_timer(50);
 
 	return 0;
 }

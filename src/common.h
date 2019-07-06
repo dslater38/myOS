@@ -30,9 +30,25 @@ void outw(u16int port, u16int value);
 void memcpy(void *dest, const void *src, u32int len);
 void memset(void *dest, u8int val, u32int len);
 
+extern void enable_interrupts(void);
+extern void disable_interrupts(void);
+extern void idle_loop(void);	/* never returns */
+extern u32int get_fault_addr(void);
+
 u8int inb(u16int port);
 u16int inw(u16int port);
 int sprintf(char *buf, const char *fmt, ...);
+
+#define NULL 0
+
+
+void panic(const char *message, const char *file, u32int line);
+void panic_assert(const char *file, u32int line, const char *desc);
+
+#define PANIC(msg) panic(msg, __FILE__, __LINE__);
+#define ASSERT(b) ((b) ? (void)0 : panic_assert(__FILE__, __LINE__, #b))
+
+#define PAGE_ALIGN(a) if( (a & 0xFFFFF000) != 0 ) { a = ((a & 0xFFFFF000) + 0x1000); }
 
 #ifdef __cplusplus
 }
