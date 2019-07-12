@@ -8,6 +8,10 @@
 
 #include "common.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct registers
 {
    u32int ds;                  // Data segment selector
@@ -54,5 +58,9 @@ typedef void (*isr_t)(registers_t);
 void register_interrupt_handler(u8int n, isr_t handler);
 
 extern isr_t interrupt_handlers[256] ;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ISR_H_INCLUDED

@@ -16,6 +16,8 @@ MBOOT_CHECKSUM      equ ( -(MBOOT_HEADER_MAGIC + MBOOT_HEADER_FLAGS) )
 [BITS 32]                       ; All instructions should be 32-bit.
 
 [GLOBAL mboot]                  ; Make 'mboot' accessible from C.
+[GLOBAL mboot2]                  ; Make 'mboot' accessible from C.
+[GLOBAL mboot2_end]
 [EXTERN code]                   ; Start of the '.text' section.
 [EXTERN bss]                    ; Start of the .bss section.
 [EXTERN end]                    ; End of the last loadable section.
@@ -33,17 +35,17 @@ struc mbootType
 	.width:			resd 1
 	.height:			resd 1
 	.depth:			resd 1
-	
+
 endstruc
 
-struc mBoot2Type
-	.magic			resd 1
-	.mode			resd 1
-	.header_length	resd 1
-	.checksum		resd 1
-	.type			resw 1
-	.flags			resw 1
-	.size			resw 1
+struc mboot2Type
+	.magic:			resd 1
+	.mode:			resd 1
+	.header_length:	resd 1
+	.checksum:		resd 1
+	.type:			resw 1
+	.flags:			resw 1
+	.size:			resw 1
 endstruc
 
 mboot:
@@ -61,18 +63,16 @@ mboot:
 		at mbootType.height, 			dd 0						; video height (ignored - flag not set)
 		at mbootType.depth, 			dd 0						; video depth (ignored - flag not set)
 	iend
-
-
 mboot2:
 	istruc mboot2Type
-		at mboot2Type.magic			dd	MBOOT2_HEADER_MAGIC
-		at mboot2Type.mode			dd	0
-		at mboot2Type.header_length	dd	0x100000000 - (0xe85250d6 + 0 + (mboot2_end - mboot2))
-		at mboot2Type.type			dw	0
-		at mboot2Type.flags			dw	0
-		at mboot2Type.size			dw	0
+		at mboot2Type.magic,			dd MBOOT2_HEADER_MAGIC
+		at mboot2Type.mode,			dd 0
+		at mboot2Type.header_length,	dd 0x100000000 - (0xe85250d6 + 0 + (mboot2_end - mboot2))
+		at mboot2Type.type,			dw 0
+		at mboot2Type.flags,			dw 0
+		at mboot2Type.size,			dw 0
 	iend
-mboot2_end
+mboot2_end:
 
 [GLOBAL start]                  ; Kernel entry point.
 [EXTERN kmain]                   ; This is the entry point of our C code
