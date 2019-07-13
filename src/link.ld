@@ -21,7 +21,13 @@ SECTIONS
      *(.rodata)
      . = ALIGN(4096);
   }
-
+  
+ .stack :
+ {
+	. += 16384; 
+	. = ALIGN(4096);
+	init_stack32 = .; _init_stack32 = .; __init_stack32 = .;
+ }
   .bss :
   {
     bss = .; _bss = .; __bss = .;
