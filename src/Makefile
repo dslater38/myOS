@@ -12,8 +12,8 @@ SSOURCES=$(wildcard *.s)
 
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)  
 
-CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -O2 -g
-CXXFLAGS=-std=c++17 -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -O2 -g -Wno-main
+CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -O2
+CXXFLAGS=-std=c++17 -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -O2 -Wno-main
 LDFLAGS=-melf_i386 -Tlink.ld
 ASFLAGS=-felf
 
@@ -21,7 +21,7 @@ ASFLAGS=-felf
 all: kernel
 
 clean:
-	@rm -f *.o *.d *.ds kernel
+	@rm -f *.o *.d *.d.* *.ds kernel
 
 kernel: $(OBJECTS) 
 	ld $(LDFLAGS) -o $@ $^

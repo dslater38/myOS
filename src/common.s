@@ -1,4 +1,5 @@
 [BITS 32]                       ; All instructions should be 32-bit.
+
 [GLOBAL outb]
 [GLOBAL outw]
 [GLOBAL inb]

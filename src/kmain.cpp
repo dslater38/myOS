@@ -3,7 +3,7 @@
 
 #include "vesavga.h"
 #include "common.h"
-#include "multiboot.h"
+#include "multiboot2.h"
 #include "timer.h"
 #include "paging.h"
 #include "isr.h"
@@ -22,7 +22,7 @@ extern "C"
 
 	void page_fault(registers_t regs);
 	
-int kmain(unsigned long magic, multiboot_info_t *mboot_ptr)
+int kmain(unsigned long magic, multiboot_tag *mboot_ptr)
 {
 	char buffer[128];
 
