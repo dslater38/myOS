@@ -21,9 +21,68 @@ extern "C"
 {
 
 	void page_fault(registers_t regs);
+	void initGDT();
+	void initIDT();
+	
+
+	static void init_monitor()
+	{
+		set_foreground_color( BLUE );
+		set_background_color( LTGRAY );
+		monitor_clear();
+	}
+	
+	static void init_GDT()
+	{
+		monitor_write("Initialize GDT\n");
+		initGDT();
+	}
+	
+	static void init_IDT()
+	{
+		monitor_write("Initialize IDT\n");
+		initIDT();
+	}
+		
+	static void init_page()
+	{
+		monitor_write("Initialize Paging....\n");
+		initialise_paging();
+	}
+	
+	static void handle_page_faults()
+	{
+		monitor_write("Register Page Fault Handler\n");
+		register_interrupt_handler(14, page_fault);
+	}
+	
+	static void test_page_fault()
+	{
+		monitor_write("Testing Page Fault\n");
+		u32int *ptr = (u32int*)0xA0000000;
+		u32int do_page_fault = *ptr;
+		monitor_write_dec(do_page_fault);
+		monitor_write("After page fault! SHOULDN'T GET HERE \n");
+	}	
 	
 int kmain(unsigned long magic, multiboot_tag *mboot_ptr)
 {
+#if 0
+	init_monitor();
+	
+	init_page();
+	
+	init_GDT();
+	init_IDT();
+	// register_interrupt_handler(14, page_fault);
+	
+	monitor_write("Hello, paging world!\n");
+	
+	test_page_fault();
+	
+	return 0;
+	
+#else
 	char buffer[128];
 
 	
@@ -62,6 +121,8 @@ int kmain(unsigned long magic, multiboot_tag *mboot_ptr)
 //	init_timer(50);
 
 	return 0;
+	
+#endif	
 }
 
 }

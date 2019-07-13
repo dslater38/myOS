@@ -29,6 +29,17 @@ idt_ptr_t   idt_ptr{ 0 };
 // initialises the GDT and IDT.
 extern "C"
 {
+	void initGDT()
+	{
+		init_gdt();
+	}
+	
+	void initIDT()
+	{
+		init_idt();
+		memset(&interrupt_handlers, 0, sizeof(isr_t)*256);
+	}
+	
 	void init_descriptor_tables()
 	{
 		// Initialise the global descriptor table.
