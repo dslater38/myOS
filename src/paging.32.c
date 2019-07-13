@@ -18,6 +18,30 @@ page_directory_t *kernel_directory=0;
 // The current page directory;
 page_directory_t *current_directory=0;
 
+page_t *get_page32(u32int address);
+void *get_directory32();
+
+void initialise_paging32()
+{
+
+	// We need to identity map (phys addr = virt addr) from
+	// 0x0 to the end of used memory, so we can access this
+	// transparently, as if paging wasn't enabled.
+	// NOTE that we use a while loop here deliberately.
+	// inside the loop body we actually change placement_address
+	// by calling kmalloc(). A while loop causes this to be
+	// computed on-the-fly rather than once at the start.
+	int i = 0;
+	while (i < placement_address)
+	{
+		// Kernel code is readable but not writeable from userspace.
+		alloc_frame( get_page32(i), 0, 0);
+		i += PAGE_SIZE;
+	}
+	// Now, enable paging!
+	switch_page_directory((page_directory_t *)get_directory32());
+}
+
 void initialise_paging()
 {
 	// The size of physical memory. For the moment we
@@ -74,7 +98,7 @@ page_t *get_page(u32int address, int make, page_directory_t *dir)
 	// Turn the address into an index.
 	address /= PAGE_SIZE;
 	// Find the page table containing this address.
-	u32int table_idx = address / 1024;
+	u32int table_idx = address >> 10;
 	if (dir->tables[table_idx]) // If this table is already assigned
 	{
 		return &dir->tables[table_idx]->pages[address%1024];

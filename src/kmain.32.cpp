@@ -61,6 +61,7 @@ extern "C"
 		monitor_write("Testing Page Fault\n");
 		u32int *ptr = (u32int*)0xA0000000;
 		u32int do_page_fault = *ptr;
+		monitor_write_dec(do_page_fault);
 		monitor_write("After page fault! SHOULDN'T GET HERE \n");
 	}
 	

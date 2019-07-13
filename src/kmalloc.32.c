@@ -6,6 +6,47 @@ u32int placement_address = (u32int)(&end);
 
 static u32int kmalloc_generic(u32int sz, int align, u32int *phys);
 
+
+u64int kmalloc64(u32int sz)
+{
+	return (u64int)kmalloc(sz);
+}
+
+u64int kmalloc64_aligned(u32int sz)
+{
+	return (u64int)kmalloc_aligned(sz);
+}
+
+u64int kmalloc64_phys(u32int sz, u64int *phys)
+{
+	if( phys )
+	{
+		u32int p=0;
+		u32int tmp = kmalloc_phys(sz, &p);
+		*phys = p;
+		return tmp;
+	}
+	else
+	{
+		return (u64int)kmalloc_phys(sz, NULL);
+	}
+}
+
+u64int kmalloc64_aligned_phys(u32int sz, u64int *phys)
+{
+	if( phys )
+	{
+		u32int p=0;
+		u32int tmp = kmalloc_aligned_phys(sz, &p);
+		*phys = p;
+		return tmp;
+	}
+	else
+	{
+		return (u64int)kmalloc_aligned_phys(sz, NULL);
+	}
+}
+
 u32int kmalloc(u32int sz)
 {
 	return kmalloc_generic(sz,0,NULL);
