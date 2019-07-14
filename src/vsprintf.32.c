@@ -7,6 +7,7 @@
 /*
 #include <string.h>
 */
+#include "vesavga.h"
 
 static inline int strlen(const char * s)
 {

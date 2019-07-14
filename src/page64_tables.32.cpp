@@ -125,6 +125,7 @@ extern "C"
 	
 	void initPaging32(u32int maxMem)
 	{
+		monitor_write("initPaging32()\n");
 	//~ monitor_write("placement_address: ");
 	//~ monitor_write_dec(placement_address);
 	//~ monitor_write("\n\n");

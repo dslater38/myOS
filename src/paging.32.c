@@ -25,27 +25,28 @@ void dumpDir(void *p);
 
 void initialise_paging32(u32int maxMem)
 {
+	monitor_write("initialise_paging32()\n");
 	page_directory_t *dir2 = (page_directory_t *)get_directory32();
-	monitor_write("placement_address: ");
-	monitor_write_dec(placement_address);
-	monitor_write("\n\n");
+	//~ monitor_write("placement_address: ");
+	//~ monitor_write_dec(placement_address);
+	//~ monitor_write("\n\n");
 	
 	
 	
 		
-	monitor_write("dir: ");
-	monitor_write_hex((u32int)dir2);
-	monitor_write(" phy: ");
-	monitor_write_hex((u32int)(dir2->physicalAddr));
-	monitor_write(" &phy: ");
-	monitor_write_hex((u32int)(&(dir2->physicalAddr)));		
-	monitor_write(" [0]: ");
-	monitor_write_hex((u32int)(dir2->tables[0]));
-	monitor_write("\n");
-	monitor_write("page 0: ");
+	//~ monitor_write("dir: ");
+	//~ monitor_write_hex((u32int)dir2);
+	//~ monitor_write(" phy: ");
+	//~ monitor_write_hex((u32int)(dir2->physicalAddr));
+	//~ monitor_write(" &phy: ");
+	//~ monitor_write_hex((u32int)(&(dir2->physicalAddr)));		
+	//~ monitor_write(" [0]: ");
+	//~ monitor_write_hex((u32int)(dir2->tables[0]));
+	//~ monitor_write("\n");
+	//~ monitor_write("page 0: ");
 	page_table_t *ptr = dir2->tables[0];
-	monitor_write_hex( *(u32int *)&(ptr->pages)[0] );
-		monitor_write("\n");
+	//~ monitor_write_hex( *(u32int *)&(ptr->pages)[0] );
+		//~ monitor_write("\n");
 	
 	
 	
@@ -86,19 +87,19 @@ void initialise_paging32(u32int maxMem)
 		i += PAGE_SIZE;
 	}
 	page_directory_t *dir = (page_directory_t *)get_directory32();
-	monitor_write("dir: ");
-	monitor_write_hex((u32int)dir);
-	monitor_write(" phy: ");
-	monitor_write_hex((u32int)(dir->physicalAddr));
-	monitor_write(" &phy: ");
-	monitor_write_hex((u32int)(&(dir->physicalAddr)));
-	monitor_write(" [0]: ");
-	monitor_write_hex((u32int)(dir->tables[0]));
-	monitor_write("\n");
-	monitor_write("page 0: ");
+	//~ monitor_write("dir: ");
+	//~ monitor_write_hex((u32int)dir);
+	//~ monitor_write(" phy: ");
+	//~ monitor_write_hex((u32int)(dir->physicalAddr));
+	//~ monitor_write(" &phy: ");
+	//~ monitor_write_hex((u32int)(&(dir->physicalAddr)));
+	//~ monitor_write(" [0]: ");
+	//~ monitor_write_hex((u32int)(dir->tables[0]));
+	//~ monitor_write("\n");
+	//~ monitor_write("page 0: ");
 	u32int entry = *(u32int *) &( dir->tables[0]->pages[0] ) ;
-	monitor_write_hex( entry);
-	monitor_write("\n");
+	//~ monitor_write_hex( entry);
+	//~ monitor_write("\n");
 //	monitor_write("\n - Dumping...\n");
 	
 	// dumpDir(dir);
@@ -169,7 +170,7 @@ void switch_page_directory(page_directory_t *dir)
 	//~ monitor_write_hex((u32int)dir);
 	//~ monitor_write("\n");
 	
-	printf("switch: dir 0x%08.8x, phys: 0x%08.8x, &phys: 0x%08.8x\n",(u32int)dir, (u32int)(dir->tablesPhysical), (u32int)(&(dir->tablesPhysical)));
+	//~ printf("switch: dir 0x%08.8x, phys: 0x%08.8x, &phys: 0x%08.8x\n",(u32int)dir, (u32int)(dir->tablesPhysical), (u32int)(&(dir->tablesPhysical)));
 	
 	current_directory = dir;
 	
