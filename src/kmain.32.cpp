@@ -5,7 +5,6 @@
 #include "common.h"
 #include "multiboot2.h"
 #include "timer.h"
-#include "paging.h"
 #include "isr.h"
 	
 extern void beep( u16int freq );
@@ -25,7 +24,6 @@ extern "C"
 	void page_fault(registers_t regs);
 	void init_gdt_table();
 	void init_idt_table();
-	void initialise_paging32(u32int maxMem);
 	void initPaging32(u32int maxMem);
 	
 
@@ -48,23 +46,10 @@ extern "C"
 		init_idt_table();
 	}
 		
-	static void init_page()
-	{
-		monitor_write("Initialize Paging....\n");
-		monitor_write("placement_address : 0x");
-		monitor_write_hex(placement_address);
-		initialise_paging();
-		monitor_write("\nAfter Initialize Paging....\n");
-		monitor_write("placement_address : 0x");
-		monitor_write_hex(placement_address);	
-		monitor_write("\n");
-	}
-
-		
+	
 	static void init_page32()
 	{
 		monitor_write("Initialize Paging 32....\n");
-		// initialise_paging32(0x1000000);
 		initPaging32(0x1000000);
 	}
 	
