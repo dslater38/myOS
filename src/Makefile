@@ -17,7 +17,7 @@ OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
 
 CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -O3
-CXXFLAGS=-std=c++17 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -fno-exceptions -fno-threadsafe-statics -fno-rtti -O3 -Wno-main
+CXXFLAGS=-std=c++17 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -fno-exceptions -fno-threadsafe-statics -O3 -Wno-main
 LDFLAGS=-Tlink.ld
 ASFLAGS=-felf64
 
@@ -32,6 +32,8 @@ clean:
 
 kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 	ld $(LDFLAGS) -o $@ $^
+	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
+
 
 .s.o:
 	nasm $(ASFLAGS) $<

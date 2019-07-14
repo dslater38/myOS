@@ -8,7 +8,8 @@
 // Defined in kheap.c
 extern u32int placement_address;
 
-extern void set_page_directory(u32int (*d)[]);
+// extern void set_page_directory(u32int (*d)[]);
+extern void set_page_directory(void *);
 u32int *frames = 0;
 u32int nframes = 0;
 
@@ -20,9 +21,35 @@ page_directory_t *current_directory=0;
 
 page_t *get_page32(u32int address);
 void *get_directory32();
+void dumpDir(void *p);
 
 void initialise_paging32(u32int maxMem)
 {
+	page_directory_t *dir2 = (page_directory_t *)get_directory32();
+	monitor_write("placement_address: ");
+	monitor_write_dec(placement_address);
+	monitor_write("\n\n");
+	
+	
+	
+		
+	monitor_write("dir: ");
+	monitor_write_hex((u32int)dir2);
+	monitor_write(" phy: ");
+	monitor_write_hex((u32int)(dir2->physicalAddr));
+	monitor_write(" &phy: ");
+	monitor_write_hex((u32int)(&(dir2->physicalAddr)));		
+	monitor_write(" [0]: ");
+	monitor_write_hex((u32int)(dir2->tables[0]));
+	monitor_write("\n");
+	monitor_write("page 0: ");
+	page_table_t *ptr = dir2->tables[0];
+	monitor_write_hex( *(u32int *)&(ptr->pages)[0] );
+		monitor_write("\n");
+	
+	
+	
+	
 	// The size of physical memory. For the moment we
 	// assume it is 16MB big.
 	u32int mem_end_page = maxMem;
@@ -63,12 +90,18 @@ void initialise_paging32(u32int maxMem)
 	monitor_write_hex((u32int)dir);
 	monitor_write(" phy: ");
 	monitor_write_hex((u32int)(dir->physicalAddr));
+	monitor_write(" &phy: ");
+	monitor_write_hex((u32int)(&(dir->physicalAddr)));
 	monitor_write(" [0]: ");
 	monitor_write_hex((u32int)(dir->tables[0]));
 	monitor_write("\n");
 	monitor_write("page 0: ");
-	monitor_write_hex( *(u32int *) &( dir->tables[0]->pages[0] ) );
+	u32int entry = *(u32int *) &( dir->tables[0]->pages[0] ) ;
+	monitor_write_hex( entry);
 	monitor_write("\n");
+//	monitor_write("\n - Dumping...\n");
+	
+	// dumpDir(dir);
 	
 	// Now, enable paging!
 	switch_page_directory(dir);
@@ -94,7 +127,10 @@ void initialise_paging()
 	// We need to identity map (phys addr = virt addr) from
 	// 0x0 to the end of used memory, so we can access this
 	// transparently, as if paging wasn't enabled.
-	// NOTE that we use a while loop here deliberately.
+	// NOTE that we use a while loop here deliberately.	monitor_write("placement_address: ");
+	monitor_write_dec(placement_address);
+	monitor_write("\n\n");
+
 	// inside the loop body we actually change placement_address
 	// by calling kmalloc(). A while loop causes this to be
 	// computed on-the-fly rather than once at the start.
@@ -121,7 +157,10 @@ void switch_page_directory(page_directory_t *dir)
 {
     //~ current_directory = dir;
     //~ asm volatile("mov %0, %%cr3":: "r"(&dir->tablesPhysical));
-    //~ u32int cr0;
+    //~ u32int cr0;	monitor_write("placement_address: ");
+	monitor_write_dec(placement_address);
+	monitor_write("\n\n");
+
     //~ asm volatile("mov %%cr0, %0": "=r"(cr0));
     //~ cr0 |= 0x80000000; // Enable paging!
     //~ asm volatile("mov %0, %%cr0":: "r"(cr0));
@@ -129,6 +168,8 @@ void switch_page_directory(page_directory_t *dir)
 	//~ monitor_write("dir == ");
 	//~ monitor_write_hex((u32int)dir);
 	//~ monitor_write("\n");
+	
+	printf("switch: dir 0x%08.8x, phys: 0x%08.8x, &phys: 0x%08.8x\n",(u32int)dir, (u32int)(dir->tablesPhysical), (u32int)(&(dir->tablesPhysical)));
 	
 	current_directory = dir;
 	
@@ -141,7 +182,7 @@ void switch_page_directory(page_directory_t *dir)
 	//~ monitor_write("\n");
 	
 	
-	set_page_directory( &dir->tablesPhysical );
+	set_page_directory( dir->tablesPhysical );
 
 }
 #if 0

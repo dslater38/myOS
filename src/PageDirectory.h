@@ -8,22 +8,27 @@ struct PageDirectory
 	using  Pointer=typename PageType::Pointer;
 	
 	static constexpr Pointer MASK = ((1<<BITS)-1);
+	static constexpr decltype(sizeof(int)) NUM_ENTRIES = 4096 / sizeof(Pointer);
 	
 	PageDirectory()
 	{
 		memset(tables, '\0', sizeof(tables));
 		memset(physical, '\0', sizeof(physical));
 		physicalAddr = 0;
+		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (u32int)this);
 	}
 	
-	Pointer tables[4096 / sizeof(Pointer )];
+	Pointer tables[NUM_ENTRIES];
 	
-	Pointer physical[4096 / sizeof(Pointer )];
+	Pointer physical[NUM_ENTRIES];
 	
-
 	Pointer physicalAddr;
 	
-	void setPhys(Pointer p){physicalAddr = p;}
+	void setPhys(Pointer p)
+	{
+		// printf("setPhys: this: 0x%08.8x, phys: 0x%08.8x\n", (u32int)this, (u32int)p);
+		physicalAddr = p;
+	}
 	
 	Pointer index(Pointer vaddr)const
 	{
@@ -50,6 +55,20 @@ struct PageDirectory
 		}
 		return table->getPage(vaddr);
 	}
+	
+	void dump()const
+	{
+		printf("PageDirectory: this 0x%08.8x, phys 0x%08.8x\n", (u32int)this ,(u32int)physicalAddr);
+		for (auto i = 0u; i < NUM_ENTRIES; ++i)
+		{
+			printf("entry: %d == 0x%08.8x (0x%08.8x)\n", i, tables[i], physical[i]);
+			if (tables[i])
+			{
+				reinterpret_cast<T *>(tables[i])->dump();
+			}
+		}
+		printf("===========================================\n");
+	}
 };
 
 template<class UINT>
@@ -58,6 +77,11 @@ class PageTableT
 public:
 
 	static constexpr decltype(sizeof(int)) NUM_PAGES = 4096 / sizeof(UINT);
+
+	PageTableT()
+	{
+		memset(pages, '\0', sizeof(pages));
+	}
 
 	using PageType=PageT<UINT>;
 
@@ -72,6 +96,16 @@ public:
 	{
 		return *(UINT *)(&pages[n]);
 	}
+	
+	void dump()
+	{
+		for (auto i = 0u; i < NUM_PAGES; ++i)
+		{
+			printf("\tpage: %d == 0x%08.8x\n", i, *(u32int *)&(pages[i]) );
+		}
+		printf("\t+++++++++++++++++++++++\n");
+	}
+	
 	
 private:
 	PageType pages[NUM_PAGES];

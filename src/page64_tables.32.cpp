@@ -61,8 +61,8 @@ static PML4E * make_page_tables(u64int ramSize)
 }
 
 
-static Frames<u32int> frames32{};
-static DIR32 *current_directory32=0;
+static Frames<u32int> *frames32 = nullptr;
+static DIR32 *current_directory32=nullptr;
 
 static void switch_page_directory32(DIR32 *dir)
 {
@@ -77,6 +77,8 @@ static void switch_page_directory32(DIR32 *dir)
 	//~ monitor_write_hex((u32int)dir);
 	//~ monitor_write("\n");
 	
+	// printf("switch: dir 0x%08.8x, phys: 0x%08.8x, &phys: 0x%08.8x\n",(u32int)dir, (u32int)(dir->physicalAddr), (u32int)(&(dir->physicalAddr)));
+	
 	current_directory32 = dir;
 	
 	//~ monitor_write("&phys == ");
@@ -88,7 +90,7 @@ static void switch_page_directory32(DIR32 *dir)
 	//~ monitor_write("\n");
 	
 	
-	set_page_directory( &dir->physicalAddr );
+	set_page_directory( dir->physical );
 
 }
 
@@ -108,24 +110,50 @@ extern "C"
 		return getDIR32()->getPage(address);
 	}
 	
-	void *init_paging()
-	{	
-		__asm__ volatile ( "movl %eax, %edx\n movb $0x39, %al\n outb %al, $0xe9 \n movl %edx,%eax");
-		void *p = make_page_tables(33554432);
-		__asm__ volatile ( "movl %eax, %edx\n movb $0x39, %al\n outb %al, $0xe9 \n movl %edx,%eax");
-		return p;
+	//~ void *init_paging()
+	//~ {	
+		//~ __asm__ volatile ( "movl %eax, %edx\n movb $0x39, %al\n outb %al, $0xe9 \n movl %edx,%eax");
+		//~ void *p = make_page_tables(33554432);
+		//~ __asm__ volatile ( "movl %eax, %edx\n movb $0x39, %al\n outb %al, $0xe9 \n movl %edx,%eax");
+		//~ return p;
+	//~ }
+	
+	void dumpDir(void *p)
+	{
+		reinterpret_cast<DIR32 *>(p)->dump();
 	}
 	
 	void initPaging32(u32int maxMem)
 	{
+	//~ monitor_write("placement_address: ");
+	//~ monitor_write_dec(placement_address);
+	//~ monitor_write("\n\n");
+		
 		auto *dir = getDIR32();
-		monitor_write("dir : ");
-		monitor_write_hex((u32int)dir);
-		monitor_write(" phys: ");
-		monitor_write_hex(dir->physicalAddr);
-		monitor_write("\n");
-		// f = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<u32int>)))) Frames<u32int>{maxMem};
-		new(reinterpret_cast<void *>(&frames32)) Frames<u32int>{maxMem};
+		
+	//~ monitor_write("dir: ");
+	//~ monitor_write_hex((u32int)dir);
+	//~ monitor_write(" phy: ");
+	//~ monitor_write_hex((u32int)(dir->physicalAddr));
+	//~ monitor_write(" &phy: ");
+	//~ monitor_write_hex((u32int)(&(dir->physicalAddr)));		
+	//~ monitor_write(" [0]: ");
+	//~ monitor_write_hex((u32int)(dir->tables[0]));
+	//~ monitor_write("\n");
+	//~ monitor_write("page 0: ");
+	PageTableT<u32int> *ptr = reinterpret_cast<PageTableT<u32int> *>(dir->tables[0]);
+	//~ monitor_write_hex( (*ptr)[0] );
+		//~ monitor_write("\n");
+		
+		
+		
+		//~ monitor_write("dir : ");
+		//~ monitor_write_hex((u32int)dir);
+		//~ monitor_write(" phys: ");
+		//~ monitor_write_hex(dir->physicalAddr);
+		//~ monitor_write("\n");
+		frames32 = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<u32int>)))) Frames<u32int>{maxMem};
+		// new(reinterpret_cast<void *>(&frames32)) Frames<u32int>{maxMem};
 		
 		// The size of physical memory. For the moment we
 		// assume it is 16MB big.
@@ -150,7 +178,7 @@ extern "C"
 			// alloc_frame( get_page32(i), 0, 0);
 			auto *page = dir->getPage(i);
 			
-			frames32.alloc(page, 0, 0);
+			frames32->alloc(page, 0, 0);
 			i += PAGE_SIZE;
 			
 		//~ monitor_write("Page: ");
@@ -163,19 +191,24 @@ extern "C"
 		// Now, enable paging!
 		//monitor_write("Before switch_page_directory\n");
 		
-	monitor_write("dir: ");
-	monitor_write_hex((u32int)dir);
-	monitor_write(" phy: ");
-	monitor_write_hex((u32int)(dir->physicalAddr));
-	monitor_write(" [0]: ");
-	monitor_write_hex((u32int)(dir->tables[0]));
-	monitor_write("\n");
-	monitor_write("page 0: ");
+	//~ monitor_write("dir: ");
+	//~ monitor_write_hex((u32int)dir);
+	//~ monitor_write(" phy: ");
+	//~ monitor_write_hex((u32int)(dir->physicalAddr));
+	//~ monitor_write(" &phy: ");
+	//~ monitor_write_hex((u32int)(&(dir->physicalAddr)));				
+	//~ monitor_write(" [0]: ");
+	//~ monitor_write_hex((u32int)(dir->tables[0]));
+	//~ monitor_write("\n");
+	//~ monitor_write("page 0: ");
 	PageTableT<u32int> * table = reinterpret_cast<PageTableT<u32int> *>(dir->tables[0]);
 	u32int entry = (*table)[0];
-	monitor_write_hex( entry );
+	//~ monitor_write_hex( entry );
+	//~ monitor_write("\n");
 	// monitor_write_hex( (u32int)(reinterpret_cast<PageTableT<u32int> *>(dir->tables[0])->getPage(0) ));
-	monitor_write("\n");
+//	monitor_write("\nDumping...\n");
+		
+	//	dir->dump();
 		
 		switch_page_directory32(dir);
 		//monitor_write("After switch_page_directory\n");

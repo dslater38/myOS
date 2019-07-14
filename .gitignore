@@ -3,3 +3,5 @@ kernel
 *.d
 *.ds
 kernel.sym
+bochsout.txt
+os.iso

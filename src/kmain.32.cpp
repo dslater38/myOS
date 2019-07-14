@@ -19,7 +19,7 @@ volatile int foobar = 0;
 
 extern "C" 
 {
-	
+	extern u32int end;
 	extern u32int placement_address;
 
 	void page_fault(registers_t regs);
@@ -86,6 +86,7 @@ extern "C"
 	
 	int kmain32(unsigned long magic, multiboot_tag *mboot_ptr)
 	{	
+		printf("init Placement: 0x%08.8x\n", placement_address);
 		
 		init_monitor();
 		init_GDT();

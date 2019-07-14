@@ -96,8 +96,6 @@ static u32int kmalloc_generic(u32int sz, int align, u32int *phys)
 	}
 	u32int tmp = placement_address;
 	placement_address += sz;
-	monitor_write("Placement: ");
-	monitor_write_dec(placement_address);
-	monitor_write("\n");
+	// printf("Placement: 0x%08.8x\n", tmp);
 	return tmp;
 }

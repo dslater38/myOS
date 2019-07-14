@@ -250,3 +250,15 @@ int sprintf(char *buf, const char *fmt, ...)
 	va_end(args);
 	return retVal;
 }
+
+int printf(const char *fmt, ...)
+{
+	char buf[1024] = {0};
+	int retVal = 0;
+	va_list args;
+	va_start(args, fmt);
+	retVal = vsprintf(buf, fmt, args);
+	va_end(args);
+	monitor_write(buf);
+	return retVal;
+}

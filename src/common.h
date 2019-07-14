@@ -40,6 +40,7 @@ extern u32int get_fault_addr(void);
 u8int inb(u16int port);
 u16int inw(u16int port);
 int sprintf(char *buf, const char *fmt, ...);
+int printf(const char *fmt, ...);
 
 #define NULL 0
 
