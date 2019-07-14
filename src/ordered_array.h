@@ -2,6 +2,7 @@
 #define ORDERED_ARRAY_H_INCLUDED
 
 #include "common.h"
+#include "kmalloc.h"
 
 template< class T > struct remove_reference      {typedef T type;};
 template< class T > struct remove_reference<T&>  {typedef T type;};
@@ -11,13 +12,13 @@ template<class _Ty>
 	using remove_reference_t = typename remove_reference<_Ty>::type;
 
 template <class T>
-inline constexpr T&& forward(remove_reference_t & t) noexcept
+inline constexpr T&& forward(remove_reference_t<T> & t) noexcept
 {
     return static_cast<T&&>(t);
 }
 
 template <class T>
-inline constexpr T&& forward(remove_reference_t && t) noexcept
+inline constexpr T&& forward(remove_reference_t<T> && t) noexcept
 {
     return static_cast<T&&>(t);
 }
@@ -25,7 +26,7 @@ inline constexpr T&& forward(remove_reference_t && t) noexcept
 template< typename T>
 inline constexpr typename remove_reference<T>::type&& move(T &&arg)noexcept
 {
-	return static_cast<remove_reference_t &&>(arg);
+	return static_cast<remove_reference_t<T> &&>(arg);
 }
 
 template<typename T>

@@ -19,22 +19,23 @@
 [EXTERN end]                    ; End of the last loadable section.
 
 [GLOBAL start]                  ; Kernel entry point.
-[EXTERN kmain]                   ; This is the entry point of our C code
+[EXTERN kmain32]                   ; This is the entry point of our C code
 [EXTERN placement_address]
+[EXTERN init_stack32]
 
 start:
 	cli                   					; Disable interrupts.
 	mov	esp, end					; setup the stack and kmalloc's placement_address
-	add	esp, 0x5000				; take 4 pages for our stack + 1 page padding between stack & heap
+	add esp, 0x1000				; add a page padding
+	mov [placement_address], esp;	
+	mov esp, init_stack32
 	and	esp, 0xFFFFF000			; make sure it starts on a page boundary.
-	mov [placement_address], esp;
-	sub esp, 0x1000				; init the stack pointer	
 	push	0h					; reset EFLAGS
 	popf						;
 	push	ebx           			; Load multiboot header location
 	push	eax					; push the magic value.
 								; Execute the kernel:
-	call	kmain           				; call our main() function.
+	call	kmain32           				; call our main() function.
 	; Enter an infinite loop, to stop the processor  executing whatever rubbish is in the memory after our kernel!
 idle_loop:
 	hlt

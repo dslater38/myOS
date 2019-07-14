@@ -6,6 +6,8 @@
 
 // Some nice typedefs, to standardise sizes across platforms.
 // These typedefs are written for 32-bit X86.
+typedef unsigned long long u64int;
+typedef long long s64int;
 typedef unsigned int   u32int;
 typedef          int   s32int;
 typedef unsigned short u16int;
@@ -38,6 +40,7 @@ extern u32int get_fault_addr(void);
 u8int inb(u16int port);
 u16int inw(u16int port);
 int sprintf(char *buf, const char *fmt, ...);
+int printf(const char *fmt, ...);
 
 #define NULL 0
 
