@@ -14,4 +14,4 @@ com1: enabled=1, mode=file, dev=serial.out
 # debug: action=ignore, BXVGA=report
 # info: action=ignore, BXVGA=report
 # pcipnic: enabled=1, mac=b0:c4:20:4F:18:00, ethmod=linux, ethdev=ens33
-# port_e9_hack: enabled=1
+port_e9_hack: enabled=1

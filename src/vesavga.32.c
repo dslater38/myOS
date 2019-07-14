@@ -162,6 +162,7 @@ static void scroll()
 // Writes a single character out to the screen.
 void monitor_put(char c)
 {
+	outb(0xe9, c);
 	switch(c)
 	{
 		case 0x08:

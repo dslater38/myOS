@@ -21,8 +21,15 @@ page_directory_t *current_directory=0;
 page_t *get_page32(u32int address);
 void *get_directory32();
 
-void initialise_paging32()
+void initialise_paging32(u32int maxMem)
 {
+	// The size of physical memory. For the moment we
+	// assume it is 16MB big.
+	u32int mem_end_page = maxMem;
+
+	nframes = (mem_end_page>> 12);
+	frames = (u32int*)kmalloc(INDEX_FROM_BIT(nframes));
+	memset(frames, 0, INDEX_FROM_BIT(nframes));
 
 	// We need to identity map (phys addr = virt addr) from
 	// 0x0 to the end of used memory, so we can access this
@@ -33,14 +40,41 @@ void initialise_paging32()
 	// computed on-the-fly rather than once at the start.
 	int i = 0;
 	while (i < placement_address)
+	// int i;
+	// for( i=0; i<0x1000000; i += PAGE_SIZE )
 	{
 		// Kernel code is readable but not writeable from userspace.
-		alloc_frame( get_page32(i), 0, 0);
+//		monitor_write("         i: ");
+//		monitor_write_dec(i);
+//		monitor_write("\n");
+		page_t *page = get_page32(i);
+		alloc_frame(page , 0, 0);
+		
+		//~ monitor_write("Page: ");
+		//~ monitor_write_hex((u32int)page);
+		//~ monitor_write(" frame: ");
+		//~ monitor_write_hex(page->frame);
+		//~ monitor_write("\n");
+		
 		i += PAGE_SIZE;
 	}
+	page_directory_t *dir = (page_directory_t *)get_directory32();
+	monitor_write("dir: ");
+	monitor_write_hex((u32int)dir);
+	monitor_write(" phy: ");
+	monitor_write_hex((u32int)(dir->physicalAddr));
+	monitor_write(" [0]: ");
+	monitor_write_hex((u32int)(dir->tables[0]));
+	monitor_write("\n");
+	monitor_write("page 0: ");
+	monitor_write_hex( *(u32int *) &( dir->tables[0]->pages[0] ) );
+	monitor_write("\n");
+	
 	// Now, enable paging!
-	switch_page_directory((page_directory_t *)get_directory32());
+	switch_page_directory(dir);
 }
+
+#if 0
 
 void initialise_paging()
 {
@@ -67,6 +101,9 @@ void initialise_paging()
 	int i = 0;
 	while (i < placement_address)
 	{
+		monitor_write_dec(i);
+		monitor_write("\n");
+		
 		// Kernel code is readable but not writeable from userspace.
 		alloc_frame( get_page(i, 1, kernel_directory), 0, 0);
 		i += PAGE_SIZE;
@@ -78,6 +115,7 @@ void initialise_paging()
 	switch_page_directory(kernel_directory);
 }
 
+#endif // 0
 
 void switch_page_directory(page_directory_t *dir)
 {
@@ -88,11 +126,25 @@ void switch_page_directory(page_directory_t *dir)
     //~ cr0 |= 0x80000000; // Enable paging!
     //~ asm volatile("mov %0, %%cr0":: "r"(cr0));
 	
+	//~ monitor_write("dir == ");
+	//~ monitor_write_hex((u32int)dir);
+	//~ monitor_write("\n");
+	
 	current_directory = dir;
+	
+	//~ monitor_write("&phys == ");
+	//~ monitor_write_hex((u32int)&(dir->tablesPhysical));
+	//~ monitor_write("\n");
+
+	//~ monitor_write("phys == ");
+	//~ monitor_write_hex((u32int)(dir->tablesPhysical));
+	//~ monitor_write("\n");
+	
+	
 	set_page_directory( &dir->tablesPhysical );
 
 }
-
+#if 0
 page_t *get_page(u32int address, int make, page_directory_t *dir)
 {
 	// Turn the address into an index.
@@ -116,13 +168,15 @@ page_t *get_page(u32int address, int make, page_directory_t *dir)
 		return NULL;
 	}
 }
+#endif // 0
 
-void page_fault(registers_t regs)
+void page_fault_(registers_t regs)
 {
 	// Output an error message.
 	//monitor_write("Page fault! ( ");
 	char buf[32];
-	// A page fault has occurred.
+	// A page fault has occurred.#include "common.h"
+
 	// The faulting address is stored in the CR2 register.
 	u32int faulting_address = get_fault_addr();
 	// u32int faulting_address;

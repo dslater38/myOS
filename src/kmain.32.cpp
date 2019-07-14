@@ -19,10 +19,14 @@ volatile int foobar = 0;
 
 extern "C" 
 {
+	
+	extern u32int placement_address;
 
 	void page_fault(registers_t regs);
 	void init_gdt_table();
 	void init_idt_table();
+	void initialise_paging32(u32int maxMem);
+	void initPaging32(u32int maxMem);
 	
 
 	static void init_monitor()
@@ -47,8 +51,23 @@ extern "C"
 	static void init_page()
 	{
 		monitor_write("Initialize Paging....\n");
+		monitor_write("placement_address : 0x");
+		monitor_write_hex(placement_address);
 		initialise_paging();
+		monitor_write("\nAfter Initialize Paging....\n");
+		monitor_write("placement_address : 0x");
+		monitor_write_hex(placement_address);	
+		monitor_write("\n");
 	}
+
+		
+	static void init_page32()
+	{
+		monitor_write("Initialize Paging 32....\n");
+		// initialise_paging32(0x1000000);
+		initPaging32(0x1000000);
+	}
+	
 	
 	static void handle_page_faults()
 	{
@@ -72,7 +91,7 @@ extern "C"
 		init_GDT();
 		init_IDT();
 		handle_page_faults();
-		init_page();
+		init_page32();
 		
 		monitor_write("Hello, paging world!\n");	
 		test_page_fault();
