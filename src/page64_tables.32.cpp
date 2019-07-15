@@ -11,6 +11,7 @@
 extern "C" {
 	extern u32int placement_address;
 	extern void set_page_directory(void *);
+	extern void set_page64_directory(void *);
 }
 
 const u64int PAGE_SIZE = 0x1000;
@@ -54,12 +55,21 @@ static DIR64 * getDIR64()
 static Frames<u32int> *frames32 = nullptr;
 static DIR32 *current_directory32=nullptr;
 
+static Frames<u64int> *frames64 = nullptr;
+static DIR64 *current_directory64=nullptr;
+
 static void switch_page_directory32(DIR32 *dir)
 {
 	current_directory32 = dir;
-	set_page_directory( dir->physical );
+	set_page_directory( dir);
 }
 
+
+static void switch_page_directory64(DIR64 *dir)
+{
+	current_directory64 = dir;
+	set_page64_directory( dir );
+}
 
 extern "C"
 {
@@ -110,6 +120,35 @@ extern "C"
 		// Now, enable paging!	
 		switch_page_directory32(dir);
 	}	
+	
+	
+	void initPaging64(u64int maxMem)
+	{
+		monitor_write("initPaging64()\n");
+		auto *dir = getDIR64();
+		PageTableT<u64int> *ptr = reinterpret_cast<PageTableT<u64int> *>(dir->tables[0]);
+
+		frames64 = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<u64int>)))) Frames<u64int>{maxMem};
+		// new(reinterpret_cast<void *>(&frames32)) Frames<u32int>{maxMem};
+
+		// We need to identity map (phys addr = virt addr) from
+		// 0x0 to the end of used memory, so we can access this
+		// transparently, as if paging wasn't enabled.
+		// NOTE that we use a while loop here deliberately.
+		// inside the loop body we actually change placement_address
+		// by calling kmalloc(). A while loop causes this to be
+		// computed on-the-fly rather than once at the start.
+
+		for( auto i=0u; i<placement_address; i+= PAGE_SIZE)
+		{
+			// Kernel code is readable but not writeable from userspace.
+			auto *page = dir->getPage(i);
+			frames64->alloc(page, 0, 0);
+		}
+		// Now, enable paging!	
+		switch_page_directory64(dir);
+	}	
+
 	
 	void page_fault(registers_t regs)
 	{

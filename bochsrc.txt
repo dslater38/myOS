@@ -1,6 +1,6 @@
 megs: 2048
-romimage: file=/usr/share/bochs/BIOS-bochs-latest
-vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+romimage: file=/usr/local/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/local/share/bochs/VGABIOS-lgpl-latest
 floppya: 1_44=floppy.img, status=inserted
 ata0-master: type=disk, path="hda.img", mode=flat, cylinders=20, heads=16, spt=63, translation=lba
 ata0-slave: type=cdrom, path=os.iso, status=inserted
@@ -8,10 +8,12 @@ boot: cdrom
 log: bochsout.txt
 mouse: enabled=0
 clock: sync=realtime
+# cpu: ips=1000000, model=corei7_sandy_bridge_2600k
 cpu: ips=1000000
+cpuid: level=6, mmx=1, sep=1, simd=sse4_2, apic=xapic, aes=1, movbe=1, xsave=1
 com1: enabled=1, mode=file, dev=serial.out
 # speaker: enabled=1, mode=sound
-# debug: action=ignore, BXVGA=report
+# debug: action=ignore, CPU0=report
 # info: action=ignore, BXVGA=report
 # pcipnic: enabled=1, mac=b0:c4:20:4F:18:00, ethmod=linux, ethdev=ens33
 port_e9_hack: enabled=1

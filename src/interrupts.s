@@ -1,4 +1,4 @@
-[BITS 32]
+[BITS 64]
 
 %macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
   [GLOBAL isr%1]        ; %1 accesses the first parameter.
@@ -33,10 +33,17 @@
 [EXTERN %2]
 
 %1:
-	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+;	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
+	push rdi
+	push rsi
+	push rbp
+	push rbx
+	push rdx
+	push rcx
+	push rax
 
 	mov ax, ds               ; Lower 16-bits of eax = ds.
-	push eax                 ; save the data segment descriptor
+	push rax                 ; save the data segment descriptor
 
 	mov ax, 0x10  ; load the kernel data segment descriptor
 	mov ds, ax
@@ -46,14 +53,21 @@
 
 	call %2
 
-	pop ebx        ; reload the original data segment descriptor
+	pop rbx        ; reload the original data segment descriptor
 	mov ds, bx
 	mov es, bx
 	mov fs, bx
 	mov gs, bx
 
-	popa                     ; Pops edi,esi,ebp...
-	add esp, 8     ; Cleans up the pushed error code and pushed ISR number
+	pop rax
+	pop rcx
+	pop rdx
+	pop rbx
+	pop rbp
+	add rsp, 8
+	pop rdi
+;	popa                     ; Pops edi,esi,ebp...
+	add rsp, 16     ; Cleans up the pushed error code and pushed ISR number
 	sti
 	iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 %endmacro

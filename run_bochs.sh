@@ -8,4 +8,4 @@
 # sudo /sbin/losetup -d /dev/loop0
 
 
-bochs -f bochsrc.txt
+bochs -q -f bochsrc.txt

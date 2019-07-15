@@ -1,0 +1,8 @@
+Next at t=0
+(0) [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
+c
+(0).[845628774] [0x0000001028d4] 0008:00000000001028d4 (monitor_write64+24): ret                       ; c3
+Next at t=845628775
+(0) [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
+q
+(0).[845628775] [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0

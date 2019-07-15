@@ -23,8 +23,13 @@ extern "C"
 
 	void page_fault(registers_t regs);
 	void init_gdt_table();
+	void init_gdt_table64();
 	void init_idt_table();
 	void initPaging32(u32int maxMem);
+	void initPaging64(u64int maxMem);
+	void enable_paging_64(void);
+	void enable_paging_64_2(void);
+	
 	
 
 	static void init_monitor()
@@ -37,7 +42,8 @@ extern "C"
 	static void init_GDT()
 	{
 		monitor_write("Initialize GDT\n");
-		init_gdt_table();
+		// init_gdt_table();
+		init_gdt_table64();
 	}
 	
 	static void init_IDT()
@@ -53,6 +59,15 @@ extern "C"
 		initPaging32(0x1000000);
 	}
 	
+	
+	static void init_page64()
+	{
+		monitor_write("Initialize Paging 64....\n");
+		// initPaging64(0x1000000);
+		// enable_paging_64();
+		enable_paging_64_2();
+	}
+
 	
 	static void handle_page_faults()
 	{
@@ -74,10 +89,12 @@ extern "C"
 		printf("init Placement: 0x%08.8x\n", placement_address);
 		
 		init_monitor();
+		init_page64();
 		init_GDT();
 		init_IDT();
 		handle_page_faults();
-		init_page32();
+		// init_page32();
+		
 		
 		monitor_write("Hello, paging world!\n");	
 		test_page_fault();

@@ -6,11 +6,13 @@
 
 extern "C" {
 extern void gdt_flush(u32int);
+extern void gdt_flush64(u32int);
 extern void idt_flush(u32int);
 }
 
 // Internal function prototypes.
 static void init_gdt();
+static void init_gdt64();
 static void gdt_set_gate(s32int,u32int,u32int,u8int,u8int);
 static void init_idt();
 static void init_irqs();
@@ -19,6 +21,8 @@ static void idt_set_gate(u8int,u32int,u16int,u8int);
 gdt_entry_t gdt_entries[5] = { 0 };
 
 gdt_ptr_t   gdt_ptr{ 0 };
+
+gdt64_ptr_t   gdt64_ptr{ 0 };
 
 idt_entry_t idt_entries[256] = { 0 };
 
@@ -33,6 +37,12 @@ extern "C"
 	{
 		init_gdt();
 	}
+	
+	void init_gdt_table64()
+	{
+		init_gdt64();
+	}
+	
 	
 	void init_idt_table()
 	{
@@ -61,6 +71,21 @@ static void init_gdt()
 	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
 
 	gdt_flush((u32int)&gdt_ptr);
+}
+
+
+static void init_gdt64()
+{
+	gdt64_ptr.limit() = (sizeof(gdt_entry_t) * 5) - 1;
+	gdt64_ptr.base()  = (u64int)&gdt_entries; 
+
+	gdt_entries[0].set(0, 0, 0, 0, SYSTEM_DESCRIPTOR);
+	gdt_entries[1].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_CODE|SEGMENT_EXECUTE_ENABLED|IS_64BITS|CODE_SEGMENT_CONFORMING_BIT), RING0, (SEGMENT_PRESENT|GRAN_1K));
+	gdt_entries[2].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_DATA|SEGMENT_WRITE_ENABLED|IS_64BITS), RING0, (SEGMENT_PRESENT|GRAN_1K));
+	gdt_entries[3].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_CODE|SEGMENT_EXECUTE_ENABLED|IS_64BITS|CODE_SEGMENT_CONFORMING_BIT), RING3, (SEGMENT_PRESENT|GRAN_1K));
+	gdt_entries[4].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_DATA|SEGMENT_WRITE_ENABLED|IS_64BITS), RING3, (SEGMENT_PRESENT|GRAN_1K));
+
+ 	gdt_flush64((u32int)&gdt64_ptr);
 }
 
 // Set the value of one GDT entry.

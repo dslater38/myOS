@@ -29,6 +29,10 @@ extern "C" {
 
 void outb(u16int port, u8int value);
 void outw(u16int port, u16int value);
+
+void outb64(u16int port, u8int value);
+void outw64(u16int port, u16int value);
+
 void memcpy(void *dest, const void *src, u32int len);
 void memset(void *dest, u8int val, u32int len);
 

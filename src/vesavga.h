@@ -25,6 +25,16 @@ bool set_foreground_color(u8int clr);
 bool set_background_color(u8int clr);
 
 
+// Output a null-terminated ASCII string to the monitor.
+void monitor_write64(const char *c);
+void monitor_write_hex64(u64int n);
+void monitor_write_dec64(u64int n);
+
+bool set_foreground_color64(u8int clr);
+bool set_background_color64(u8int clr);
+void monitor_clear64();
+void monitor_put64(char c);
+
 #define BLACK 0
 #define BLUE 1
 #define GREEN 2

@@ -60,12 +60,22 @@ u32int kmalloc_aligned(u32int sz)
 
 u32int kmalloc_phys(u32int sz, u32int *phys)
 {
-	return kmalloc_generic(sz,0,phys);
+	u32int retVal =  kmalloc_generic(sz,0,phys);
+	if(phys)
+	{
+		printf("kmalloc_phys: ptr: 0x%08.8x, phys: 0x%08.8x\n", retVal, (*phys));
+	}
+	return retVal;
 }
 
 u32int kmalloc_aligned_phys(u32int sz, u32int *phys)
 {
-	return kmalloc_generic(sz, 1, phys);
+	u32int retVal = kmalloc_generic(sz, 1, phys);
+	if(phys)
+	{
+		printf("kmalloc_aligned_phys: ptr: 0x%08.8x, phys: 0x%08.8x\n", retVal, (*phys));
+	}
+	return retVal;
 }
 
 static void page_align_placement()

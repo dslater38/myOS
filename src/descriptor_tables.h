@@ -7,6 +7,45 @@
 // We use the attribute 'packed' to tell GCC not to change
 // any of the alignment in the structure.
 
+
+const u8int PRESENT_BIT = (1<<7);
+const u8int CODE_SEGMENT_BIT = (1<<4);
+const u8int DATA_SEGMENT_BIT = (0<<4);
+const u8int SYSTEM_SEGMENT_BIT = (1<<4);
+const u8int EXECUTABLE_SEGMENT_BIT = (1<<3);
+const u8int DATA_SEGMENT_EXPAND_DOWN_BIT = (1<<2);
+const u8int CODE_SEGMENT_CONFORMING_BIT = (1<<2);
+const u8int SEGMENT_RW_BIT = (1<<1);
+const u8int SEGMENT_ACCESSED_BIT = (1<<0);
+
+const u8int GRAN_1K_BIT = (1<<7);
+const u8int GRAN_1B_BIT = (0<<7);
+const u8int SELECTOR_SIZE_32 = (1<<6);
+const u8int SELECTOR_SIZE_16 = (0<<6);
+const u8int SELECTOR_SIZE_64 = (0<<6);
+
+
+
+
+const u8int SEGMENT_PRESENT = (1<<0);
+const u8int SYSTEM_DESCRIPTOR = (1<<1);
+const u8int GRAN_1K = (1<<2);
+const u8int OPERAND_SIZE_32 = (1<<3);
+const u8int IS_64BITS = (1<<4);
+
+const u8int SEGMENT_TYPE_CODE = (1u<<3);
+const u8int SEGMENT_TYPE_DATA = (0u<<3);
+
+const u8int RING0	=	0u;
+const u8int RING1	=	1u;
+const u8int RING2	=	2u;
+const u8int RING3	=	3u;
+
+const u8int SEGMENT_EXPAND_DOWN = (1u<<2);
+const u8int SEGMENT_WRITE_ENABLED = (1u<<1);
+const u8int SEGMENT_EXECUTE_ENABLED = (1u<<1);
+const u8int SEGMENT_ACCESSED = (1u<<0);
+
 struct gdt_entry_t
 {
 	u16int &limit_low() noexcept	{ return *(u16int *)data; }
@@ -27,6 +66,45 @@ struct gdt_entry_t
 	u8int &base_high() noexcept		{ return *(data+7); };
 	u8int base_high()const noexcept		{ return *(data+7); };
 
+	void set(u32int base, u32int limit, u8int type, u8int privlege_level, u8int flags)
+	{
+		limit_low()   = static_cast<u16int>(limit & 0xFFFF);
+		base_low()    = static_cast<u16int>(base & 0xFFFF);
+		base_high()   = static_cast<u8int>((base >> 24) & 0xFF);
+		
+		u8int acc =  (type & 0x0F);
+		
+		if( 0 == (flags & SYSTEM_DESCRIPTOR))
+		{
+			acc |= static_cast<u8int>(1<<4);
+		}
+		
+		acc |= static_cast<u8int>((privlege_level & 0x03)<<5);
+		
+		if(flags & SEGMENT_PRESENT)
+		{
+			acc |= static_cast<u8int>(1<<7);
+		}
+		access() = acc;
+		
+		u8int gran = static_cast<u8int>((limit>>16) & 0x0F);
+		if(type & IS_64BITS)
+		{
+			gran |= (1<<5);
+		}
+		if(flags & OPERAND_SIZE_32)
+		{
+			gran |= (1<<6);
+		}
+
+		if(flags & GRAN_1K)
+		{
+			gran |= (1<<7);
+		}
+		granularity() = gran;
+		base_high() = static_cast<u8int>((base >> 24) & 0xFF);
+	}
+	
 	void set(u32int base, u32int limit, u8int access_, u8int gran)noexcept
 	{
 		base_low()    = (base & 0xFFFF);
@@ -54,6 +132,20 @@ struct gdt_ptr_t
 
 	u8int data[6];
 };
+
+
+struct gdt64_ptr_t
+{
+
+	u16int &limit() noexcept{ return *(u16int *)data;}
+	u16int limit()const noexcept{ return *(u16int *)data;}
+	u64int &base() noexcept{ return *(u64int *)(data+2);}
+	u64int base()const noexcept{ return *(u64int *)(data+2);}
+
+
+	u8int data[10];
+};
+
 
 struct idt_entry_t
 {
@@ -96,6 +188,16 @@ struct idt_ptr_t
 	u32int &base()noexcept {return *(u32int *)(data + 2);}                // The address of the first element in our idt_entry_t array.
 	u32int base()const noexcept {return *(u32int *)(data + 2);}
 	u8int data[6];
+};
+
+struct idt_ptr64_t
+{
+	u16int &limit()noexcept { return *(u16int *)(data);}
+	u16int limit()const noexcept { return *(u16int *)(data);}
+
+	u64int &base()noexcept {return *(u64int *)(data + 2);}                // The address of the first element in our idt_entry_t array.
+	u64int base()const noexcept {return *(u64int *)(data + 2);}
+	u8int data[10];
 };
 
 #if 0

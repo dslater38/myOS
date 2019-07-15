@@ -10,6 +10,11 @@ struct PageDirectory
 	static constexpr Pointer MASK = ((1<<BITS)-1);
 	static constexpr decltype(sizeof(int)) NUM_ENTRIES = 4096 / sizeof(Pointer);
 	
+	Pointer physical[NUM_ENTRIES];
+	Pointer tables[NUM_ENTRIES];
+	Pointer physicalAddr;
+	
+	
 	PageDirectory()
 	{
 		memset(tables, '\0', sizeof(tables));
@@ -17,12 +22,6 @@ struct PageDirectory
 		physicalAddr = 0;
 		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (u32int)this);
 	}
-	
-	Pointer tables[NUM_ENTRIES];
-	
-	Pointer physical[NUM_ENTRIES];
-	
-	Pointer physicalAddr;
 	
 	void setPhys(Pointer p)
 	{
@@ -51,7 +50,7 @@ struct PageDirectory
 			table = new(reinterpret_cast<void *>(kmalloc_aligned_phys(sizeof(T), &phys))) T{};
 			table->setPhys(phys);			
 			tables[i] = reinterpret_cast<Pointer>(table);			
-			physical[i] = (phys|0x07); // PRESENT, RW, US.			
+			physical[i] = static_cast<Pointer>(phys|0x03); // PRESENT, RW, US.			
 		}
 		return table->getPage(vaddr);
 	}
