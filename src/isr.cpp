@@ -11,6 +11,9 @@
 isr_t interrupt_handlers[256] = {0};
 isr64_t interrupt64_handlers[256] = {0};
 
+extern "C"
+{
+
 // This gets called from our ASM interrupt handler stub.
 void isr_handler(registers_t regs)
 {
@@ -104,4 +107,6 @@ void irq64_handler(registers64_t regs)
 		//monitor_write_dec(regs.int_no);
 		//monitor_put('\n');
 	}
+}
+
 }
