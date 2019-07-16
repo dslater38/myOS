@@ -1,15 +1,16 @@
 #include "common.h"
 
 // Copy len bytes from src to dest.
-void memcpy(void *dest, const void *src, u32int len)
+void *memcpy(void *dest, const void *src, u32int len)
 {
     const u8int *sp = (const u8int *)src;
     u8int *dp = (u8int *)dest;
     for(; len != 0; len--) *dp++ = *sp++;
+     return dest;
 }
 
 // Write len copies of val into dest.
-void memset(void *vdest, u8int val, u32int len)
+void *memset(void *vdest, int val, u32int len)
 {
 #ifndef  FAST_MEMCPY
 	u8int *ptr,*pEnd;
@@ -17,8 +18,9 @@ void memset(void *vdest, u8int val, u32int len)
 		ptr<pEnd;
 		++ptr )
 	{
-		*ptr = val;
+		*ptr = (u8int)val;
 	}
+	return vdest;
 #else
 	u8int *dest = (u8int *)vdest;
 	u32int slen,dlen;

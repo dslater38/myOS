@@ -20,6 +20,18 @@ typedef struct registers
    u32int eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
 } registers_t;
 
+
+typedef struct registers64
+{
+   u64int ds;                  // Data segment selector
+   u64int rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax; // Pushed by pusha.
+   u64int r8, r9, r10, r11, r12, r13, r14, r15;
+   u64int int_no, err_code;    // Interrupt number and error code (if applicable)
+   u64int rip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
+} registers64_t;
+
+
+
 // A few defines to make life a little easier
 // for the remapped IRQ's
 #define IRQ0 32
@@ -55,9 +67,12 @@ typedef struct registers
 // For IRQs, to ease confusion, use the #defines above as the
 // first parameter.
 typedef void (*isr_t)(registers_t);
+typedef void (*isr64_t)(registers64_t);
 void register_interrupt_handler(u8int n, isr_t handler);
+void register_interrupt_handler64(u8int n, isr64_t handler);
 
 extern isr_t interrupt_handlers[256] ;
+extern isr64_t interrupt64_handlers[256] ;
 
 #ifdef __cplusplus
 }

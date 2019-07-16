@@ -34,42 +34,76 @@
 
 %1:
 ;	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
-	push rdi
-	push rsi
-	push rbp
-	push rbx
-	push rdx
-	push rcx
-	push rax
+	push qword rax
+	mov rax, es
+	push qword rax
+	mov rax, ds
+	push qword rax
 
-	mov ax, ds               ; Lower 16-bits of eax = ds.
-	push rax                 ; save the data segment descriptor
+	push qword rdi
+	push qword rsi
+	push qword rbp
+	push qword rsp
+	push qword rbx
+	push qword rdx
+	push qword rcx
+	push qword rax
 
-	mov ax, 0x10  ; load the kernel data segment descriptor
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
+	push qword r8
+	push qword r9
+	push qword r10
+	push qword r11
+	push qword r12
+	push qword r13
+	push qword r14
+	push qword r15
+	mov rdi, 0x10
+	mov es, rdi
+	mov ds, rdi
+
+	; mov ax, ds               ; Lower 16-bits of eax = ds.
+	; push rax                 ; save the data segment descriptor
+
+	; mov ax, 0x10  ; load the kernel data segment descriptor
+	; mov ds, ax
+	; mov es, ax
+	; mov fs, ax
+	; mov gs, ax
 
 	call %2
 
-	pop rbx        ; reload the original data segment descriptor
-	mov ds, bx
-	mov es, bx
-	mov fs, bx
-	mov gs, bx
+	; pop rbx        ; reload the original data segment descriptor
+	; mov ds, bx
+	; mov es, bx
+	; mov fs, bx
+	; mov gs, bx
 
-	pop rax
-	pop rcx
-	pop rdx
-	pop rbx
-	pop rbp
-	add rsp, 8
-	pop rdi
+	pop qword r15
+	pop qword r14
+	pop qword r13
+	pop qword r12
+	pop qword r11
+	pop qword r10
+	pop qword r9
+	pop qword r8
+	pop qword rax
+	pop qword rcx
+	pop qword rdx
+	pop qword rbx
+	pop qword rbp
+	add rsp, 8	; don't actually pop rsp
+	pop qword rsi
+	pop qword rdi
+
+	mov ds, rax
+	pop qword rax
+	mov es, rax
+	pop qword rax
+
 ;	popa                     ; Pops edi,esi,ebp...
-	add rsp, 16     ; Cleans up the pushed error code and pushed ISR number
+	add rsp,16	     ; Cleans up the pushed error code and pushed ISR number
 	sti
-	iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+	iretq           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
 %endmacro
 
 
@@ -85,38 +119,38 @@
 		ret
 
 
-ISR_NOERRCODE 0
-ISR_NOERRCODE 1
-ISR_NOERRCODE 2
-ISR_NOERRCODE 3
-ISR_NOERRCODE 4
-ISR_NOERRCODE 5
-ISR_NOERRCODE 6
-ISR_NOERRCODE 7
+ISR_ERRCODE 0
+ISR_ERRCODE 1
+ISR_ERRCODE 2
+ISR_ERRCODE 3
+ISR_ERRCODE 4
+ISR_ERRCODE 5
+ISR_ERRCODE 6
+ISR_ERRCODE 7
 ISR_ERRCODE 8
-ISR_NOERRCODE 9
+ISR_ERRCODE 9
 ISR_ERRCODE 10
 ISR_ERRCODE 11
 ISR_ERRCODE 12
 ISR_ERRCODE 13
 ISR_ERRCODE 14
-ISR_NOERRCODE 15
-ISR_NOERRCODE 16
-ISR_NOERRCODE 17
-ISR_NOERRCODE 18
-ISR_NOERRCODE 19
-ISR_NOERRCODE 20
-ISR_NOERRCODE 21
-ISR_NOERRCODE 22
-ISR_NOERRCODE 23
-ISR_NOERRCODE 24
-ISR_NOERRCODE 25
-ISR_NOERRCODE 26
-ISR_NOERRCODE 27
-ISR_NOERRCODE 28
-ISR_NOERRCODE 29
-ISR_NOERRCODE 30
-ISR_NOERRCODE 31
+ISR_ERRCODE 15
+ISR_ERRCODE 16
+ISR_ERRCODE 17
+ISR_ERRCODE 18
+ISR_ERRCODE 19
+ISR_ERRCODE 20
+ISR_ERRCODE 21
+ISR_ERRCODE 22
+ISR_ERRCODE 23
+ISR_ERRCODE 24
+ISR_ERRCODE 25
+ISR_ERRCODE 26
+ISR_ERRCODE 27
+ISR_ERRCODE 28
+ISR_ERRCODE 29
+ISR_ERRCODE 30
+ISR_ERRCODE 31
 
 
 
@@ -137,8 +171,8 @@ IRQ   13,    45
 IRQ   14,    46
 IRQ   15,    47
 
-COMMON_STUB isr_common_stub, isr_handler
-COMMON_STUB irq_common_stub, irq_handler
+COMMON_STUB isr_common_stub, isr64_handler
+COMMON_STUB irq_common_stub, isr64_handler
 
 
 ; In isr.c

@@ -256,7 +256,7 @@ void monitor_write_hex64(u64int n)
 {
 	// TODO: implement this yourself!
 	char buffer[64];
-	sprintf(buffer, "%x", n);
+	sprintf(buffer, "%llx", n);
 	monitor_write64(buffer);
 }
 
@@ -264,6 +264,6 @@ void monitor_write_dec64(u64int n)
 {
 	// TODO: implement this yourself!
 	char buffer[64];
-	sprintf(buffer, "%d", n);
+	sprintf(buffer, "%lld", n);
 	monitor_write64(buffer);
 }

@@ -60,7 +60,7 @@ struct PageDirectory
 		printf("PageDirectory: this 0x%08.8x, phys 0x%08.8x\n", (u32int)this ,(u32int)physicalAddr);
 		for (auto i = 0u; i < NUM_ENTRIES; ++i)
 		{
-			printf("entry: %d == 0x%08.8x (0x%08.8x)\n", i, tables[i], physical[i]);
+			printf("entry: %d == 0x%08.8x (0x%08.8x)\n", i, (u32int)tables[i], (u32int)physical[i]);
 			if (tables[i])
 			{
 				reinterpret_cast<T *>(tables[i])->dump();

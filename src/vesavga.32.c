@@ -119,9 +119,6 @@ static void copy_buffer2()
 	}
 }
 
-extern void memmove(void *dst, void *src, u32int size);
-
-
 
 // Updates the hardware cursor.
 static void move_cursor()
@@ -267,4 +264,10 @@ void monitor_write_dec(u32int n)
 	char buffer[32];
 	sprintf(buffer, "%d", n);
 	monitor_write(buffer);
+}
+
+int puts(const char *s)
+{
+	monitor_write(s);
+	return 1;
 }

@@ -9,6 +9,10 @@
 #include "vesavga.h"
 
 isr_t interrupt_handlers[256] = {0};
+isr64_t interrupt64_handlers[256] = {0};
+
+extern "C"
+{
 
 // This gets called from our ASM interrupt handler stub.
 void isr_handler(registers_t regs)
@@ -26,9 +30,30 @@ void isr_handler(registers_t regs)
 	}
 }
 
+// This gets called from our ASM interrupt handler stub.
+void isr64_handler(registers64_t regs)
+{
+	if (interrupt64_handlers[regs.int_no] != 0)
+	{
+		isr64_t handler = interrupt64_handlers[regs.int_no];
+		handler(regs);
+	}
+	else
+	{
+		monitor_write("unhandled interrupt: ");
+		monitor_write_dec(regs.int_no);
+		monitor_put('\n');
+	}
+}
+
 void register_interrupt_handler(u8int n, isr_t handler)
 {
 	interrupt_handlers[n] = handler;
+}
+
+void register_interrupt_handler64(u8int n, isr64_t handler)
+{
+	interrupt64_handlers[n] = handler;
 }
 
 
@@ -56,4 +81,32 @@ void irq_handler(registers_t regs)
 		//monitor_write_dec(regs.int_no);
 		//monitor_put('\n');
 	}
+}
+
+// This gets called from our ASM interrupt handler stub.
+void irq64_handler(registers64_t regs)
+{
+	// Send an EOI (end of interrupt) signal to the PICs.
+	// If this interrupt involved the slave.
+	if (regs.int_no >= 40)
+	{
+		// Send reset signal to slave.
+		outb64(SLAVE_PIC_COMMAND, PIC_RESET_COMMAND);
+	}
+	// Send reset signal to master. (As well as slave, if necessary).
+	outb64(MASTER_PIC_COMMAND, PIC_RESET_COMMAND);
+
+	if (interrupt_handlers[regs.int_no] != 0)
+	{
+		isr64_t handler = interrupt64_handlers[regs.int_no];
+		handler(regs);
+	}
+	else
+	{
+		//monitor_write("no interrupt handler for: ");
+		//monitor_write_dec(regs.int_no);
+		//monitor_put('\n');
+	}
+}
+
 }

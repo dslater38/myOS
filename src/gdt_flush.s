@@ -18,7 +18,7 @@ gdt_flush:
 .flush:
 	ret
 
-
+[GLOBAL gdt_flush64]
 gdt_flush64:
 	mov eax, [esp+4] ; Get the pointer to the GDT, passed as a parameter.
 	lgdt [eax]        ; Load the new GDT pointer
@@ -44,7 +44,7 @@ idt_flush:
 section .text
 [BITS 64]
 
-[GLOBAL gdt_flush64]
+
 
 [EXTERN kmain64]
 
@@ -59,3 +59,10 @@ long_mode_start:
 .loop:
 	hlt
 	jmp .loop
+
+
+[GLOBAL idt_flush64]
+idt_flush64:
+	mov rax, qword [rsp+8]  ; Get the pointer to the IDT, passed as a parameter. 
+	lidt [rax]        ; Load the IDT pointer.
+	ret
