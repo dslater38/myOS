@@ -33,8 +33,8 @@ void outw(u16int port, u16int value);
 void outb64(u16int port, u8int value);
 void outw64(u16int port, u16int value);
 
-void memcpy(void *dest, const void *src, u32int len);
-void memset(void *dest, u8int val, u32int len);
+void *memcpy(void *dest, const void *src, u32int len);
+void *memset(void *dest, int val, u32int len);
 
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);

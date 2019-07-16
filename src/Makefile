@@ -16,8 +16,8 @@ OBJECTS32=$(CXXSOURCES32:%.cpp=%.o) $(CSOURCES32:%.c=%.o)
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)  
 
 
-CFLAGS=-mno-sse2 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -O3
-CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -fno-exceptions -fno-threadsafe-statics -O3 -Wno-main
+CFLAGS=-mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O3 -I .
+CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O3 -Wno-main -I .
 LDFLAGS=-Tlink.ld
 ASFLAGS=-felf64
 
