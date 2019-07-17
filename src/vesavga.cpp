@@ -15,11 +15,14 @@ static u8int foreColor = CYAN;
 
 static u16int *video_memory=(u16int *)0xB8000;
 
-static _Alignas(4) u16int back_buffer[VIDEO_MEM_COUNT] = {0};
+static u16int back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
 static u32int	cur_line = 0;
 // static u32int	count = 0;
 
-bool set_foreground_color64(u8int clr)
+extern "C"
+{
+
+bool set_foreground_color(u8int clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -30,7 +33,7 @@ bool set_foreground_color64(u8int clr)
 	return success;
 }
 
-bool set_background_color64(u8int clr)
+bool set_background_color(u8int clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -159,7 +162,7 @@ static void scroll()
 }
 
 // Writes a single character out to the screen.
-void monitor_put64(char c)
+void monitor_put(char c)
 {
 	outb64(0xe9, c);
 	switch(c)
@@ -221,7 +224,7 @@ void monitor_put64(char c)
 }
 
 // Clears the screen, by copying lots of spaces to the framebuffer.
-void monitor_clear64()
+void monitor_clear()
 {
 	// u8int attributeByte = color_attribute();
 	// u16int blank = 0x20 /* space */ | (attributeByte << 8);
@@ -243,27 +246,29 @@ void monitor_clear64()
 }
 
 // Outputs a null-terminated ASCII string to the monitor.
-void monitor_write64(const char *c)
+void monitor_write(const char *c)
 {
 	while(*c)
 	{
-		monitor_put64(*c);
+		monitor_put(*c);
 		++c;
 	}
 }
 
-void monitor_write_hex64(u64int n)
+void monitor_write_hex(u64int n)
 {
 	// TODO: implement this yourself!
 	char buffer[64];
-	sprintf(buffer, "%llx", n);
-	monitor_write64(buffer);
+	sprintf(buffer, "%Lx", n);
+	monitor_write(buffer);
 }
 
-void monitor_write_dec64(u64int n)
+void monitor_write_dec(u64int n)
 {
 	// TODO: implement this yourself!
 	char buffer[64];
-	sprintf(buffer, "%lld", n);
-	monitor_write64(buffer);
+	sprintf(buffer, "%Ld", n);
+	monitor_write(buffer);
+}
+
 }

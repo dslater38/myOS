@@ -51,11 +51,7 @@ section .text
 long_mode_start:
 	mov rax, 0x2f592f412f4b2f4f
 	mov qword [0xb8000], rax
-	mov qword [0xb8008], rax
-	mov qword [0xb8010], rax
-	mov qword [0xb8018], rax
-	mov qword [0xb8020], rax
-	jmp kmain64
+	call kmain64
 .loop:
 	hlt
 	jmp .loop
@@ -63,6 +59,5 @@ long_mode_start:
 
 [GLOBAL idt_flush64]
 idt_flush64:
-	mov rax, qword [rsp+8]  ; Get the pointer to the IDT, passed as a parameter. 
-	lidt [rax]        ; Load the IDT pointer.
+	lidt [rdi]        ; Load the IDT pointer.
 	ret

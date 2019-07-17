@@ -13,7 +13,7 @@
   [GLOBAL isr%1]
   isr%1:
     cli
-    push byte %1
+    push qword %1
     jmp isr_common_stub
 %endmacro
 
@@ -34,32 +34,34 @@
 
 %1:
 ;	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
-	push qword rax
-	mov rax, es
-	push qword rax
-	mov rax, ds
-	push qword rax
 
-	push qword rdi
-	push qword rsi
-	push qword rbp
-	push qword rsp
-	push qword rbx
-	push qword rdx
-	push qword rcx
-	push qword rax
 
-	push qword r8
-	push qword r9
-	push qword r10
-	push qword r11
-	push qword r12
-	push qword r13
-	push qword r14
 	push qword r15
-	mov rdi, 0x10
-	mov es, rdi
-	mov ds, rdi
+	push qword r14
+	push qword r13
+	push qword r12
+	push qword r11
+	push qword r10
+	push qword r9
+	push qword r8
+
+	push qword rax
+	push qword rcx
+	push qword rdx
+	push qword rbx
+	push qword rsp
+	push qword rbp
+	push qword rsi
+	push qword rdi
+	
+	mov ax, ds
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	
+	push qword rax
+	mov rdi, rsp
 
 	; mov ax, ds               ; Lower 16-bits of eax = ds.
 	; push rax                 ; save the data segment descriptor
@@ -71,6 +73,30 @@
 	; mov gs, ax
 
 	call %2
+
+	pop rax
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	
+	pop rdi
+	pop rsi
+	pop rbp
+	add rsp,8
+	pop rbx
+	pop rdx
+	pop rcx
+	pop rax
+	
+	pop r8
+	pop r9
+	pop r10
+	pop r11
+	pop r12
+	pop r13
+	pop r14
+	pop r15
 
 	; pop rbx        ; reload the original data segment descriptor
 	; mov ds, bx
@@ -94,6 +120,8 @@
 	add rsp, 8	; don't actually pop rsp
 	pop qword rsi
 	pop qword rdi
+	
+	add rsp, 8	; pop the error code pushed by the stub
 
 	mov ds, rax
 	pop qword rax

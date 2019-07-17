@@ -20,7 +20,7 @@ static _Alignas(4) u16int back_buffer[VIDEO_MEM_COUNT] = {0};
 static u32int	cur_line = 0;
 // static u32int	count = 0;
 
-bool set_foreground_color(u8int clr)
+bool set_foreground_color32(u8int clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -31,7 +31,7 @@ bool set_foreground_color(u8int clr)
 	return success;
 }
 
-bool set_background_color(u8int clr)
+bool set_background_color32(u8int clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -157,7 +157,7 @@ static void scroll()
 }
 
 // Writes a single character out to the screen.
-void monitor_put(char c)
+void monitor_put32(char c)
 {
 	outb(0xe9, c);
 	switch(c)
@@ -219,7 +219,7 @@ void monitor_put(char c)
 }
 
 // Clears the screen, by copying lots of spaces to the framebuffer.
-void monitor_clear()
+void monitor_clear32()
 {
 	// u8int attributeByte = color_attribute();
 	// u16int blank = 0x20 /* space */ | (attributeByte << 8);
@@ -241,33 +241,33 @@ void monitor_clear()
 }
 
 // Outputs a null-terminated ASCII string to the monitor.
-void monitor_write(const char *c)
+void monitor_write32(const char *c)
 {
 	while(*c)
 	{
-		monitor_put(*c);
+		monitor_put32(*c);
 		++c;
 	}
 }
 
-void monitor_write_hex(u32int n)
+void monitor_write_hex32(u32int n)
 {
 	// TODO: implement this yourself!
 	char buffer[32];
-	sprintf(buffer, "%x", n);
-	monitor_write(buffer);
+	sprintf32(buffer, "%x", n);
+	monitor_write32(buffer);
 }
 
-void monitor_write_dec(u32int n)
+void monitor_write_dec32(u32int n)
 {
 	// TODO: implement this yourself!
 	char buffer[32];
-	sprintf(buffer, "%d", n);
-	monitor_write(buffer);
+	sprintf32(buffer, "%d", n);
+	monitor_write32(buffer);
 }
 
-int puts(const char *s)
+int puts32(const char *s)
 {
-	monitor_write(s);
+	monitor_write32(s);
 	return 1;
 }

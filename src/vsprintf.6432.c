@@ -3,21 +3,12 @@
  * Wirzenius wrote this portably, Torvalds fucked it up :-)
  */
 
+// #define strlen(a) strlen32(a)
 #include "stdarg.h"
-/*
 #include <string.h>
-*/
+#include "common.h"
 #include "vesavga.h"
-
-static inline int strlen(const char * s)
-{
-	const char *tmp;
-	for(tmp = s; *tmp; ++tmp )
-	{
-		;
-	}
-	return (int)(tmp-s);
-}
+#include "sym6432.h"
 
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')
@@ -99,7 +90,8 @@ static char * number(char * str, int num, int base, int size, int precision
 	return str;
 }
 
-int vsprintf(char *buf, const char *fmt, va_list args)
+static
+int vsprintf_imp(char *buf, const char *fmt, va_list args)
 {
 	int len;
 	int i;
@@ -178,7 +170,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 
 		case 's':
 			s = va_arg(args, char *);
-			len = strlen(s);
+			len = SYM6432(strlen)(s);
 			if (precision < 0)
 				precision = len;
 			else if (len > precision)
@@ -242,24 +234,29 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	return str-buf;
 }
 
-int sprintf(char *buf, const char *fmt, ...)
+int SYM6432(vsprintf)(char *buf, const char *fmt, va_list args)
+{
+	return vsprintf_imp(buf, fmt, args);
+}
+
+int SYM6432(sprintf)(char *buf, const char *fmt, ...)
 {
 	int retVal = 0;
 	va_list args;
 	va_start(args, fmt);
-	retVal = vsprintf(buf, fmt, args);
+	retVal = vsprintf_imp(buf, fmt, args);
 	va_end(args);
 	return retVal;
 }
 
-int printf(const char *fmt, ...)
+int SYM6432(printf)(const char *fmt, ...)
 {
 	char buf[1024] = {0};
 	int retVal = 0;
 	va_list args;
 	va_start(args, fmt);
-	retVal = vsprintf(buf, fmt, args);
+	retVal = vsprintf_imp(buf, fmt, args);
 	va_end(args);
-	monitor_write(buf);
+	SYM6432(monitor_write)(buf);
 	return retVal;
 }

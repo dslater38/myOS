@@ -27,7 +27,7 @@ typedef struct registers64
    u64int rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax; // Pushed by pusha.
    u64int r8, r9, r10, r11, r12, r13, r14, r15;
    u64int int_no, err_code;    // Interrupt number and error code (if applicable)
-   u64int rip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
+   u64int rip, cs, rflags, userrsp, ss; // Pushed by the processor automatically.
 } registers64_t;
 
 

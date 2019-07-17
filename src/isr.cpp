@@ -40,7 +40,7 @@ void isr64_handler(registers64_t regs)
 	}
 	else
 	{
-		monitor_write("unhandled interrupt: ");
+		monitor_write("Unhandled interrupt: ");
 		monitor_write_dec(regs.int_no);
 		monitor_put('\n');
 	}

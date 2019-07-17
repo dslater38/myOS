@@ -4,7 +4,7 @@
 [GLOBAL outw]
 [GLOBAL inb]
 [GLOBAL inw]
-[GLOBAL idle_loop]
+[GLOBAL idle_loop32]
 [GLOBAL set_page_directory]
 [GLOBAL get_fault_addr]
 [GLOBAL set_page64_directory]
@@ -34,10 +34,9 @@ inw:
 	in ax, dx
 	ret
 
-idle_loop:
-loop:
+idle_loop32:
 	hlt
-	jmp loop
+	jmp idle_loop32
 
 
 set_page_directory:
@@ -165,7 +164,7 @@ enable_paging_64_2:
     mov [p1_table + ecx * 8], eax
 
     inc ecx
-    cmp ecx, 512*512
+    cmp ecx, 512*2
     jne .map_p1_table
 
     ; move page table address to cr3

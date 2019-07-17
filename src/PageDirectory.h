@@ -57,16 +57,16 @@ struct PageDirectory
 	
 	void dump()const
 	{
-		printf("PageDirectory: this 0x%08.8x, phys 0x%08.8x\n", (u32int)this ,(u32int)physicalAddr);
+		printf32("PageDirectory: this 0x%08.8x, phys 0x%08.8x\n", (u32int)this ,(u32int)physicalAddr);
 		for (auto i = 0u; i < NUM_ENTRIES; ++i)
 		{
-			printf("entry: %d == 0x%08.8x (0x%08.8x)\n", i, (u32int)tables[i], (u32int)physical[i]);
+			printf32("entry: %d == 0x%08.8x (0x%08.8x)\n", i, (u32int)tables[i], (u32int)physical[i]);
 			if (tables[i])
 			{
 				reinterpret_cast<T *>(tables[i])->dump();
 			}
 		}
-		printf("===========================================\n");
+		printf32("===========================================\n");
 	}
 };
 
@@ -100,9 +100,9 @@ public:
 	{
 		for (auto i = 0u; i < NUM_PAGES; ++i)
 		{
-			printf("\tpage: %d == 0x%08.8x\n", i, *(u32int *)&(pages[i]) );
+			printf32("\tpage: %d == 0x%08.8x\n", i, *(u32int *)&(pages[i]) );
 		}
-		printf("\t+++++++++++++++++++++++\n");
+		printf32("\t+++++++++++++++++++++++\n");
 	}
 	
 	

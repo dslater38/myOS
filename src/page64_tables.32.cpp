@@ -96,7 +96,7 @@ extern "C"
 	
 	void initPaging32(u32int maxMem)
 	{
-		monitor_write("initPaging32()\n");
+		monitor_write32("initPaging32()\n");
 		auto *dir = getDIR32();
 		PageTableT<u32int> *ptr = reinterpret_cast<PageTableT<u32int> *>(dir->tables[0]);
 
@@ -124,7 +124,7 @@ extern "C"
 	
 	void initPaging64(u64int maxMem)
 	{
-		monitor_write("initPaging64()\n");
+		monitor_write32("initPaging64()\n");
 		auto *dir = getDIR64();
 		PageTableT<u64int> *ptr = reinterpret_cast<PageTableT<u64int> *>(dir->tables[0]);
 
@@ -170,16 +170,16 @@ extern "C"
 		int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
 
 		// Output an error message.
-		monitor_write("Page fault! ( ");
-		if (present) {monitor_write("present ");} else {monitor_write("absent ");}
-		if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
-		if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
-		if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
-		sprintf(buf, ") at 0x%08x", faulting_address);
-		monitor_write(buf);
+		monitor_write32("Page fault! ( ");
+		if (present) {monitor_write32("present ");} else {monitor_write32("absent ");}
+		if (rw) {monitor_write32("read-only ");} else {monitor_write32("read/write ");}
+		if (us) {monitor_write32("user-mode ");} else {monitor_write32("kernel-mode ");}
+		if (reserved) {monitor_write32("reserved ");} else {monitor_write32("not-reserved ");}
+		sprintf32(buf, ") at 0x%08x", faulting_address);
+		monitor_write32(buf);
 		// monitor_write(") at 0x");
 		// monitor_write_hex(faulting_address);
-		monitor_write("\n");
+		monitor_write32("\n");
 		PANIC("Page fault");
 	}
 
