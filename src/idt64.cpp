@@ -10,7 +10,7 @@ extern void idt_flush64(void *);
 
 extern isr64_t interrupt64_handlers[256] ;
 
-static void idt_set_gate(u8int num, u64int base, u16int sel, u8int flags);
+static void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags);
 static void remap_pics();
 static void init_irqs();
 static void init_isrs();
@@ -43,7 +43,7 @@ extern "C"
 static void init_idt()
 {
 	idt64_ptr.limit() = sizeof(idt_entry64_t) * 256 -1;
-	idt64_ptr.base()  = reinterpret_cast<u64int>(&idt64_entries);
+	idt64_ptr.base()  = reinterpret_cast<uint64_t>(&idt64_entries);
 
 
 	// memset(idt64_entries, 0, sizeof(idt_entry64_t)*256);
@@ -97,22 +97,22 @@ static void remap_pics()
 static void init_irqs()
 {
 
-	idt_set_gate(32, reinterpret_cast<u64int>(irq0), 0x08, 0x8E);
-	idt_set_gate(33, reinterpret_cast<u64int>(irq1), 0x08, 0x8E);
-	idt_set_gate(34, reinterpret_cast<u64int>(irq2), 0x08, 0x8E);
-	idt_set_gate(35, reinterpret_cast<u64int>(irq3), 0x08, 0x8E);
-	idt_set_gate(36, reinterpret_cast<u64int>(irq4), 0x08, 0x8E);
-	idt_set_gate(37, reinterpret_cast<u64int>(irq5), 0x08, 0x8E);
-	idt_set_gate(38, reinterpret_cast<u64int>(irq6), 0x08, 0x8E);
-	idt_set_gate(39, reinterpret_cast<u64int>(irq7), 0x08, 0x8E);
-	idt_set_gate(40, reinterpret_cast<u64int>(irq8), 0x08, 0x8E);
-	idt_set_gate(41, reinterpret_cast<u64int>(irq9), 0x08, 0x8E);
-	idt_set_gate(42, reinterpret_cast<u64int>(irq10), 0x08, 0x8E);
-	idt_set_gate(43, reinterpret_cast<u64int>(irq11), 0x08, 0x8E);
-	idt_set_gate(44, reinterpret_cast<u64int>(irq12), 0x08, 0x8E);
-	idt_set_gate(45, reinterpret_cast<u64int>(irq13), 0x08, 0x8E);
-	idt_set_gate(46, reinterpret_cast<u64int>(irq14), 0x08, 0x8E);
-	idt_set_gate(47, reinterpret_cast<u64int>(irq15), 0x08, 0x8E);
+	idt_set_gate(32, reinterpret_cast<uint64_t>(irq0), 0x08, 0x8E);
+	idt_set_gate(33, reinterpret_cast<uint64_t>(irq1), 0x08, 0x8E);
+	idt_set_gate(34, reinterpret_cast<uint64_t>(irq2), 0x08, 0x8E);
+	idt_set_gate(35, reinterpret_cast<uint64_t>(irq3), 0x08, 0x8E);
+	idt_set_gate(36, reinterpret_cast<uint64_t>(irq4), 0x08, 0x8E);
+	idt_set_gate(37, reinterpret_cast<uint64_t>(irq5), 0x08, 0x8E);
+	idt_set_gate(38, reinterpret_cast<uint64_t>(irq6), 0x08, 0x8E);
+	idt_set_gate(39, reinterpret_cast<uint64_t>(irq7), 0x08, 0x8E);
+	idt_set_gate(40, reinterpret_cast<uint64_t>(irq8), 0x08, 0x8E);
+	idt_set_gate(41, reinterpret_cast<uint64_t>(irq9), 0x08, 0x8E);
+	idt_set_gate(42, reinterpret_cast<uint64_t>(irq10), 0x08, 0x8E);
+	idt_set_gate(43, reinterpret_cast<uint64_t>(irq11), 0x08, 0x8E);
+	idt_set_gate(44, reinterpret_cast<uint64_t>(irq12), 0x08, 0x8E);
+	idt_set_gate(45, reinterpret_cast<uint64_t>(irq13), 0x08, 0x8E);
+	idt_set_gate(46, reinterpret_cast<uint64_t>(irq14), 0x08, 0x8E);
+	idt_set_gate(47, reinterpret_cast<uint64_t>(irq15), 0x08, 0x8E);
 	
 
 }
@@ -120,42 +120,42 @@ static void init_irqs()
 
 static void init_isrs()
 {
-	idt_set_gate( 0, reinterpret_cast<u64int>(isr0) , 0x08, 0x8E);
-	idt_set_gate( 1, reinterpret_cast<u64int>(isr1) , 0x08, 0x8E);	
-	idt_set_gate( 2, reinterpret_cast<u64int>(isr2) , 0x08, 0x8E);
-	idt_set_gate( 3, reinterpret_cast<u64int>(isr3) , 0x08, 0x8E);
-	idt_set_gate( 4, reinterpret_cast<u64int>(isr4) , 0x08, 0x8E);
-	idt_set_gate( 5, reinterpret_cast<u64int>(isr5) , 0x08, 0x8E);
-	idt_set_gate( 6, reinterpret_cast<u64int>(isr6) , 0x08, 0x8E);
-	idt_set_gate( 7, reinterpret_cast<u64int>(isr7) , 0x08, 0x8E);
-	idt_set_gate( 8, reinterpret_cast<u64int>(isr8) , 0x08, 0x8E);
-	idt_set_gate( 9, reinterpret_cast<u64int>(isr9) , 0x08, 0x8E);
-	idt_set_gate( 10, reinterpret_cast<u64int>(isr10) , 0x08, 0x8E);
-	idt_set_gate( 11, reinterpret_cast<u64int>(isr11) , 0x08, 0x8E);
-	idt_set_gate( 12, reinterpret_cast<u64int>(isr12) , 0x08, 0x8E);
-	idt_set_gate( 13, reinterpret_cast<u64int>(isr13) , 0x08, 0x8E);
-	idt_set_gate( 14, reinterpret_cast<u64int>(isr14) , 0x08, 0x8E);
-	idt_set_gate( 15, reinterpret_cast<u64int>(isr15) , 0x08, 0x8E);
-	idt_set_gate( 16, reinterpret_cast<u64int>(isr16) , 0x08, 0x8E);
-	idt_set_gate( 17, reinterpret_cast<u64int>(isr17) , 0x08, 0x8E);
-	idt_set_gate( 18, reinterpret_cast<u64int>(isr18) , 0x08, 0x8E);
-	idt_set_gate( 19, reinterpret_cast<u64int>(isr19) , 0x08, 0x8E);
-	idt_set_gate( 20, reinterpret_cast<u64int>(isr20) , 0x08, 0x8E);
-	idt_set_gate( 21, reinterpret_cast<u64int>(isr21) , 0x08, 0x8E);
-	idt_set_gate( 22, reinterpret_cast<u64int>(isr22) , 0x08, 0x8E);
-	idt_set_gate( 23, reinterpret_cast<u64int>(isr23) , 0x08, 0x8E);
-	idt_set_gate( 24, reinterpret_cast<u64int>(isr24) , 0x08, 0x8E);
-	idt_set_gate( 25, reinterpret_cast<u64int>(isr25) , 0x08, 0x8E);
-	idt_set_gate( 26, reinterpret_cast<u64int>(isr26) , 0x08, 0x8E);
-	idt_set_gate( 27, reinterpret_cast<u64int>(isr27) , 0x08, 0x8E);
-	idt_set_gate( 28, reinterpret_cast<u64int>(isr28) , 0x08, 0x8E);
-	idt_set_gate( 29, reinterpret_cast<u64int>(isr29) , 0x08, 0x8E);
-	idt_set_gate( 30, reinterpret_cast<u64int>(isr30) , 0x08, 0x8E);
-	idt_set_gate( 31, reinterpret_cast<u64int>(isr31) , 0x08, 0x8E);
+	idt_set_gate( 0, reinterpret_cast<uint64_t>(isr0) , 0x08, 0x8E);
+	idt_set_gate( 1, reinterpret_cast<uint64_t>(isr1) , 0x08, 0x8E);	
+	idt_set_gate( 2, reinterpret_cast<uint64_t>(isr2) , 0x08, 0x8E);
+	idt_set_gate( 3, reinterpret_cast<uint64_t>(isr3) , 0x08, 0x8E);
+	idt_set_gate( 4, reinterpret_cast<uint64_t>(isr4) , 0x08, 0x8E);
+	idt_set_gate( 5, reinterpret_cast<uint64_t>(isr5) , 0x08, 0x8E);
+	idt_set_gate( 6, reinterpret_cast<uint64_t>(isr6) , 0x08, 0x8E);
+	idt_set_gate( 7, reinterpret_cast<uint64_t>(isr7) , 0x08, 0x8E);
+	idt_set_gate( 8, reinterpret_cast<uint64_t>(isr8) , 0x08, 0x8E);
+	idt_set_gate( 9, reinterpret_cast<uint64_t>(isr9) , 0x08, 0x8E);
+	idt_set_gate( 10, reinterpret_cast<uint64_t>(isr10) , 0x08, 0x8E);
+	idt_set_gate( 11, reinterpret_cast<uint64_t>(isr11) , 0x08, 0x8E);
+	idt_set_gate( 12, reinterpret_cast<uint64_t>(isr12) , 0x08, 0x8E);
+	idt_set_gate( 13, reinterpret_cast<uint64_t>(isr13) , 0x08, 0x8E);
+	idt_set_gate( 14, reinterpret_cast<uint64_t>(isr14) , 0x08, 0x8E);
+	idt_set_gate( 15, reinterpret_cast<uint64_t>(isr15) , 0x08, 0x8E);
+	idt_set_gate( 16, reinterpret_cast<uint64_t>(isr16) , 0x08, 0x8E);
+	idt_set_gate( 17, reinterpret_cast<uint64_t>(isr17) , 0x08, 0x8E);
+	idt_set_gate( 18, reinterpret_cast<uint64_t>(isr18) , 0x08, 0x8E);
+	idt_set_gate( 19, reinterpret_cast<uint64_t>(isr19) , 0x08, 0x8E);
+	idt_set_gate( 20, reinterpret_cast<uint64_t>(isr20) , 0x08, 0x8E);
+	idt_set_gate( 21, reinterpret_cast<uint64_t>(isr21) , 0x08, 0x8E);
+	idt_set_gate( 22, reinterpret_cast<uint64_t>(isr22) , 0x08, 0x8E);
+	idt_set_gate( 23, reinterpret_cast<uint64_t>(isr23) , 0x08, 0x8E);
+	idt_set_gate( 24, reinterpret_cast<uint64_t>(isr24) , 0x08, 0x8E);
+	idt_set_gate( 25, reinterpret_cast<uint64_t>(isr25) , 0x08, 0x8E);
+	idt_set_gate( 26, reinterpret_cast<uint64_t>(isr26) , 0x08, 0x8E);
+	idt_set_gate( 27, reinterpret_cast<uint64_t>(isr27) , 0x08, 0x8E);
+	idt_set_gate( 28, reinterpret_cast<uint64_t>(isr28) , 0x08, 0x8E);
+	idt_set_gate( 29, reinterpret_cast<uint64_t>(isr29) , 0x08, 0x8E);
+	idt_set_gate( 30, reinterpret_cast<uint64_t>(isr30) , 0x08, 0x8E);
+	idt_set_gate( 31, reinterpret_cast<uint64_t>(isr31) , 0x08, 0x8E);
 
 }
 
-static void idt_set_gate(u8int num, u64int base, u16int sel, u8int flags)
+static void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
 {
 	idt64_entries[num].set(base, sel, flags);
 #if 0
@@ -174,11 +174,11 @@ void page_fault(registers64_t regs)
 {
 	// Output an error message.
 	//monitor_write("Page fault! ( ");
-	char buf[32];
+	char buf[64] = {0};
 	// A page fault has occurred.
 	// The faulting address is stored in the CR2 register.
-	u64int faulting_address = get_fault_addr64();
-	// u32int faulting_address;
+	uint64_t faulting_address = get_fault_addr64();
+	// uint32_t faulting_address;
 	// asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
 
 	// The error code gives us details of what happened.
@@ -194,8 +194,15 @@ void page_fault(registers64_t regs)
 	if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
 	if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
 	if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
-	sprintf(buf, ") at 0x%08Lx\n", faulting_address);
+	monitor_write(") at 0x");
+	monitor_write_hex(faulting_address);
+	monitor_write("\n");
+	
+	sprintf(buf, ") at 0x%08.8X%08.8X\n", HIDWORD(faulting_address), LODWORD(faulting_address) );
 	monitor_write(buf);
+	
+	//~ sprintf(buf, ") at 0x%08Lx\n", faulting_address);
+	//~ monitor_write(buf);
 	// monitor_write(") at 0x");
 	// monitor_write_hex(faulting_address);
 

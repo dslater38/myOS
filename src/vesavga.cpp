@@ -2,10 +2,10 @@
 #include "common.h"
 
 
-static u16int cursor_x;
-static u16int cursor_y;
-static u8int backColor = BLACK;
-static u8int foreColor = CYAN;
+static uint16_t cursor_x;
+static uint16_t cursor_y;
+static uint8_t backColor = BLACK;
+static uint8_t foreColor = CYAN;
 
 #define COLS 80
 #define COLS2 (COLS/2)
@@ -13,16 +13,16 @@ static u8int foreColor = CYAN;
 
 #define VIDEO_MEM_COUNT ROWS*COLS
 
-static u16int *video_memory=(u16int *)0xB8000;
+static uint16_t *video_memory=(uint16_t *)0xB8000;
 
-static u16int back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
-static u32int	cur_line = 0;
-// static u32int	count = 0;
+static uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
+static uint32_t	cur_line = 0;
+// static uint32_t	count = 0;
 
 extern "C"
 {
 
-bool set_foreground_color(u8int clr)
+bool set_foreground_color(uint8_t clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -33,7 +33,7 @@ bool set_foreground_color(u8int clr)
 	return success;
 }
 
-bool set_background_color(u8int clr)
+bool set_background_color(uint8_t clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -50,22 +50,22 @@ static void inc_cur_line()
 	cur_line = (cur_line + 1) % ROWS;
 }
 
-static u16int color_attribute()
+static uint16_t color_attribute()
 {
 	
-	return (u16int)((backColor << 4) | (foreColor & 0x0F));
+	return (uint16_t)((backColor << 4) | (foreColor & 0x0F));
 }
 
-static u16int colored_char(char c)
+static uint16_t colored_char(char c)
 {
 	return ((color_attribute() << 8) | c);
 }
 
 static void copy_buffer()
 {
-	u32int *dst = (u32int *)video_memory;
-	u32int *src=(u32int *)back_buffer;
-	u32int *end = (u32int *)(back_buffer + ROWS*COLS);
+	uint32_t *dst = (uint32_t *)video_memory;
+	uint32_t *src=(uint32_t *)back_buffer;
+	uint32_t *end = (uint32_t *)(back_buffer + ROWS*COLS);
 	
 	while(src<end)
 	{
@@ -76,25 +76,25 @@ static void copy_buffer()
 
 static void copy_line2(int dstLine, int srcLine)
 {
-	u32int *pDest = (u32int *)(video_memory + COLS*dstLine);
-	u32int *pSrc= (u32int *)(back_buffer + COLS*srcLine);
-	u32int *pEnd = pSrc + COLS2;
+	uint32_t *pDest = (uint32_t *)(video_memory + COLS*dstLine);
+	uint32_t *pSrc= (uint32_t *)(back_buffer + COLS*srcLine);
+	uint32_t *pEnd = pSrc + COLS2;
 	while(pSrc<pEnd)
 	{
 		*pDest++ = *pSrc++;
 	}
 }
 
-static void blank_line(u32int line)
+static void blank_line(uint32_t line)
 {
 	if( line >= 0 && line < ROWS )
 	{
-//		u8int attributeByte = color_attribute();
-//		u16int blank = 0x20 /* space */ | (attributeByte << 8);
-		u16int blank = colored_char( (char)0x20 );
-		u32int blank32 = (((u32int)blank) << 16)|blank;
-		u32int *ptr = (u32int *)(back_buffer + line*COLS);
-		u32int *pEnd = ptr + COLS2;
+//		uint8_t attributeByte = color_attribute();
+//		uint16_t blank = 0x20 /* space */ | (attributeByte << 8);
+		uint16_t blank = colored_char( (char)0x20 );
+		uint32_t blank32 = (((uint32_t)blank) << 16)|blank;
+		uint32_t *ptr = (uint32_t *)(back_buffer + line*COLS);
+		uint32_t *pEnd = ptr + COLS2;
 		while(ptr < pEnd)
 		{
 			*ptr++ = blank32;
@@ -121,7 +121,7 @@ static void copy_buffer2()
 	}
 }
 
-// extern void memmove(void *dst, void *src, u32int size);
+// extern void memmove(void *dst, void *src, uint32_t size);
 
 
 
@@ -129,7 +129,7 @@ static void copy_buffer2()
 static void move_cursor()
 {
    // The screen is COLS characters wide...
-   u16int cursorLocation = cursor_y * COLS + cursor_x;
+   uint16_t cursorLocation = cursor_y * COLS + cursor_x;
    outb64(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
    outb64(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
    outb64(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
@@ -138,9 +138,9 @@ static void move_cursor()
 
 static void copy_line(int dstLine, int srcLine)
 {
-	u32int *pDest = (u32int *)(video_memory + COLS*dstLine);
-	u32int *pEnd = pDest + 12;
-	u32int *pSrc= (u32int *)(video_memory + COLS*srcLine);
+	uint32_t *pDest = (uint32_t *)(video_memory + COLS*dstLine);
+	uint32_t *pEnd = pDest + 12;
+	uint32_t *pSrc= (uint32_t *)(video_memory + COLS*srcLine);
 	for(;pDest<pEnd;++pDest,++pSrc)
 	{
 		*pDest = *pSrc;
@@ -188,17 +188,17 @@ void monitor_put(char c)
 			if(c >= ' ')
 			{
 				// The background colour is black (0), the foreground is white (15).
-				// u8int backColour = 0;
-				// u8int foreColour = 15;
+				// uint8_t backColour = 0;
+				// uint8_t foreColour = 15;
 
 				// The attribute byte is made up of two nibbles - the lower being the
 				// foreground colour, and the upper the background colour.
-				// u8int  attributeByte = color_attribute();
+				// uint8_t  attributeByte = color_attribute();
 				// The attribute byte is the top 8 bits of the word we have to send to the
 				// VGA board.
-				// u16int attribute = attributeByte << 8;
-				//  u16int *location = (u16int *)(video_memory + (cursor_y*COLS + cursor_x));
-				u16int *location = (u16int *)(back_buffer + (cur_line*COLS + cursor_x));
+				// uint16_t attribute = attributeByte << 8;
+				//  uint16_t *location = (uint16_t *)(video_memory + (cursor_y*COLS + cursor_x));
+				uint16_t *location = (uint16_t *)(back_buffer + (cur_line*COLS + cursor_x));
 				*location = colored_char(c);
 				// *location = (c | attribute);
 				++cursor_x;				   
@@ -226,12 +226,12 @@ void monitor_put(char c)
 // Clears the screen, by copying lots of spaces to the framebuffer.
 void monitor_clear()
 {
-	// u8int attributeByte = color_attribute();
-	// u16int blank = 0x20 /* space */ | (attributeByte << 8);
-	u16int blank = colored_char((char)0x20);
-	u32int blank32 = (((u32int)blank) << 16)|blank;
+	// uint8_t attributeByte = color_attribute();
+	// uint16_t blank = 0x20 /* space */ | (attributeByte << 8);
+	uint16_t blank = colored_char((char)0x20);
+	uint32_t blank32 = (((uint32_t)blank) << 16)|blank;
 
-	for(u32int *pStart = (u32int *)back_buffer, *pEnd=pStart + COLS2*ROWS;
+	for(uint32_t *pStart = (uint32_t *)back_buffer, *pEnd=pStart + COLS2*ROWS;
 		pStart < pEnd;
 		++pStart )
 	{
@@ -255,19 +255,21 @@ void monitor_write(const char *c)
 	}
 }
 
-void monitor_write_hex(u64int n)
+void monitor_write_hex(uint64_t n)
 {
 	// TODO: implement this yourself!
+	uint32_t hi = static_cast<uint32_t>((n & 0xFFFFFFFF00000000ull) >> 32);
+	uint32_t lo = static_cast<uint32_t>(n & 0x00000000FFFFFFFFull);
 	char buffer[64];
-	sprintf(buffer, "%Lx", n);
+	sprintf(buffer, "%x%08.8x", hi, lo);
 	monitor_write(buffer);
 }
 
-void monitor_write_dec(u64int n)
+void monitor_write_dec(uint64_t n)
 {
 	// TODO: implement this yourself!
 	char buffer[64];
-	sprintf(buffer, "%Ld", n);
+	sprintf(buffer, "%d", static_cast<uint32_t>(n));
 	monitor_write(buffer);
 }
 

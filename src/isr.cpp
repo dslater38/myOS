@@ -46,12 +46,12 @@ void isr64_handler(registers64_t regs)
 	}
 }
 
-void register_interrupt_handler(u8int n, isr_t handler)
+void register_interrupt_handler(uint8_t n, isr_t handler)
 {
 	interrupt_handlers[n] = handler;
 }
 
-void register_interrupt_handler64(u8int n, isr64_t handler)
+void register_interrupt_handler64(uint8_t n, isr64_t handler)
 {
 	interrupt64_handlers[n] = handler;
 }

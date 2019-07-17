@@ -32,7 +32,7 @@ inline constexpr typename remove_reference<T>::type&& move(T &&arg)noexcept
 template<typename T>
 struct less
 {
-	u8int operator()(T a, T b)
+	uint8_t operator()(T a, T b)
 	{
 		return a<b ? 1 : 0;
 	}
@@ -56,7 +56,7 @@ struct ordered_array_t
 	value_type *end{0};
 	Pred	pred{};
 	
-	ordered_array_t(value_type *ptr, u32int size)
+	ordered_array_t(value_type *ptr, uint32_t size)
 		: start{ptr}
 		, last{ptr}
 		, end{ptr + size}
@@ -64,15 +64,15 @@ struct ordered_array_t
 		{
 		}
 	
-	u32int size()const { return last - start; }
+	uint32_t size()const { return last - start; }
 };
 
 template<typename T, typename Pred=less<T> >
-ordered_array_t<T, Pred> place_ordered_array(void *addr, u32int max_size)
+ordered_array_t<T, Pred> place_ordered_array(void *addr, uint32_t max_size)
 {
 	return ordered_array_t<T, Pred> { reinterpret_cast<T *>(addr), max_size };
 	//~ ordered_array_t<T, Pred> to_ret;
-	//~ const u32int alloc_size = max_size*sizeof(T);
+	//~ const uint32_t alloc_size = max_size*sizeof(T);
 	//~ to_ret.start = reinterpret_cast<T *>(addr);
 	//~ memset(to_ret.array, 0, alloc_size);
 	//~ to_ret.last = to_ret.start;
@@ -81,11 +81,11 @@ ordered_array_t<T, Pred> place_ordered_array(void *addr, u32int max_size)
 }
 
 template<typename T, typename Pred=less<T> >
-ordered_array_t<T, Pred> create_ordered_array(u32int max_size)
+ordered_array_t<T, Pred> create_ordered_array(uint32_t max_size)
 {
 	return place_ordered_array(kmalloc(max_size*sizeof(T)), max_size);
 	//~ ordered_array_t<T, Pred> to_ret;
-	//~ const u32int alloc_size = max_size*sizeof(T);
+	//~ const uint32_t alloc_size = max_size*sizeof(T);
 	//~ to_ret.start = reinterpret_cast<T *>(kmalloc(alloc_size));
 	//~ memset(to_ret.array, 0, alloc_size);
 	//~ to_ret.last = to_ret.start;
@@ -103,7 +103,7 @@ template<typename T, typename Pred=less<T> >
 void insert_ordered_array(type_t item, ordered_array_t<T, Pred> *array)
 {
 	T *it = 0;
-	u32int size = array->size();
+	uint32_t size = array->size();
 	for( it=array->start, it<array->last && array->pred(*it, item); ++iterator )
 	{
 	}
@@ -127,14 +127,14 @@ void insert_ordered_array(type_t item, ordered_array_t<T, Pred> *array)
 }
 
 template<typename T, typename Pred=less<T> >
-T lookup_ordered_array(u32int i, ordered_array_t<T,Pred> *array)
+T lookup_ordered_array(uint32_t i, ordered_array_t<T,Pred> *array)
 {
 	ASSERT(i < array->size());
 	return array->start[i];
 }
 
 template<typename T, typename Pred=less<T> >
-void remove_ordered_array(u32int i, ordered_array_t<T,Pred> *array)
+void remove_ordered_array(uint32_t i, ordered_array_t<T,Pred> *array)
 {
 	for( auto it = array->start + i, e=array->last; it<e; ++it)
 	{

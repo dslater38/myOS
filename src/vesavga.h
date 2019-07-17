@@ -18,11 +18,11 @@ void SYM6432(monitor_clear)();
 
 // Output a null-terminated ASCII string to the monitor.
 void SYM6432(monitor_write)(const char *c);
-void SYM6432(monitor_write_hex)(uint_ptr n);
-void SYM6432(monitor_write_dec)(uint_ptr n);
+void SYM6432(monitor_write_hex)(uintptr_t n);
+void SYM6432(monitor_write_dec)(uintptr_t n);
 
-bool SYM6432(set_foreground_color)(u8int clr);
-bool SYM6432(set_background_color)(u8int clr);
+bool SYM6432(set_foreground_color)(uint8_t clr);
+bool SYM6432(set_background_color)(uint8_t clr);
 
 
 #define BLACK 0

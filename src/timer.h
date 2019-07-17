@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-void init_timer(u32int frequency);
+void init_timer(uint32_t frequency);
 
 #define PIT_CLOCK_FREQ 1193180
 

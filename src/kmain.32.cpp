@@ -8,7 +8,7 @@
 #include "isr.h"
 #include "serial.h"
 	
-extern void beep( u16int freq );
+extern void beep( uint16_t freq );
 extern void vga43(void);
 
 #include "descriptor_tables.h"
@@ -19,15 +19,15 @@ volatile int foobar = 0;
 
 extern "C" 
 {
-	extern u32int end;
-	extern u32int placement_address;
+	extern uint32_t end;
+	extern uint32_t placement_address;
 
 	void page_fault(registers_t regs);
 	void init_gdt_table();
 	void init_gdt_table64();
 	void init_idt_table();
-	void initPaging32(u32int maxMem);
-	void initPaging64(u64int maxMem);
+	void initPaging32(uint32_t maxMem);
+	void initPaging64(uint64_t maxMem);
 	void enable_paging_64(void);
 	void enable_paging_64_2(void);
 	
@@ -79,8 +79,8 @@ extern "C"
 	static void test_page_fault()
 	{
 		monitor_write32("Testing Page Fault\n");
-		u32int *ptr = (u32int*)0xA0000000;
-		u32int do_page_fault = *ptr;
+		uint32_t *ptr = (uint32_t*)0xA0000000;
+		uint32_t do_page_fault = *ptr;
 		monitor_write_dec32(do_page_fault);
 		monitor_write32("After page fault! SHOULDN'T GET HERE \n");
 	}

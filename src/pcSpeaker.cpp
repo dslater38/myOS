@@ -2,9 +2,9 @@
 
 volatile int foo = 0;
 
-void beep( u16int freq )
+void beep( uint16_t freq )
 {
-	u8int note;
+	uint8_t note;
 	
 	volatile int bx, cx;
 	

@@ -11,7 +11,7 @@ public:
 	Frames() = default;
 	Frames(UINT maxSize)
 		:frames{(UINT*)kmalloc(INDEX_FROM_BIT((maxSize>>12)))}
-		, count{static_cast<u32int>(maxSize>>12)}
+		, count{static_cast<uint32_t>(maxSize>>12)}
 	{
 		memset(frames, 0, INDEX_FROM_BIT(count));
 	}
@@ -103,7 +103,7 @@ private:
 	
 private:
 	UINT *	frames{nullptr};
-	u32int	count{0};
+	uint32_t	count{0};
 };
 
 

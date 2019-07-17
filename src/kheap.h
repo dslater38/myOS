@@ -12,10 +12,10 @@
 
 struct header_t
 {
-	u32int magic{HEAP_MAGIC};
-	u32int size{0};
-	u8int is_hole{1};
-	header_t(u32int size_, u8int hole)
+	uint32_t magic{HEAP_MAGIC};
+	uint32_t size{0};
+	uint8_t is_hole{1};
+	header_t(uint32_t size_, uint8_t hole)
 		: magic{HEAP_MAGIC}
 		, size{size_}
 		, is_hole{hole}
@@ -25,7 +25,7 @@ struct header_t
 
 struct footer_t
 {
-	u32int magic{HEAP_MAGIC};
+	uint32_t magic{HEAP_MAGIC};
 	header_t	*header{0};
 	explicit footer_t(header_t *h)
 		: magic{HEAP_MAGIC}
@@ -37,7 +37,7 @@ struct footer_t
 template<>
 struct less<header_t>
 {
-	u8int operator()(const header_t &a, const header_t& b)
+	uint8_t operator()(const header_t &a, const header_t& b)
 	{
 		return a.size()<b.size() ? 1 : 0;
 	}
@@ -46,13 +46,13 @@ struct less<header_t>
 struct heap_t
 {
 	ordered_array_t<header_t> index{};
-	u32int start_address{0}; // The start of our allocated space.
-	u32int end_address{0};   // The end of our allocated space. May be expanded up to max_address.
-	u32int max_address{0};   // The maximum address the heap can be expanded to.
-	u8int supervisor{0};     // Should extra pages requested by us be mapped as supervisor-only?
-	u8int readonly{0};       // Should extra pages requested by us be mapped as read-only?
+	uint32_t start_address{0}; // The start of our allocated space.
+	uint32_t end_address{0};   // The end of our allocated space. May be expanded up to max_address.
+	uint32_t max_address{0};   // The maximum address the heap can be expanded to.
+	uint8_t supervisor{0};     // Should extra pages requested by us be mapped as supervisor-only?
+	uint8_t readonly{0};       // Should extra pages requested by us be mapped as read-only?
 	
-	heap_t(u32int start, u32int end_addr, u32int max_size, u8int super, u8int ro)
+	heap_t(uint32_t start, uint32_t end_addr, uint32_t max_size, uint8_t super, uint8_t ro)
 		: index{place_ordered_array<header_t>((void*)start, HEAP_INDEX_SIZE)}
 		, start_address{start}
 		, end_address{end_addr}
@@ -76,7 +76,7 @@ struct heap_t
 			insert_ordered_array((void*)hole, &heap->index);
 		}
 	
-	static heap_t *create(u32int start, u32int end_addr, u32int max_size, u8int supervisor, u8int readonly)
+	static heap_t *create(uint32_t start, uint32_t end_addr, uint32_t max_size, uint8_t supervisor, uint8_t readonly)
 	{
 		return new(kmalloc(sizeof(heap_t))) heap_t{start, end_addr, max_size, supervisor, readonly};
 	}

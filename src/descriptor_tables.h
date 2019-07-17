@@ -8,86 +8,86 @@
 // any of the alignment in the structure.
 
 
-const u8int PRESENT_BIT = (1<<7);
-const u8int CODE_SEGMENT_BIT = (1<<4);
-const u8int DATA_SEGMENT_BIT = (0<<4);
-const u8int SYSTEM_SEGMENT_BIT = (1<<4);
-const u8int EXECUTABLE_SEGMENT_BIT = (1<<3);
-const u8int DATA_SEGMENT_EXPAND_DOWN_BIT = (1<<2);
-const u8int CODE_SEGMENT_CONFORMING_BIT = (1<<2);
-const u8int SEGMENT_RW_BIT = (1<<1);
-const u8int SEGMENT_ACCESSED_BIT = (1<<0);
+const uint8_t PRESENT_BIT = (1<<7);
+const uint8_t CODE_SEGMENT_BIT = (1<<4);
+const uint8_t DATA_SEGMENT_BIT = (0<<4);
+const uint8_t SYSTEM_SEGMENT_BIT = (1<<4);
+const uint8_t EXECUTABLE_SEGMENT_BIT = (1<<3);
+const uint8_t DATA_SEGMENT_EXPAND_DOWN_BIT = (1<<2);
+const uint8_t CODE_SEGMENT_CONFORMING_BIT = (1<<2);
+const uint8_t SEGMENT_RW_BIT = (1<<1);
+const uint8_t SEGMENT_ACCESSED_BIT = (1<<0);
 
-const u8int GRAN_1K_BIT = (1<<7);
-const u8int GRAN_1B_BIT = (0<<7);
-const u8int SELECTOR_SIZE_32 = (1<<6);
-const u8int SELECTOR_SIZE_16 = (0<<6);
-const u8int SELECTOR_SIZE_64 = (0<<6);
-
-
+const uint8_t GRAN_1K_BIT = (1<<7);
+const uint8_t GRAN_1B_BIT = (0<<7);
+const uint8_t SELECTOR_SIZE_32 = (1<<6);
+const uint8_t SELECTOR_SIZE_16 = (0<<6);
+const uint8_t SELECTOR_SIZE_64 = (0<<6);
 
 
-const u8int SEGMENT_PRESENT = (1<<0);
-const u8int SYSTEM_DESCRIPTOR = (1<<1);
-const u8int GRAN_1K = (1<<2);
-const u8int OPERAND_SIZE_32 = (1<<3);
-const u8int IS_64BITS = (1<<4);
 
-const u8int SEGMENT_TYPE_CODE = (1u<<3);
-const u8int SEGMENT_TYPE_DATA = (0u<<3);
 
-const u8int RING0	=	0u;
-const u8int RING1	=	1u;
-const u8int RING2	=	2u;
-const u8int RING3	=	3u;
+const uint8_t SEGMENT_PRESENT = (1<<0);
+const uint8_t SYSTEM_DESCRIPTOR = (1<<1);
+const uint8_t GRAN_1K = (1<<2);
+const uint8_t OPERAND_SIZE_32 = (1<<3);
+const uint8_t IS_64BITS = (1<<4);
 
-const u8int SEGMENT_EXPAND_DOWN = (1u<<2);
-const u8int SEGMENT_WRITE_ENABLED = (1u<<1);
-const u8int SEGMENT_EXECUTE_ENABLED = (1u<<1);
-const u8int SEGMENT_ACCESSED = (1u<<0);
+const uint8_t SEGMENT_TYPE_CODE = (1u<<3);
+const uint8_t SEGMENT_TYPE_DATA = (0u<<3);
+
+const uint8_t RING0	=	0u;
+const uint8_t RING1	=	1u;
+const uint8_t RING2	=	2u;
+const uint8_t RING3	=	3u;
+
+const uint8_t SEGMENT_EXPAND_DOWN = (1u<<2);
+const uint8_t SEGMENT_WRITE_ENABLED = (1u<<1);
+const uint8_t SEGMENT_EXECUTE_ENABLED = (1u<<1);
+const uint8_t SEGMENT_ACCESSED = (1u<<0);
 
 struct gdt_entry_t
 {
-	u16int &limit_low() noexcept	{ return *(u16int *)data; }
-	u16int limit_low()const noexcept	{ return *(u16int *)data; }
+	uint16_t &limit_low() noexcept	{ return *(uint16_t *)data; }
+	uint16_t limit_low()const noexcept	{ return *(uint16_t *)data; }
 	
-	u16int &base_low() noexcept		{ return *(u16int *)(data+2); };
-	u16int base_low()const noexcept		{ return *(u16int *)(data+2); };
+	uint16_t &base_low() noexcept		{ return *(uint16_t *)(data+2); };
+	uint16_t base_low()const noexcept		{ return *(uint16_t *)(data+2); };
 
-	u8int &base_middle()noexcept	{ return *(data+4); };
-	u8int base_middle()const noexcept	{ return *(data+4); };
+	uint8_t &base_middle()noexcept	{ return *(data+4); };
+	uint8_t base_middle()const noexcept	{ return *(data+4); };
 
-	u8int &access() noexcept		{ return *(data+5); };
-	u8int access()const noexcept		{ return *(data+5); };
+	uint8_t &access() noexcept		{ return *(data+5); };
+	uint8_t access()const noexcept		{ return *(data+5); };
 
-	u8int &granularity() noexcept	{ return *(data+6); };
-	u8int granularity()const noexcept	{ return *(data+6); };
+	uint8_t &granularity() noexcept	{ return *(data+6); };
+	uint8_t granularity()const noexcept	{ return *(data+6); };
 
-	u8int &base_high() noexcept		{ return *(data+7); };
-	u8int base_high()const noexcept		{ return *(data+7); };
+	uint8_t &base_high() noexcept		{ return *(data+7); };
+	uint8_t base_high()const noexcept		{ return *(data+7); };
 
-	void set(u32int base, u32int limit, u8int type, u8int privlege_level, u8int flags)
+	void set(uint32_t base, uint32_t limit, uint8_t type, uint8_t privlege_level, uint8_t flags)
 	{
-		limit_low()   = static_cast<u16int>(limit & 0xFFFF);
-		base_low()    = static_cast<u16int>(base & 0xFFFF);
-		base_high()   = static_cast<u8int>((base >> 24) & 0xFF);
+		limit_low()   = static_cast<uint16_t>(limit & 0xFFFF);
+		base_low()    = static_cast<uint16_t>(base & 0xFFFF);
+		base_high()   = static_cast<uint8_t>((base >> 24) & 0xFF);
 		
-		u8int acc =  (type & 0x0F);
+		uint8_t acc =  (type & 0x0F);
 		
 		if( 0 == (flags & SYSTEM_DESCRIPTOR))
 		{
-			acc |= static_cast<u8int>(1<<4);
+			acc |= static_cast<uint8_t>(1<<4);
 		}
 		
-		acc |= static_cast<u8int>((privlege_level & 0x03)<<5);
+		acc |= static_cast<uint8_t>((privlege_level & 0x03)<<5);
 		
 		if(flags & SEGMENT_PRESENT)
 		{
-			acc |= static_cast<u8int>(1<<7);
+			acc |= static_cast<uint8_t>(1<<7);
 		}
 		access() = acc;
 		
-		u8int gran = static_cast<u8int>((limit>>16) & 0x0F);
+		uint8_t gran = static_cast<uint8_t>((limit>>16) & 0x0F);
 		if(type & IS_64BITS)
 		{
 			gran |= (1<<5);
@@ -102,10 +102,10 @@ struct gdt_entry_t
 			gran |= (1<<7);
 		}
 		granularity() = gran;
-		base_high() = static_cast<u8int>((base >> 24) & 0xFF);
+		base_high() = static_cast<uint8_t>((base >> 24) & 0xFF);
 	}
 	
-	void set(u32int base, u32int limit, u8int access_, u8int gran)noexcept
+	void set(uint32_t base, uint32_t limit, uint8_t access_, uint8_t gran)noexcept
 	{
 		base_low()    = (base & 0xFFFF);
 		base_middle() = (base >> 16) & 0xFF;
@@ -118,53 +118,53 @@ struct gdt_entry_t
 		access()      = access_;		
 	}
 
-	u8int data[8];
+	uint8_t data[8];
 };
 
 struct gdt_ptr_t
 {
 
-	u16int &limit() noexcept{ return *(u16int *)data;}
-	u16int limit()const noexcept{ return *(u16int *)data;}
-	u32int &base() noexcept{ return *(u32int *)(data+2);}
-	u32int base()const noexcept{ return *(u32int *)(data+2);}
+	uint16_t &limit() noexcept{ return *(uint16_t *)data;}
+	uint16_t limit()const noexcept{ return *(uint16_t *)data;}
+	uint32_t &base() noexcept{ return *(uint32_t *)(data+2);}
+	uint32_t base()const noexcept{ return *(uint32_t *)(data+2);}
 
 
-	u8int data[6];
+	uint8_t data[6];
 };
 
 
 struct gdt64_ptr_t
 {
 
-	u16int &limit() noexcept{ return *(u16int *)data;}
-	u16int limit()const noexcept{ return *(u16int *)data;}
-	u64int &base() noexcept{ return *(u64int *)(data+2);}
-	u64int base()const noexcept{ return *(u64int *)(data+2);}
+	uint16_t &limit() noexcept{ return *(uint16_t *)data;}
+	uint16_t limit()const noexcept{ return *(uint16_t *)data;}
+	uint64_t &base() noexcept{ return *(uint64_t *)(data+2);}
+	uint64_t base()const noexcept{ return *(uint64_t *)(data+2);}
 
 
-	u8int data[10];
+	uint8_t data[10];
 };
 
 
 struct idt_entry_t
 {
-	u16int &base_lo()noexcept { return *(u16int *)(data);}
-	u16int base_lo() const noexcept { return *(u16int *)(data);}
+	uint16_t &base_lo()noexcept { return *(uint16_t *)(data);}
+	uint16_t base_lo() const noexcept { return *(uint16_t *)(data);}
 
-	u16int &sel()noexcept { return *(u16int *)(data+2); }
-	u16int sel() const noexcept { return *(u16int *)(data+2); }
+	uint16_t &sel()noexcept { return *(uint16_t *)(data+2); }
+	uint16_t sel() const noexcept { return *(uint16_t *)(data+2); }
 
-	u8int  &always0()noexcept { return *(data+4); }
-	u8int  always0() const noexcept { return *(data+4); }
+	uint8_t  &always0()noexcept { return *(data+4); }
+	uint8_t  always0() const noexcept { return *(data+4); }
 
-	u8int  &flags()noexcept { return *(data+5); }
-	u8int  flags() const noexcept { return *(data+5); }
+	uint8_t  &flags()noexcept { return *(data+5); }
+	uint8_t  flags() const noexcept { return *(data+5); }
 
-	u16int &base_hi()noexcept { return *(u16int *)(data+6); }
-	u16int base_hi() const noexcept { return *(u16int *)(data+6); }
+	uint16_t &base_hi()noexcept { return *(uint16_t *)(data+6); }
+	uint16_t base_hi() const noexcept { return *(uint16_t *)(data+6); }
 
-	void set(u32int base, u16int sel, u8int flags)
+	void set(uint32_t base, uint16_t sel, uint8_t flags)
 	{
 		this->base_lo() = base & 0xFFFF;
 		this->base_hi() = (base >> 16) & 0xFFFF;
@@ -177,48 +177,48 @@ struct idt_entry_t
 
 	}
 
-	u8int data[8];
+	uint8_t data[8];
 };
 
 struct idt_ptr_t
 {
-	u16int &limit()noexcept { return *(u16int *)(data);}
-	u16int limit()const noexcept { return *(u16int *)(data);}
+	uint16_t &limit()noexcept { return *(uint16_t *)(data);}
+	uint16_t limit()const noexcept { return *(uint16_t *)(data);}
 
-	u32int &base()noexcept {return *(u32int *)(data + 2);}                // The address of the first element in our idt_entry_t array.
-	u32int base()const noexcept {return *(u32int *)(data + 2);}
-	u8int data[6];
+	uint32_t &base()noexcept {return *(uint32_t *)(data + 2);}                // The address of the first element in our idt_entry_t array.
+	uint32_t base()const noexcept {return *(uint32_t *)(data + 2);}
+	uint8_t data[6];
 };
 
 
 
 struct idt_entry64_t
 {
-	u16int &base_lo()noexcept { return *(u16int *)(data);}
-	u16int base_lo() const noexcept { return *(u16int *)(data);}
+	uint16_t &base_lo()noexcept { return *(uint16_t *)(data);}
+	uint16_t base_lo() const noexcept { return *(uint16_t *)(data);}
 
-	u16int &sel()noexcept { return *(u16int *)(data+2); }
-	u16int sel() const noexcept { return *(u16int *)(data+2); }
+	uint16_t &sel()noexcept { return *(uint16_t *)(data+2); }
+	uint16_t sel() const noexcept { return *(uint16_t *)(data+2); }
 
-	u8int  &always0()noexcept { return *(data+4); }
-	u8int  always0() const noexcept { return *(data+4); }
+	uint8_t  &always0()noexcept { return *(data+4); }
+	uint8_t  always0() const noexcept { return *(data+4); }
 
-	u8int  &flags()noexcept { return *(data+5); }
-	u8int  flags() const noexcept { return *(data+5); }
+	uint8_t  &flags()noexcept { return *(data+5); }
+	uint8_t  flags() const noexcept { return *(data+5); }
 
-	u16int &base_mid()noexcept { return *(u16int *)(data+6); }
-	u16int base_mid() const noexcept { return *(u16int *)(data+6); }
+	uint16_t &base_mid()noexcept { return *(uint16_t *)(data+6); }
+	uint16_t base_mid() const noexcept { return *(uint16_t *)(data+6); }
 	
-	u32int &base_hi()noexcept { return *(u32int *)(data+8); }
-	u32int base_hi()const noexcept { return *(u32int *)(data+8); }
+	uint32_t &base_hi()noexcept { return *(uint32_t *)(data+8); }
+	uint32_t base_hi()const noexcept { return *(uint32_t *)(data+8); }
 	
-	u32int &reserved()noexcept { return *(u32int *)(data+12); }
-	u32int reserved()const noexcept { return *(u32int *)(data+12); }
+	uint32_t &reserved()noexcept { return *(uint32_t *)(data+12); }
+	uint32_t reserved()const noexcept { return *(uint32_t *)(data+12); }
 
-	void set(u64int base, u16int sel, u8int flags)
+	void set(uint64_t base, uint16_t sel, uint8_t flags)
 	{
-		this->base_lo() = (u16int)(base & 0xFFFF);
-		this->base_mid() = (u16int)((base >> 16) & 0xFFFF);
+		this->base_lo() = (uint16_t)(base & 0xFFFF);
+		this->base_mid() = (uint16_t)((base >> 16) & 0xFFFF);
 
 		this->sel()     = sel;
 		this->always0() = 0;
@@ -226,40 +226,40 @@ struct idt_entry64_t
 		// It sets the interrupt gate's privilege level to 3.
 		this->flags()   = flags /* | 0x60 */;
 		
-		this->base_hi() = (u32int)( (base >> 32) & 0xFFFFFFFF );
+		this->base_hi() = (uint32_t)( (base >> 32) & 0xFFFFFFFF );
 		this->reserved() = 0;
 	}
 
-	u8int data[16];
+	uint8_t data[16];
 };
 
 struct idt_ptr64_t
 {
-	u16int &limit()noexcept { return *(u16int *)(data);}
-	u16int limit()const noexcept { return *(u16int *)(data);}
+	uint16_t &limit()noexcept { return *(uint16_t *)(data);}
+	uint16_t limit()const noexcept { return *(uint16_t *)(data);}
 
-	u64int &base()noexcept {return *(u64int *)(data + 2);}                // The address of the first element in our idt_entry_t array.
-	u64int base()const noexcept {return *(u64int *)(data + 2);}
-	u8int data[10];
+	uint64_t &base()noexcept {return *(uint64_t *)(data + 2);}                // The address of the first element in our idt_entry_t array.
+	uint64_t base()const noexcept {return *(uint64_t *)(data + 2);}
+	uint8_t data[10];
 };
 
 #if 0
 
 struct gdt_entry_struct
 {
-	u16int limit_low;           // The lower 16 bits of the limit.
-	u16int base_low;            // The lower 16 bits of the base.
-	u8int  base_middle;         // The next 8 bits of the base.
-	u8int  access;              // Access flags, determine what ring this segment can be used in.
-	u8int  granularity;
-	u8int  base_high;           // The last 8 bits of the base.
+	uint16_t limit_low;           // The lower 16 bits of the limit.
+	uint16_t base_low;            // The lower 16 bits of the base.
+	uint8_t  base_middle;         // The next 8 bits of the base.
+	uint8_t  access;              // Access flags, determine what ring this segment can be used in.
+	uint8_t  granularity;
+	uint8_t  base_high;           // The last 8 bits of the base.
 } __attribute__((packed));
 typedef struct gdt_entry_struct gdt_entry_t;
 
 struct gdt_ptr_struct
 {
-	u16int limit;               // The upper 16 bits of all selector limits.
-	u32int base;                // The address of the first gdt_entry_t struct.
+	uint16_t limit;               // The upper 16 bits of all selector limits.
+	uint32_t base;                // The address of the first gdt_entry_t struct.
 } __attribute__((packed));
 
 typedef struct gdt_ptr_struct gdt_ptr_t;
@@ -268,11 +268,11 @@ typedef struct gdt_ptr_struct gdt_ptr_t;
 // A struct describing an interrupt gate.
 struct idt_entry_struct
 {
-	u16int base_lo;             // The lower 16 bits of the address to jump to when this interrupt fires.
-	u16int sel;                 // Kernel segment selector.
-	u8int  always0;             // This must always be zero.
-	u8int  flags;               // More flags. See documentation.
-	u16int base_hi;             // The upper 16 bits of the address to jump to.
+	uint16_t base_lo;             // The lower 16 bits of the address to jump to when this interrupt fires.
+	uint16_t sel;                 // Kernel segment selector.
+	uint8_t  always0;             // This must always be zero.
+	uint8_t  flags;               // More flags. See documentation.
+	uint16_t base_hi;             // The upper 16 bits of the address to jump to.
 } __attribute__((packed));
 typedef struct idt_entry_struct idt_entry_t;
 
@@ -280,8 +280,8 @@ typedef struct idt_entry_struct idt_entry_t;
 // This is in a format suitable for giving to 'lidt'.
 struct idt_ptr_struct
 {
-	u16int limit;
-	u32int base;                // The address of the first element in our idt_entry_t array.
+	uint16_t limit;
+	uint32_t base;                // The address of the first element in our idt_entry_t array.
 } __attribute__((packed));
 typedef struct idt_ptr_struct idt_ptr_t;
 

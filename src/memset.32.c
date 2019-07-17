@@ -1,38 +1,38 @@
 #include "common.h"
 
 // Copy len bytes from src to dest.
-void *memcpy(void *dest, const void *src, u32int len)
+void *memcpy(void *dest, const void *src, uint32_t len)
 {
-    const u8int *sp = (const u8int *)src;
-    u8int *dp = (u8int *)dest;
+    const uint8_t *sp = (const uint8_t *)src;
+    uint8_t *dp = (uint8_t *)dest;
     for(; len != 0; len--) *dp++ = *sp++;
      return dest;
 }
 
 // Write len copies of val into dest.
-void *memset(void *vdest, int val, u32int len)
+void *memset(void *vdest, int val, uint32_t len)
 {
 #ifndef  FAST_MEMCPY
-	u8int *ptr,*pEnd;
-	for( ptr = (u8int *)vdest, pEnd = ptr + len;
+	uint8_t *ptr,*pEnd;
+	for( ptr = (uint8_t *)vdest, pEnd = ptr + len;
 		ptr<pEnd;
 		++ptr )
 	{
-		*ptr = (u8int)val;
+		*ptr = (uint8_t)val;
 	}
 	return vdest;
 #else
-	u8int *dest = (u8int *)vdest;
-	u32int slen,dlen;
+	uint8_t *dest = (uint8_t *)vdest;
+	uint32_t slen,dlen;
 	
 	dlen = (len >> 2);	/* length in DWORDS*/
 	
 	if(dlen>0)
 	{
-		u32int v = ((val<<24)|(val<<16)|(val<<8)|val);
-		u32int *ptr = (u32int *)dest;
-		dest = (u8int *)(ptr + dlen);
-		for( ;ptr < (u32int *)dest; ++ptr )
+		uint32_t v = ((val<<24)|(val<<16)|(val<<8)|val);
+		uint32_t *ptr = (uint32_t *)dest;
+		dest = (uint8_t *)(ptr + dlen);
+		for( ;ptr < (uint32_t *)dest; ++ptr )
 		{
 			*ptr = v;
 		}
@@ -42,10 +42,10 @@ void *memset(void *vdest, int val, u32int len)
 	slen = (len>>1);
 	if(slen>0)
 	{
-		u16int v = ((val<<8)|val);
-		u16int *ptr = (u16int *)dest;
-		dest = (u8int *)(ptr + slen);
-		for( ;ptr < (u16int *)dest; ++ptr )
+		uint16_t v = ((val<<8)|val);
+		uint16_t *ptr = (uint16_t *)dest;
+		dest = (uint8_t *)(ptr + slen);
+		for( ;ptr < (uint16_t *)dest; ++ptr )
 		{
 			*ptr = v;
 		}
@@ -54,7 +54,7 @@ void *memset(void *vdest, int val, u32int len)
 	
 	if(len>0)
 	{
-		u8int *ptr = dest;
+		uint8_t *ptr = dest;
 		dest = (ptr + len);
 		for( ;ptr < dest; ++ptr )
 		{

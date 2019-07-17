@@ -83,8 +83,8 @@
 #define TRANS_EMPTY 		0x40
 #define IMPENDING_ERROR 	0x80
 
-#define LOBYTE(b) ((u8int)(b&0x00FF))
-#define HIBYTE(b) ((u8int)((b&0xFF00) >> 8))
+#define LOBYTE(b) ((uint8_t)(b&0x00FF))
+#define HIBYTE(b) ((uint8_t)((b&0xFF00) >> 8))
 
 #define CAT(a,b) a##b
 
@@ -100,7 +100,7 @@
 
 #endif
 
-static u16int select_speed(u32int speed)
+static uint16_t select_speed(uint32_t speed)
 {
 	switch(speed)
 	{
@@ -129,14 +129,14 @@ static u16int select_speed(u32int speed)
 	}
 }
 
-static u8int encode_bits( u8int bits )
+static uint8_t encode_bits( uint8_t bits )
 {
 	if( bits < 5 || bits > 8 )
 		return 0;
 	return (bits - 5);
 }
 
-static u8int encode_parity(u8int parity)
+static uint8_t encode_parity(uint8_t parity)
 {
 	switch(parity)
 	{
@@ -156,7 +156,7 @@ static u8int encode_parity(u8int parity)
 	return 0xFF;
 }
 
-static u16int encode_port(u16int port)
+static uint16_t encode_port(uint16_t port)
 {
 	switch(port)
 	{
@@ -176,10 +176,10 @@ static u16int encode_port(u16int port)
 
 static
 inline
-u8int init_serial_imp( u16int port, u32int speed, u8int bits, u8int parity, u8int stop)
+uint8_t init_serial_imp( uint16_t port, uint32_t speed, uint8_t bits, uint8_t parity, uint8_t stop)
 {
-	u8int fifo_ctl, modem_ctl;
-	u16int divisor = select_speed(speed);
+	uint8_t fifo_ctl, modem_ctl;
+	uint16_t divisor = select_speed(speed);
 	if( divisor == 0 ) { return ERROR_BAD_SPEED; }
 	
 	bits = encode_bits(bits);
@@ -188,7 +188,7 @@ u8int init_serial_imp( u16int port, u32int speed, u8int bits, u8int parity, u8in
 	parity = encode_parity(parity);
 	if( parity == 0xFF ) {return ERROR_BAD_PARITY; }
 	
-	u8int flags = bits | parity;
+	uint8_t flags = bits | parity;
 	if(stop)
 	{
 		flags |= BIT_2;
@@ -213,7 +213,7 @@ u8int init_serial_imp( u16int port, u32int speed, u8int bits, u8int parity, u8in
 	return SUCCESS;
 }
 
-u8int SYM6432(init_serial)( u16int port, u32int speed, u8int bits, u8int parity, u8int stop)
+uint8_t SYM6432(init_serial)( uint16_t port, uint32_t speed, uint8_t bits, uint8_t parity, uint8_t stop)
 {
 	return init_serial_imp(port, speed, bits, parity, stop);
 }
@@ -222,11 +222,11 @@ extern int printf(const char *fmt, ... );
 
 static
 inline
-void identify_uart_imp(u16int port)
+void identify_uart_imp(uint16_t port)
 {
 	port = encode_port(port);
 	OUTB( port + FIFO_CTL, 0xE7);
-	u8int flags = inb( port + INT_ID );
+	uint8_t flags = inb( port + INT_ID );
 	if( 0 != (flags & 0x40) )
 	{
 		if( 0 != (flags & 0x80) )
@@ -259,31 +259,31 @@ void identify_uart_imp(u16int port)
 	}
 }
 
-void  SYM6432(identify_uart)(u16int port)
+void  SYM6432(identify_uart)(uint16_t port)
 {
 	identify_uart_imp(port);
 }
 
 static
-int serial_received(u8int port) {
+int serial_received(uint8_t port) {
 	return (inb(port +LINE_STATUS) & DATA_READY);
 }
 
  static
-char read_serial(u8int port) {
+char read_serial(uint8_t port) {
    while (serial_received(port) == 0);
  
    return inb(port);
 }
 
 static
-int is_transmit_empty(u8int port) {
+int is_transmit_empty(uint8_t port) {
    return (inb(port + LINE_STATUS) & XMIT_HOLD_EMPTY);
 }
 
 static
 inline
-u8int serial_getc_imp( u16int port, char *c )
+uint8_t serial_getc_imp( uint16_t port, char *c )
 {
 	int i;	
 	if( NULL == c )
@@ -302,7 +302,7 @@ u8int serial_getc_imp( u16int port, char *c )
 	return ERROR_TIMEOUT;	
 }
 
-u8int SYM6432(serial_getc)( u16int port, char *c )
+uint8_t SYM6432(serial_getc)( uint16_t port, char *c )
 {
 	return serial_getc_imp(port, c);
 }
@@ -310,7 +310,7 @@ u8int SYM6432(serial_getc)( u16int port, char *c )
 
 static
 inline
-u8int serial_putc_imp(u16int port, char c)
+uint8_t serial_putc_imp(uint16_t port, char c)
 {
 	int i;
 	port = encode_port(port);
@@ -327,18 +327,18 @@ u8int serial_putc_imp(u16int port, char c)
 	return ERROR_TIMEOUT;
 }
 
-u8int SYM6432(serial_putc)(u16int port, char c)
+uint8_t SYM6432(serial_putc)(uint16_t port, char c)
 {
 	return serial_putc_imp(port, c);
 }
 
 static
 inline
-u8int serial_write_imp(u16int port, const char *str)
+uint8_t serial_write_imp(uint16_t port, const char *str)
 {
 	while( *str )
 	{
-		u8int status = serial_putc_imp(port, *str);
+		uint8_t status = serial_putc_imp(port, *str);
 		if( status != SUCCESS )
 		{
 			return status;
@@ -348,7 +348,7 @@ u8int serial_write_imp(u16int port, const char *str)
 	return SUCCESS;	
 }
 
-u8int SYM6432(serial_write)(u16int port, const char *str)
+uint8_t SYM6432(serial_write)(uint16_t port, const char *str)
 {
 	return serial_write_imp(port, str);
 }

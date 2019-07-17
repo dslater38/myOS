@@ -20,12 +20,12 @@ struct PageDirectory
 		memset(tables, '\0', sizeof(tables));
 		memset(physical, '\0', sizeof(physical));
 		physicalAddr = 0;
-		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (u32int)this);
+		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (uint32_t)this);
 	}
 	
 	void setPhys(Pointer p)
 	{
-		// printf("setPhys: this: 0x%08.8x, phys: 0x%08.8x\n", (u32int)this, (u32int)p);
+		// printf("setPhys: this: 0x%08.8x, phys: 0x%08.8x\n", (uint32_t)this, (uint32_t)p);
 		physicalAddr = p;
 	}
 	
@@ -45,7 +45,7 @@ struct PageDirectory
 		auto *table = (*this)[i];
 		if( table == nullptr)
 		{
-			u32int phys = 0;
+			uint32_t phys = 0;
 			
 			table = new(reinterpret_cast<void *>(kmalloc_aligned_phys(sizeof(T), &phys))) T{};
 			table->setPhys(phys);			
@@ -57,10 +57,10 @@ struct PageDirectory
 	
 	void dump()const
 	{
-		printf32("PageDirectory: this 0x%08.8x, phys 0x%08.8x\n", (u32int)this ,(u32int)physicalAddr);
+		printf32("PageDirectory: this 0x%08.8x, phys 0x%08.8x\n", (uint32_t)this ,(uint32_t)physicalAddr);
 		for (auto i = 0u; i < NUM_ENTRIES; ++i)
 		{
-			printf32("entry: %d == 0x%08.8x (0x%08.8x)\n", i, (u32int)tables[i], (u32int)physical[i]);
+			printf32("entry: %d == 0x%08.8x (0x%08.8x)\n", i, (uint32_t)tables[i], (uint32_t)physical[i]);
 			if (tables[i])
 			{
 				reinterpret_cast<T *>(tables[i])->dump();
@@ -89,7 +89,7 @@ public:
 		return &(pages[ (vaddr>>12) & (NUM_PAGES-1)]);
 	}
 	
-	void setPhys(u32int){}
+	void setPhys(uint32_t){}
 
 	UINT operator[](int n)
 	{
@@ -100,7 +100,7 @@ public:
 	{
 		for (auto i = 0u; i < NUM_PAGES; ++i)
 		{
-			printf32("\tpage: %d == 0x%08.8x\n", i, *(u32int *)&(pages[i]) );
+			printf32("\tpage: %d == 0x%08.8x\n", i, *(uint32_t *)&(pages[i]) );
 		}
 		printf32("\t+++++++++++++++++++++++\n");
 	}

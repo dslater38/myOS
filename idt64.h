@@ -4,41 +4,41 @@
 
 struct idt_ptr64_t
 {
-	u16int &limit()noexcept { return *(u16int *)(data);}
-	u16int limit()const noexcept { return *(u16int *)(data);}
+	uint16_t &limit()noexcept { return *(uint16_t *)(data);}
+	uint16_t limit()const noexcept { return *(uint16_t *)(data);}
 
-	u64int &base()noexcept {return *(u64int *)(data + 2);}                // The address of the first element in our idt_entry_t array.
-	u64int base()const noexcept {return *(u64int *)(data + 2);}
-	u8int data[10];
+	uint64_t &base()noexcept {return *(uint64_t *)(data + 2);}                // The address of the first element in our idt_entry_t array.
+	uint64_t base()const noexcept {return *(uint64_t *)(data + 2);}
+	uint8_t data[10];
 };
 
 struct idt_entry64_t
 {
-	u16int &base_lo()noexcept { return *(u16int *)(data);}
-	u16int base_lo() const noexcept { return *(u16int *)(data);}
+	uint16_t &base_lo()noexcept { return *(uint16_t *)(data);}
+	uint16_t base_lo() const noexcept { return *(uint16_t *)(data);}
 
-	u16int &sel()noexcept { return *(u16int *)(data+2); }
-	u16int sel() const noexcept { return *(u16int *)(data+2); }
+	uint16_t &sel()noexcept { return *(uint16_t *)(data+2); }
+	uint16_t sel() const noexcept { return *(uint16_t *)(data+2); }
 
-	u8int  &always0()noexcept { return *(data+4); }
-	u8int  always0() const noexcept { return *(data+4); }
+	uint8_t  &always0()noexcept { return *(data+4); }
+	uint8_t  always0() const noexcept { return *(data+4); }
 
-	u8int  &flags()noexcept { return *(data+5); }
-	u8int  flags() const noexcept { return *(data+5); }
+	uint8_t  &flags()noexcept { return *(data+5); }
+	uint8_t  flags() const noexcept { return *(data+5); }
 
-	u16int &base_mid()noexcept { return *(u16int *)(data+6); }
-	u16int base_mid() const noexcept { return *(u16int *)(data+6); }
+	uint16_t &base_mid()noexcept { return *(uint16_t *)(data+6); }
+	uint16_t base_mid() const noexcept { return *(uint16_t *)(data+6); }
 
-    u32int &base_hi()noexcept { return *(u32int *)(data+8);}
-    u32int base_hi()const noexcept { return *(u32int *)(data+8);}
+    uint32_t &base_hi()noexcept { return *(uint32_t *)(data+8);}
+    uint32_t base_hi()const noexcept { return *(uint32_t *)(data+8);}
 
-    u32int &reserved()noexcept { return *(u32int *)(data+12);}
-    u32int reserved()const noexcept { return *(u32int *)(data+12);}
+    uint32_t &reserved()noexcept { return *(uint32_t *)(data+12);}
+    uint32_t reserved()const noexcept { return *(uint32_t *)(data+12);}
 
-	void set(u64int base, u16int sel, u8int flags)
+	void set(uint64_t base, uint16_t sel, uint8_t flags)
 	{
-		this->base_lo() = (u16int)(base & 0xFFFF);
-		this->base_mid() = (u16int)((base >> 16) & 0xFFFF);
+		this->base_lo() = (uint16_t)(base & 0xFFFF);
+		this->base_mid() = (uint16_t)((base >> 16) & 0xFFFF);
 
 		this->sel()     = sel;
 		this->always0() = 0;
@@ -46,10 +46,10 @@ struct idt_entry64_t
 		// It sets the interrupt gate's privilege level to 3.
 		this->flags()   = flags /* | 0x60 */;
 
-        this->base_hi() = (u32int)( (base >> 32) & 0xFFFFFFFF );
+        this->base_hi() = (uint32_t)( (base >> 32) & 0xFFFFFFFF );
 	}
 
-	u8int data[16];
+	uint8_t data[16];
 };
 
 #endif // IDT64_H_INCLUDED

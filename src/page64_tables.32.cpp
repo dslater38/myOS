@@ -9,24 +9,24 @@
 #include "vesavga.h"
 
 extern "C" {
-	extern u32int placement_address;
+	extern uint32_t placement_address;
 	extern void set_page_directory(void *);
 	extern void set_page64_directory(void *);
 }
 
-const u64int PAGE_SIZE = 0x1000;
+const uint64_t PAGE_SIZE = 0x1000;
 
-using PTE = PageDirectory<PageTableT<u64int>, 12, 9>;
+using PTE = PageDirectory<PageTableT<uint64_t>, 12, 9>;
 using PDE = PageDirectory<PTE, 21, 9>;
 using PDPTE = PageDirectory<PDE, 30, 9>;
 using PML4E = PageDirectory<PDPTE, 39, 9>;
 
-using DIR32 = PageDirectory<PageTableT<u32int>, 10, 10>;
+using DIR32 = PageDirectory<PageTableT<uint32_t>, 10, 10>;
 using DIR64 = PageDirectory<PDPTE, 39, 9>;
 
 static DIR32 *initDir32()
 {
-	u32int phys = 0;
+	uint32_t phys = 0;
 	DIR32 *table = new(reinterpret_cast<void *>(kmalloc_aligned_phys(sizeof(DIR32), &phys))) DIR32{};
 	table->setPhys(phys);
 	return table;
@@ -40,7 +40,7 @@ static DIR32 * getDIR32()
 
 static DIR64 *initDir64()
 {
-	u32int phys = 0;
+	uint32_t phys = 0;
 	DIR64 *table = new(reinterpret_cast<void *>(kmalloc_aligned_phys(sizeof(DIR64), &phys))) DIR64{};
 	table->setPhys(phys);
 	return table;
@@ -52,10 +52,10 @@ static DIR64 * getDIR64()
 	return table;
 }
 
-static Frames<u32int> *frames32 = nullptr;
+static Frames<uint32_t> *frames32 = nullptr;
 static DIR32 *current_directory32=nullptr;
 
-static Frames<u64int> *frames64 = nullptr;
+static Frames<uint64_t> *frames64 = nullptr;
 static DIR64 *current_directory64=nullptr;
 
 static void switch_page_directory32(DIR32 *dir)
@@ -94,14 +94,14 @@ extern "C"
 		reinterpret_cast<DIR64 *>(p)->dump();
 	}
 	
-	void initPaging32(u32int maxMem)
+	void initPaging32(uint32_t maxMem)
 	{
 		monitor_write32("initPaging32()\n");
 		auto *dir = getDIR32();
-		PageTableT<u32int> *ptr = reinterpret_cast<PageTableT<u32int> *>(dir->tables[0]);
+		PageTableT<uint32_t> *ptr = reinterpret_cast<PageTableT<uint32_t> *>(dir->tables[0]);
 
-		frames32 = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<u32int>)))) Frames<u32int>{maxMem};
-		// new(reinterpret_cast<void *>(&frames32)) Frames<u32int>{maxMem};
+		frames32 = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<uint32_t>)))) Frames<uint32_t>{maxMem};
+		// new(reinterpret_cast<void *>(&frames32)) Frames<uint32_t>{maxMem};
 
 		// We need to identity map (phys addr = virt addr) from
 		// 0x0 to the end of used memory, so we can access this
@@ -122,14 +122,14 @@ extern "C"
 	}	
 	
 	
-	void initPaging64(u64int maxMem)
+	void initPaging64(uint64_t maxMem)
 	{
 		monitor_write32("initPaging64()\n");
 		auto *dir = getDIR64();
-		PageTableT<u64int> *ptr = reinterpret_cast<PageTableT<u64int> *>(dir->tables[0]);
+		PageTableT<uint64_t> *ptr = reinterpret_cast<PageTableT<uint64_t> *>(dir->tables[0]);
 
-		frames64 = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<u64int>)))) Frames<u64int>{maxMem};
-		// new(reinterpret_cast<void *>(&frames32)) Frames<u32int>{maxMem};
+		frames64 = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<uint64_t>)))) Frames<uint64_t>{maxMem};
+		// new(reinterpret_cast<void *>(&frames32)) Frames<uint32_t>{maxMem};
 
 		// We need to identity map (phys addr = virt addr) from
 		// 0x0 to the end of used memory, so we can access this
@@ -158,8 +158,8 @@ extern "C"
 		// A page fault has occurred.#include "common.h"
 
 		// The faulting address is stored in the CR2 register.
-		u32int faulting_address = get_fault_addr();
-		// u32int faulting_address;
+		uint32_t faulting_address = get_fault_addr();
+		// uint32_t faulting_address;
 		// asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
 
 		// The error code gives us details of what happened.

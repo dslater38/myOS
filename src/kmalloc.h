@@ -7,16 +7,16 @@
 extern "C" {
 #endif
 
-u32int kmalloc(u32int sz);
-u32int kmalloc_aligned(u32int sz);
-u32int kmalloc_phys(u32int sz, u32int *phys);
-u32int kmalloc_aligned_phys(u32int sz, u32int *phys);
+uint32_t kmalloc(uint32_t sz);
+uint32_t kmalloc_aligned(uint32_t sz);
+uint32_t kmalloc_phys(uint32_t sz, uint32_t *phys);
+uint32_t kmalloc_aligned_phys(uint32_t sz, uint32_t *phys);
 
 
-u64int kmalloc64(u32int sz);
-u64int kmalloc64_aligned(u32int sz);
-u64int kmalloc64_phys(u32int sz, u64int *phys);
-u64int kmalloc64_aligned_phys(u32int sz, u64int *phys);
+uint64_t kmalloc64(uint32_t sz);
+uint64_t kmalloc64_aligned(uint32_t sz);
+uint64_t kmalloc64_phys(uint32_t sz, uint64_t *phys);
+uint64_t kmalloc64_aligned_phys(uint32_t sz, uint64_t *phys);
 
 #ifdef __cplusplus
 }

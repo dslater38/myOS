@@ -14,20 +14,20 @@ extern "C" {
 
 typedef struct registers
 {
-   u32int ds;                  // Data segment selector
-   u32int edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by pusha.
-   u32int int_no, err_code;    // Interrupt number and error code (if applicable)
-   u32int eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
+   uint32_t ds;                  // Data segment selector
+   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by pusha.
+   uint32_t int_no, err_code;    // Interrupt number and error code (if applicable)
+   uint32_t eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
 } registers_t;
 
 
 typedef struct registers64
 {
-   u64int ds;                  // Data segment selector
-   u64int rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax; // Pushed by pusha.
-   u64int r8, r9, r10, r11, r12, r13, r14, r15;
-   u64int int_no, err_code;    // Interrupt number and error code (if applicable)
-   u64int rip, cs, rflags, userrsp, ss; // Pushed by the processor automatically.
+   uint64_t ds;                  // Data segment selector
+   uint64_t rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax; // Pushed by pusha.
+   uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
+   uint64_t int_no, err_code;    // Interrupt number and error code (if applicable)
+   uint64_t rip, cs, rflags, userrsp, ss; // Pushed by the processor automatically.
 } registers64_t;
 
 
@@ -68,8 +68,8 @@ typedef struct registers64
 // first parameter.
 typedef void (*isr_t)(registers_t);
 typedef void (*isr64_t)(registers64_t);
-void register_interrupt_handler(u8int n, isr_t handler);
-void register_interrupt_handler64(u8int n, isr64_t handler);
+void register_interrupt_handler(uint8_t n, isr_t handler);
+void register_interrupt_handler64(uint8_t n, isr64_t handler);
 
 extern isr_t interrupt_handlers[256] ;
 extern isr64_t interrupt64_handlers[256] ;

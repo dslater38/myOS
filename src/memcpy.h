@@ -10,4 +10,4 @@ void *memcpy(T *src, T *dst, size_t count )
 	return retVal;
 }
 
-void *memset(void *dest, u8int val, u32int size);
+void *memset(void *dest, uint8_t val, uint32_t size);
