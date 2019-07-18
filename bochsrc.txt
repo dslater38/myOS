@@ -18,3 +18,9 @@ com1: enabled=1, mode=file, dev=serial.out
 # pcipnic: enabled=1, mac=b0:c4:20:4F:18:00, ethmod=linux, ethdev=ens33
 port_e9_hack: enabled=1
 debug_symbols: file=./src/kernel.sym
+
+
+  debug: action=ignore, pci=report
+  info: action=report
+  error: action=report
+  panic: action=ask

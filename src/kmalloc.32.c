@@ -1,9 +1,9 @@
 #include "kmalloc.h"
 #include "vesavga.h"
 
-extern uint32_t end;
+// extern uint32_t end;
 
-uint32_t placement_address = (uint32_t)(&end);
+uint32_t placement_address = 0; // (uint32_t)end;
 
 static uint32_t kmalloc_generic(uint32_t sz, int align, uint32_t *phys);
 
@@ -61,10 +61,10 @@ uint32_t kmalloc_aligned(uint32_t sz)
 uint32_t kmalloc_phys(uint32_t sz, uint32_t *phys)
 {
 	uint32_t retVal =  kmalloc_generic(sz,0,phys);
-	if(phys)
-	{
-		printf32("kmalloc_phys: ptr: 0x%08.8x, phys: 0x%08.8x\n", retVal, (*phys));
-	}
+	//~ if(phys)
+	//~ {
+		//~ printf32("kmalloc_phys: ptr: 0x%08.8x, phys: 0x%08.8x\n", retVal, (*phys));
+	//~ }
 	return retVal;
 }
 
@@ -73,14 +73,14 @@ uint32_t kmalloc_aligned_phys(uint32_t sz, uint32_t *phys)
 	uint32_t retVal = kmalloc_generic(sz, 1, phys);
 	if(phys)
 	{
-		printf32("kmalloc_aligned_phys: ptr: 0x%08.8x, phys: 0x%08.8x\n", retVal, (*phys));
+	// 	printf32("kmalloc_aligned_phys: ptr: 0x%08.8x, phys: 0x%08.8x, size: %d\n", retVal, (*phys), sz);
 	}
 	return retVal;
 }
 
 static void page_align_placement()
 {
-	if( 0 != (placement_address | 0x00000FFF) )
+	if( 0 != (placement_address & 0x00000FFF) )
 	{
 		// Align it.
 		placement_address &= 0xFFFFF000;

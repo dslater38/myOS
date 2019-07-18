@@ -11,6 +11,11 @@
 [GLOBAL enable_paging_64]
 [GLOBAL enable_paging_64_2]
 
+[GLOBAL  p4_table]
+[GLOBAL  p3_table]
+[GLOBAL  p2_table]
+[GLOBAL  p1_table]
+
 outb:
 	mov edx, [esp+4]
 	mov eax, [esp+8]
@@ -203,4 +208,3 @@ p2_table:			; PDE with (PS=1 == 2mb pages, PS == 0 -> points to PTE)
     resb 4096
 p1_table:
     resb 4096*512		; PTE 
-

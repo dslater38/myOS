@@ -30,7 +30,6 @@ gdt_flush64:
 	mov gs, ax
 	mov ss, ax
 	jmp 0x08:long_mode_start   ; 0x08 is the offset to our code segment: Far jump!
-.flush:
 	ret
 
 

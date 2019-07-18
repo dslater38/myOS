@@ -20,6 +20,8 @@ static void idt_set_gate(uint8_t,uint32_t,uint16_t,uint8_t);
 
 gdt_entry_t gdt_entries[5] = { 0 };
 
+gdt_entry_t gdt_entries32[5] = { 0 };
+
 gdt_ptr_t   gdt_ptr{ 0 };
 
 gdt64_ptr_t   gdt64_ptr{ 0 };
@@ -62,7 +64,7 @@ extern "C"
 static void init_gdt()
 {
  	gdt_ptr.limit() = (sizeof(gdt_entry_t) * 5) - 1;
-	gdt_ptr.base()  = (uint32_t)&gdt_entries; 
+	gdt_ptr.base()  = (uint32_t)&gdt_entries32; 
 
 	gdt_set_gate(0, 0, 0, 0, 0);                // Null segment
 	gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code segment
@@ -91,7 +93,7 @@ static void init_gdt64()
 // Set the value of one GDT entry.
 static void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)
 {
-	gdt_entries[num].set(base, limit, access, gran);
+	gdt_entries32[num].set(base, limit, access, gran);
 }
 
 /* reinitialize the PIC controllers, giving them specified vector offsets

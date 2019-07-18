@@ -19,6 +19,14 @@ volatile int foobar = 0;
 
 extern "C" 
 {
+
+	extern uint32_t end;
+	
+	extern uint64_t p4_table[512];
+	extern uint64_t p3_table[512];
+	extern uint64_t p2_table[512];
+	extern uint64_t p1_table[512*4096];
+	
 	extern uint32_t end;
 	extern uint32_t placement_address;
 
@@ -64,9 +72,9 @@ extern "C"
 	static void init_page64()
 	{
 		monitor_write32("Initialize Paging 64....\n");
-		// initPaging64(0x1000000);
+		initPaging64(0x10000000);
 		// enable_paging_64();
-		enable_paging_64_2();
+		// enable_paging_64_2();
 	}
 
 	
@@ -87,20 +95,29 @@ extern "C"
 	
 	int kmain32(unsigned long magic, multiboot_tag *mboot_ptr)
 	{	
+		placement_address = (uint32_t)&end;
 		printf32("init Placement: 0x%08.8x\n", placement_address);
+		init_gdt_table();
 		
-		init_serial32(1, 38400, 8, 1, 0);
+		
+//		init_serial32(1, 38400, 8, 1, 0);
 		
 		init_monitor();
 		init_page64();
+
 		init_GDT();
-		init_IDT();
-		handle_page_faults();
+//		init_IDT();
+//		handle_page_faults();
 		// init_page32();
 		
+		monitor_write_hex32((uint32_t)p4_table);
+		monitor_write_hex32((uint32_t)p3_table);
+		monitor_write_hex32((uint32_t)p2_table);
+		monitor_write_hex32((uint32_t)p1_table);
 		
-		monitor_write32("Hello, paging world!\n");	
-		test_page_fault();
+		
+//		monitor_write32("Hello, paging world!\n");	
+//		test_page_fault();
 		return 0;
 	}
 
