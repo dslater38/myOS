@@ -18,13 +18,51 @@ struct PageT
 	
 	using  Pointer=UINT;
 
-	UINT present : 1;
-	UINT rw : 1;
-	UINT user : 1;
-	UINT accessed : 1;
-	UINT dirty : 1;
-	UINT unused : 7;
-	UINT frame : (8*sizeof(UINT) - 12);
+	Pointer present : 1;
+	Pointer rw : 1;
+	Pointer user : 1;
+	Pointer write_through : 1;
+	Pointer no_cache : 1;
+	Pointer accessed : 1;
+	Pointer dirty : 1;
+	Pointer huge : 1;	// unused  - must be 0
+	Pointer global : 1;	// ignored
+	Pointer bit9 : 1;
+	Pointer bit10 : 1;
+	Pointer bit11 : 1;
+	Pointer frame : (8*sizeof(Pointer) - 12);
+	
+	static PageT<Pointer> &toEntry(Pointer &n)
+	{
+		return *((PageT<Pointer> *)(&n));
+	}
+	
+};
+
+
+template<class UINT>
+struct PageDirectoryEntryT
+{
+	using  Pointer=UINT;
+	
+	Pointer present : 1;
+	Pointer rw : 1;
+	Pointer user : 1;
+	Pointer write_through : 1;
+	Pointer no_cache : 1;
+	Pointer dirty : 1;
+	Pointer huge : 1;
+	Pointer global : 1;	// ignored
+	Pointer bit9 : 1;
+	Pointer bit10 : 1;
+	Pointer bit11 : 1;
+	Pointer frame : (8*sizeof(Pointer) - 12);
+	
+	static PageDirectoryEntryT<Pointer> &toEntry(Pointer &n)
+	{
+		return *((PageDirectoryEntryT<Pointer> *)(&n));
+	}
+	
 };
 
 #endif // PAGET_H_INCLUDED

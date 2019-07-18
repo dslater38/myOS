@@ -45,18 +45,36 @@ struct PageDirectory
 
 	PageType *getPage(Pointer vaddr)
 	{
-		auto i = index(vaddr);
-		auto *table = (*this)[i];
-		if( table == nullptr)
+		auto *page = findPage(vaddr);
+		if( page == nullptr)
 		{
 			uint32_t phys = 0;
-
-			table = new(reinterpret_cast<void *>(kmalloc_aligned_phys(sizeof(T), &phys))) T{};
+			auto i = index(vaddr);
+			auto *table = new(reinterpret_cast<void *>(kmalloc_aligned_phys(sizeof(T), &phys))) T{};
 //			table->setPhys(phys);
 //			tables[i] = reinterpret_cast<Pointer>(table);
 			physical[i] = static_cast<Pointer>(phys|0x03); // PRESENT, RW, US.
+			page = table->getPage(vaddr);
 		}
-		return table->getPage(vaddr);
+		return page;
+	}
+
+	PageType *findPage(Pointer vaddr)
+	{
+		auto i = index(vaddr);
+		auto n = physical[i] ;
+
+		if( (n & 0xFFFFFFFCull) != 0 )
+		{
+			PageDirectoryEntryT<Pointer> &entry  = PageDirectoryEntryT<Pointer>::toEntry(n);
+		
+			ASSERT( entry.present == 1 );
+		
+			auto *table = (T *)(n & 0xFFFFFFFCull);
+		
+			return table ? table->getPage(vaddr) : nullptr;
+		}
+		return nullptr;
 	}
 
 	void dump()const
@@ -92,7 +110,7 @@ public:
 
 	PageType *getPage(UINT vaddr)
 	{
-		return &(pages[( (vaddr >> 12) & 0xFFF)]);
+		return &(pages[( (vaddr >> 12) & 0x1FF)]);
 	}
 
 	void setPhys(uint32_t){}

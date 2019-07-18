@@ -1,5 +1,6 @@
 #include "vesavga.h"
 #include "common.h"
+#include "serial.h"
 
 
 static uint16_t cursor_x;
@@ -165,6 +166,7 @@ static void scroll()
 void monitor_put(char c)
 {
 	outb64(0xe9, c);
+	serial_putc(1, c);
 	switch(c)
 	{
 		case 0x08:

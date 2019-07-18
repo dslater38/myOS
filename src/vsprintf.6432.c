@@ -251,7 +251,7 @@ int SYM6432(sprintf)(char *buf, const char *fmt, ...)
 
 int SYM6432(printf)(const char *fmt, ...)
 {
-	char buf[1024] = {0};
+	char buf[4096] = {0};
 	int retVal = 0;
 	va_list args;
 	va_start(args, fmt);

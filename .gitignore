@@ -5,3 +5,5 @@ kernel
 kernel.sym
 bochsout.txt
 os.iso
+bochsrun.log
+debug.log

@@ -26,6 +26,8 @@ using PML4E = PageDirectory<PDPTE, 39, 9>;
 using DIR32 = PageDirectory<PageTableT<uint32_t>, 10, 10>;
 using DIR64 = PageDirectory<PDPTE, 39, 9>;
 
+static void printPageTables(uint32_t maxMem, uint64_t *PML4E);
+
 static DIR32 *initDir32()
 {
 	uint32_t phys = 0;
@@ -165,10 +167,12 @@ void switch_page_directory64(DIR64 *dir)
 		{
 			// Kernel code is readable but not writeable from userspace.
 			auto *page = dir->getPage(i);
-			frames64->alloc(page, 0, 0);
+			frames64->alloc(page, 1, 1);
 			++pages_mapped;
 //			printf32(" i == 0x%08.8x, place == 0x%08.8x, gap == %d\n", i, placement_address, (placement_address - i));
 		}
+		
+//		printPageTables((uint32_t)maxMem, dir->physical );
 		
 		printf32("Mapped %d pages for %d bytes. final Placement: 0x%08.8x\n", pages_mapped, pages_mapped*4096, placement_address);
 		
@@ -212,3 +216,65 @@ void switch_page_directory64(DIR64 *dir)
 	}
 
 }
+
+static
+inline
+uint64_t *PTR(uint64_t n)
+{
+	return (uint64_t *)(((uint32_t)n) & 0xFFFFFFFC);
+}
+
+static
+void printPageTables(uint32_t maxMem, uint64_t *pml4e)
+{
+	printf32("PageTable: maxMem: %d\n", maxMem);
+	printf32("PML4E: %08.8x, PML4E[0]: %08.8x, PML4E[1]: %08.8x\n", (uint32_t)(pml4e), (uint32_t)(pml4e[0]), (uint32_t)(pml4e[1]) );
+	
+	ASSERT(pml4e[1] == 0);
+	
+	uint64_t *pdpte = PTR(pml4e[0]);
+
+	ASSERT(pdpte != nullptr);
+
+	printf32("\tPDPTE: %08.8x, PDPTE[0]: %08.8x, PDPTE[1]: %08.8x\n", (uint32_t)(pdpte), (uint32_t)(pdpte[0]), (uint32_t)(pdpte[1]) );
+	
+	uint64_t *pde = PTR(pdpte[0]);
+	
+	ASSERT(pde != nullptr);
+	
+	// printf("\t\tPDE: %08.8x, PDE[0]: %08.8x, PDE[1]: %08.8x\n", (uint32_t)(PDE), (uint32_t)(PDE[0]), (uint32_t)(PDE[1]) );
+	
+	for( auto i=0; i<512; ++i )
+	{
+		uint64_t *pte = PTR(pde[i]);
+		if( pte != nullptr )
+		{
+			printf32("\t\tPTE[%d] %08.8x\n", i, (uint32_t)pte);
+			for( auto j=0; j<512; ++j )
+			{
+				uint64_t uentry = pte[j];
+				printf32("\t\t\tPageEntry[%d,%d] 0x%08.8x%08.8x\n", i, j, HIDWORD(uentry),LODWORD(uentry));
+			}
+			printf32("\t\t====================================\n");
+		}
+	}
+	
+	// try the lookups
+	
+	DIR64 *dir = (DIR64 *)pml4e;
+	
+	for( uint64_t i=0; i<maxMem; i+= 4096 )
+	{
+		const auto *page = dir->findPage(i);
+		if( page )
+		{
+			uint64_t n = *((uint64_t *)(page));
+			printf32("vaddr 0x%08.8x%08.8x ==> 0x%08.8x%08.8x\n", HIDWORD(i), LODWORD(i), HIDWORD(n), LODWORD(n));
+		}
+		else
+		{
+			printf32("vaddr 0x%08.8x%08.8x ==> <NULL>\n", HIDWORD(i), LODWORD(i));
+		}
+	}
+}
+
