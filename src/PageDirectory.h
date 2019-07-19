@@ -3,6 +3,7 @@
 
 #include "kmalloc.h"
 #include "PageT.h"
+#include "memcpy.h"
 
 template<typename T, const int SHIFT, const int BITS>
 struct PageDirectory
@@ -20,8 +21,8 @@ struct PageDirectory
 
 	PageDirectory()
 	{
-//		memset(tables, '\0', sizeof(tables));
-		memset(physical, '\0', sizeof(physical));
+//		memset32(tables, '\0', sizeof(tables));
+		memset32(physical, '\0', sizeof(physical));
 //		physicalAddr = 0;
 		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (uint32_t)this);
 	}
@@ -103,7 +104,7 @@ public:
 
 	PageTableT()
 	{
-		memset(pages, '\0', sizeof(pages));
+		memset32(pages, '\0', sizeof(pages));
 	}
 
 	using PageType=PageT<UINT>;

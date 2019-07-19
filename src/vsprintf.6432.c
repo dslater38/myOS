@@ -5,7 +5,9 @@
 
 // #define strlen(a) strlen32(a)
 #include "stdarg.h"
+#define memset memset32
 #include <string.h>
+#undef memset
 #include "common.h"
 #include "vesavga.h"
 #include "sym6432.h"
@@ -251,7 +253,7 @@ int SYM6432(sprintf)(char *buf, const char *fmt, ...)
 
 int SYM6432(printf)(const char *fmt, ...)
 {
-	char buf[4096] = {0};
+	char buf[4096] ;
 	int retVal = 0;
 	va_list args;
 	va_start(args, fmt);

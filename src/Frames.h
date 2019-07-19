@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "PageT.h"
 #include "common.h"
+#include "memcpy.h"
 
 template<class Uint, const unsigned PAGE_SIZE=4096u>
 class Frames
@@ -23,7 +24,7 @@ public:
 		printf32("maxzSize: %u\n",(uint32_t)maxSize);
 		
 		printf32("frames: %08.8x to %08.8x for %d bits, maxSize: %u\n", (uint32_t)frames, (uint32_t)(((unsigned char *)frames) + allocSize), allocSize*8, (uint32_t)maxSize);
-		memset(frames, 0, allocSize);
+		memset32(frames, 0, allocSize);
 		
 		printf32("maxzSize: %u\n",(uint32_t)maxSize);
 	}

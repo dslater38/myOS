@@ -1,6 +1,7 @@
 #include "common.h"
 #include "descriptor_tables.h"
 #include "isr.h"
+#include "memcpy.h"
 
 // Lets us access our ASM functions from our C code.
 
@@ -49,7 +50,7 @@ extern "C"
 	void init_idt_table()
 	{
 		init_idt();
-		memset(&interrupt_handlers, 0, sizeof(isr_t)*256);		
+		memset32(&interrupt_handlers, 0, sizeof(isr_t)*256);		
 	}
 	
 	void init_descriptor_tables()
@@ -57,7 +58,7 @@ extern "C"
 		// Initialise the global descriptor table.
 		init_gdt();
 		init_idt();
-		memset(&interrupt_handlers, 0, sizeof(isr_t)*256);
+		memset32(&interrupt_handlers, 0, sizeof(isr_t)*256);
 	}
 }
 
@@ -191,7 +192,7 @@ static void init_idt()
 	idt_ptr.base()  = (uint32_t)&idt_entries;
 
 
-	memset(&idt_entries, 0, sizeof(idt_entry_t)*256);
+	memset32(&idt_entries, 0, sizeof(idt_entry_t)*256);
 	
 	// Remap the irq table.
 	remap_pics();

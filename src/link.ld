@@ -10,6 +10,7 @@ SECTIONS
   {
     code = .; _code = .; __code = .;
     multibootheader.o(.data)
+    *.32.o(.text)
     *(.text)
     . = ALIGN(4096);
   }
