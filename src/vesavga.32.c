@@ -125,10 +125,10 @@ static void move_cursor()
 {
    // The screen is COLS characters wide...
    uint16_t cursorLocation = cursor_y * COLS + cursor_x;
-   outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
-   outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
-   outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
-   outb(0x3D5, cursorLocation);      // Send the low cursor byte.
+   outb32(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
+   outb32(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
+   outb32(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
+   outb32(0x3D5, cursorLocation);      // Send the low cursor byte.
 }
 
 static void copy_line(int dstLine, int srcLine)
@@ -159,7 +159,7 @@ static void scroll()
 // Writes a single character out to the screen.
 void monitor_put32(char c)
 {
-	outb(0xe9, c);
+	outb32(0xe9, c);
 	switch(c)
 	{
 		case 0x08:

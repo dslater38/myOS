@@ -20,12 +20,12 @@ void kmain64()
 	init_idt64_table();
 	printf("64-bit interrupt table is initailzed!!!\n");
 	
-	// auto success = init_serial(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
+	auto success = init_serial(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
 
-	// if( success == SUCCESS)
-	// {
-	// 	printf("Initialized COM1 port\n");
-	// }
+	if( success == SUCCESS)
+	{
+	 	printf("Initialized COM1 port\n");
+	}
 
 	test_page_fault();
 	

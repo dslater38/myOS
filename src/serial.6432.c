@@ -88,17 +88,13 @@
 
 #define CAT(a,b) a##b
 
-#ifdef __x86_64__
+#define OUTB(a,b) SYM6432(outb)(a,b)
+#define OUTW(a,b) SYM6432(outw)(a,b)
+#define OUTD(a,b) SYM6432(outd)(a,b)
+#define INB(a) SYM6432(inb)(a)
+#define INW(a) SYM6432(inw)(a)
+#define IND(a) SYM6432(ind)(a)
 
-#define OUTB(a,b) outb64(a,b)
-#define OUTW(a,b) outw64(a,b)
-
-#else
-
-#define OUTB(a,b) outb(a,b)
-#define OUTW(a,b) outw(a,b)
-
-#endif
 
 static uint16_t select_speed(uint32_t speed)
 {
@@ -174,6 +170,8 @@ static uint16_t encode_port(uint16_t port)
 	return 0;
 }
 
+static uint8_t INITED_PORTS[5] = {0, 0, 0, 0, 0};
+
 static
 inline
 uint8_t init_serial_imp( uint16_t port, uint32_t speed, uint8_t bits, uint8_t parity, uint8_t stop)
@@ -193,8 +191,8 @@ uint8_t init_serial_imp( uint16_t port, uint32_t speed, uint8_t bits, uint8_t pa
 	{
 		flags |= BIT_2;
 	}
-	port = encode_port(port);
-	if( 0 == port ) { return ERROR_BAD_PORT; }
+	uint16_t com_port = encode_port(port);
+	if( 0 == com_port ) { return ERROR_BAD_PORT; }
 	
 	// Enable FIFO, clear them, with 14-byte threshold
 	fifo_ctl = (TRIGGER_LEVEL_14_BYTES|CLEAR_XMIT_FIFO|CLEAR_RCV_FIFO|ENABLE_FIFOS);
@@ -203,13 +201,14 @@ uint8_t init_serial_imp( uint16_t port, uint32_t speed, uint8_t bits, uint8_t pa
 	// most UARTs need Auxiliary Output 2 set to a logical "1" to enable interrupts.
 	modem_ctl = (AUX_OUT_2|RTS|DTR);
 	
-	OUTB( port + INT_ENABLE, DISABLE_INTERRUPTS );   // Disable all interrupts
-	OUTB( port + LINE_CTL, ENABLE_DLAB);			// Enable DLAB (set baud rate divisor)
-	OUTB( port + DIV_LOBYTE, LOBYTE(divisor) );		// Set divisor low byte
-	OUTB( port + DIV_HIBYTE, HIBYTE(divisor) );		// Set divisor high byte
-	OUTB( port + LINE_CTL, flags );					// set bits, parity, & stop bit options
-	OUTB( port + FIFO_CTL, fifo_ctl ); 				// Enable FIFO, clear them, with 14-byte threshold 
-	OUTB( port + MODEM_CTL, modem_ctl);				// IRQs enabled, RTS/DSR set
+	OUTB( com_port + INT_ENABLE, DISABLE_INTERRUPTS );   // Disable all interrupts
+	OUTB( com_port + LINE_CTL, ENABLE_DLAB);			// Enable DLAB (set baud rate divisor)
+	OUTB( com_port + DIV_LOBYTE, LOBYTE(divisor) );		// Set divisor low byte
+	OUTB( com_port + DIV_HIBYTE, HIBYTE(divisor) );		// Set divisor high byte
+	OUTB( com_port + LINE_CTL, flags );					// set bits, parity, & stop bit options
+	OUTB( com_port + FIFO_CTL, fifo_ctl ); 				// Enable FIFO, clear them, with 14-byte threshold 
+	OUTB( com_port + MODEM_CTL, modem_ctl);				// IRQs enabled, RTS/DSR set
+	INITED_PORTS[port] = 1;
 	return SUCCESS;
 }
 
@@ -226,7 +225,7 @@ void identify_uart_imp(uint16_t port)
 {
 	port = encode_port(port);
 	OUTB( port + FIFO_CTL, 0xE7);
-	uint8_t flags = inb( port + INT_ID );
+	uint8_t flags = INB( port + INT_ID );
 	if( 0 != (flags & 0x40) )
 	{
 		if( 0 != (flags & 0x80) )
@@ -248,7 +247,7 @@ void identify_uart_imp(uint16_t port)
 	else
 	{
 		OUTB( port + SCRATCH_REG, 0x2A );
-		if( inb(port + SCRATCH_REG) == 0x2A )
+		if( INB(port + SCRATCH_REG) == 0x2A )
 		{
 			printf("UART 16450\n");
 		}
@@ -266,19 +265,19 @@ void  SYM6432(identify_uart)(uint16_t port)
 
 static
 int serial_received(uint8_t port) {
-	return (inb(port +LINE_STATUS) & DATA_READY);
+	return (INB(port +LINE_STATUS) & DATA_READY);
 }
 
  static
 char read_serial(uint8_t port) {
    while (serial_received(port) == 0);
  
-   return inb(port);
+   return INB(port);
 }
 
 static
 int is_transmit_empty(uint8_t port) {
-   return (inb(port + LINE_STATUS) & XMIT_HOLD_EMPTY);
+   return (INB(port + LINE_STATUS) & XMIT_HOLD_EMPTY);
 }
 
 static
@@ -295,7 +294,7 @@ uint8_t serial_getc_imp( uint16_t port, char *c )
 	{
 		if( serial_received(port) )
 		{
-			*c = inb(port);
+			*c = INB(port);
 			return SUCCESS;
 		}
 	}
@@ -307,7 +306,6 @@ uint8_t SYM6432(serial_getc)( uint16_t port, char *c )
 	return serial_getc_imp(port, c);
 }
 
-
 static
 inline
 uint8_t serial_putc_imp(uint16_t port, char c)
@@ -316,6 +314,7 @@ uint8_t serial_putc_imp(uint16_t port, char c)
 	port = encode_port(port);
 	if( port == 0 )
 		return ERROR_BAD_PORT;
+
 	for( i=0; i<50000; ++i )
 	{
 		if( is_transmit_empty(port) )
@@ -329,7 +328,14 @@ uint8_t serial_putc_imp(uint16_t port, char c)
 
 uint8_t SYM6432(serial_putc)(uint16_t port, char c)
 {
-	return serial_putc_imp(port, c);
+	if( INITED_PORTS[port] )
+	{
+		return serial_putc_imp(port, c);
+	}
+	else
+	{
+		return ERROR_PORT_NOT_READY;
+	}
 }
 
 static
@@ -350,12 +356,23 @@ uint8_t serial_write_imp(uint16_t port, const char *str)
 
 uint8_t SYM6432(serial_write)(uint16_t port, const char *str)
 {
-	return serial_write_imp(port, str);
+	if( INITED_PORTS[port] )
+	{
+		return serial_write_imp(port, str);
+	}
+	else
+	{
+		return ERROR_PORT_NOT_READY;
+	}
 }
 
 
-void SYM6432(write_serial)(char a) {
-    serial_putc_imp(1, a);
+void SYM6432(write_serial)(char a) 
+{
+	if( INITED_PORTS[1] )
+	{
+		serial_putc_imp(1, a);
+	}
 }
 
 static
@@ -371,5 +388,8 @@ void write_string_imp(const char *str)
 
 void SYM6432(write_string)(const char *str)
 {
-	write_string_imp(str);
+	if( INITED_PORTS[1] )
+	{
+		write_string_imp(str);
+	}
 }

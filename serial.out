@@ -1,0 +1,5 @@
+Initialized COM1 port
+Testing Page Fault
+Page fault! ( present read/write kernel-mode not-reserved ) at 0x0a0000000
+) at 0x00000000A0000000
+PANIC(Page fault) at idt64.cpp : 210

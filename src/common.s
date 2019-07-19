@@ -1,9 +1,11 @@
 [BITS 32]                       ; All instructions should be 32-bit.
 
-[GLOBAL outb]
-[GLOBAL outw]
-[GLOBAL inb]
-[GLOBAL inw]
+[GLOBAL outb32]
+[GLOBAL outw32]
+[GLOBAL outd32]
+[GLOBAL inb32]
+[GLOBAL inw32]
+[GLOBAL ind32]
 [GLOBAL idle_loop32]
 [GLOBAL set_page_directory]
 [GLOBAL get_fault_addr]
@@ -16,27 +18,37 @@
 [GLOBAL  p2_table]
 [GLOBAL  p1_table]
 
-outb:
+outb32:
 	mov edx, [esp+4]
 	mov eax, [esp+8]
 	out dx, al
 	ret
 	
-outw:
+outw32:
 	mov edx, [esp+4]
 	mov eax, [esp+8]
 	out dx, ax
 	ret
 
-inb:
+outd32:
+	mov edx, [esp+4]
+	mov eax, [esp+8]
+	out dx, eax
+	ret
+
+inb32:
 	mov edx, [esp+4]
 	in al, dx
 	ret
 
-
-inw:
+inw32:
 	mov edx, [esp+4]
 	in ax, dx
+	ret
+
+ind32:
+	mov edx, [esp+4]
+	in eax, dx
 	ret
 
 idle_loop32:

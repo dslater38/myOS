@@ -53,6 +53,7 @@ void  SYM6432(identify_uart)(uint16_t port);
 #define ERROR_BAD_PORT 4
 #define ERROR_TIMEOUT 5
 #define ERROR_NULL_POINTER 6
+#define ERROR_PORT_NOT_READY 7
 
 #undef IMPORT
 #undef CAT

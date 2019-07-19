@@ -21,11 +21,9 @@ typedef		_Bool	bool;
 extern "C" {
 #endif
 
-void outb(uint16_t port, uint8_t value);
-void outw(uint16_t port, uint16_t value);
-
-void outb64(uint16_t port, uint8_t value);
-void outw64(uint16_t port, uint16_t value);
+void SYM6432(outb)(uint16_t port, uint8_t value);
+void SYM6432(outw)(uint16_t port, uint16_t value);
+void SYM6432(outd)(uint16_t port, uint32_t value);
 
 // void *memcpy(void *dest, const void *src, uint32_t len);
 // void *memset(void *dest, int val, uint32_t len);
@@ -36,8 +34,9 @@ extern void SYM6432(idle_loop)(void);	/* never returns */
 extern uint32_t get_fault_addr(void);
 extern uint64_t get_fault_addr64(void);
 
-uint8_t inb(uint16_t port);
-uint16_t inw(uint16_t port);
+uint8_t SYM6432(inb)(uint16_t port);
+uint16_t SYM6432(inw)(uint16_t port);
+
 int SYM6432(sprintf)(char *buf, const char *fmt, ...);
 int SYM6432(printf)(const char *fmt, ...);
 size_t SYM6432(strlen)(const char *str);

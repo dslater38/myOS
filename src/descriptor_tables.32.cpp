@@ -111,7 +111,9 @@ static void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t acc
 #define ICW4_BUF_SLAVE	0x08		/* Buffered mode/slave */
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
- 
+
+#define outb outb32
+
 static void remap_pics()
 {
 	// Remap the irq table.
@@ -126,6 +128,8 @@ static void remap_pics()
 	outb(0x21, 0x0);
 	outb(0xA1, 0x0);
 }
+
+#undef outb
 
 static void init_irqs()
 {

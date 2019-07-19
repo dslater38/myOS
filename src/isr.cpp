@@ -56,7 +56,7 @@ void register_interrupt_handler64(uint8_t n, isr64_t handler)
 	interrupt64_handlers[n] = handler;
 }
 
-
+#if 0
 // This gets called from our ASM interrupt handler stub.
 void irq_handler(registers_t regs)
 {
@@ -82,6 +82,7 @@ void irq_handler(registers_t regs)
 		//monitor_put('\n');
 	}
 }
+#endif
 
 // This gets called from our ASM interrupt handler stub.
 void irq64_handler(registers64_t regs)
@@ -91,10 +92,10 @@ void irq64_handler(registers64_t regs)
 	if (regs.int_no >= 40)
 	{
 		// Send reset signal to slave.
-		outb64(SLAVE_PIC_COMMAND, PIC_RESET_COMMAND);
+		outb(SLAVE_PIC_COMMAND, PIC_RESET_COMMAND);
 	}
 	// Send reset signal to master. (As well as slave, if necessary).
-	outb64(MASTER_PIC_COMMAND, PIC_RESET_COMMAND);
+	outb(MASTER_PIC_COMMAND, PIC_RESET_COMMAND);
 
 	if (interrupt_handlers[regs.int_no] != 0)
 	{

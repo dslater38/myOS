@@ -29,6 +29,8 @@ ASFLAGS=-felf64
 CFLAGS32=-m32 $(CFLAGS)
 CXXFLAGS32=-m32 $(CXXFLAGS)
 
+OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes --redefine-sym memset=memset32 
+
 .PHONY: all
 all: kernel 
 
@@ -51,12 +53,12 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 
 %.32.o: %.32.c
 	$(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy -O elf64-x86-64 --elf-stt-common=yes $@.o $@
+	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
 	-rm $@.o
 
 %.32.o : %.6432.c
 	$(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy -O elf64-x86-64 --elf-stt-common=yes $@.o $@
+	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
 	-rm $@.o
 
 %.64.o : %.6432.c
@@ -64,12 +66,12 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 
 %.32.o: %.32.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy -O elf64-x86-64 --elf-stt-common=yes $@.o $@
+	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
 	-rm $@.o
 
 %.32.o: %.6432.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy -O elf64-x86-64 --elf-stt-common=yes $@.o $@
+	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
 	-rm $@.o
 
 %.64.o: %.6432.cpp
