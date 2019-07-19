@@ -1,8 +1,8 @@
 [BITS 32]
 
 [GLOBAL gdt_flush]    ; Allows the C code to call gdt_flush().
-
 [GLOBAL idt_flush]    ; Allows the C code to call idt_flush().
+[EXTERN long_mode_start]
 
 gdt_flush:
 	mov eax, [esp+4]  ; Get the pointer to the GDT, passed as a parameter.
@@ -38,25 +38,3 @@ idt_flush:
 	lidt [eax]        ; Load the IDT pointer.
 	ret
    
-
-
-section .text
-[BITS 64]
-
-
-
-[EXTERN kmain64]
-
-long_mode_start:
-	mov rax, 0x2f592f412f4b2f4f
-	mov qword [0xb8000], rax
-	call kmain64
-.loop:
-	hlt
-	jmp .loop
-
-
-[GLOBAL idt_flush64]
-idt_flush64:
-	lidt [rdi]        ; Load the IDT pointer.
-	ret

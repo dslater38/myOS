@@ -3,9 +3,6 @@
 # The only one that needs changing is the assembler 
 # rule, as we use nasm instead of GNU as.
 
-CC=clang
-CXX=clang++
-
 CSOURCES=$(shell find . -maxdepth 1 -name '*.c' -a -not -name '*.32.c' -a -not -name '*.6432.c' -print)
 CSOURCES32=$(wildcard *.32.c)
 CSOURCES6432=$(wildcard *.6432.c)
@@ -19,27 +16,18 @@ SSOURCES=$(wildcard *.s)
 OBJECTS32=$(CXXSOURCES32:%.cpp=%.o)  $(CXXSOURCES6432:%.6432.cpp=%.32.o) $(CSOURCES32:%.c=%.o) $(CSOURCES6432:%.6432.c=%.32.o)
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CXXSOURCES6432:%.6432.cpp=%.64.o) $(CSOURCES:%.c=%.o) $(CSOURCES6432:%.6432.c=%.64.o) $(SSOURCES:%.s=%.o)
 
-CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
+# CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
 
-CFLAGS=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -I.
-CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -Wno-main -I.
-LDFLAGS=-Tlink.ld
 ASFLAGS=-felf64
 
 CFLAGS32=-m32 $(CFLAGS)
 CXXFLAGS32=-m32 $(CXXFLAGS)
 
-OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes --redefine-sym memset=memset32 
-
 .PHONY: all
-all: kernel 
+all: $(OBJECTS32) $(OBJECTS)
 
 clean:
 	@rm -f *.o *.d *.d.* *.ds kernel
-
-kernel: $(OBJECTS32) $(OBJECTS) | link.ld
-	ld $(LDFLAGS) -o $@ $^
-	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
 
 .s.o:
 	nasm $(ASFLAGS) $<
@@ -52,26 +40,30 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 
 %.32.o: %.32.c
 	$(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
-	-rm $@.o
+	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@.oo
+	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
+	-rm $@.o $@.oo
 
 %.32.o : %.6432.c
 	$(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
-	-rm $@.o
+	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@.oo
+	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
+	-rm $@.o $@.oo
 
 %.64.o : %.6432.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 %.32.o: %.32.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
-	-rm $@.o
+	$(OBJCOPY) $(OBJCOPYFLAGS)  $@.o $@.oo
+	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
+	-rm $@.o $@.oo
 
 %.32.o: %.6432.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
-	-rm $@.o
+	$(OBJCOPY) $(OBJCOPYFLAGS)  $@.o $@.oo
+	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
+	-rm $@.o $@.oo
 
 %.64.o: %.6432.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@

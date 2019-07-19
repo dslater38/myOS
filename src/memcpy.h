@@ -1,6 +1,10 @@
 #ifndef MEMCPY_H_INCLUDED__
 #define MEMCPY_H_INCLUDED__
 
+#include <string.h>
+
+#if 0
+
 #include "sym6432.h"
 
 #ifndef __cplusplus
@@ -28,6 +32,8 @@ void *SYM6432(memset)(void *dest, uint8_t val, uint32_t size);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // 0
 
 #endif // MEMCPY_H_INCLUDED__
 

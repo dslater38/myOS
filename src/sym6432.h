@@ -6,12 +6,13 @@
 #endif
 
 
-#ifdef __x86_64__
+//~ #ifdef __x86_64__
+//~ #define SYM6432(a) a
+//~ #else
+//~ #define SYM6432(a) CONCAT(a,32)
+//~ #endif
+
+
 #define SYM6432(a) a
-#else
-#define SYM6432(a) CONCAT(a,32)
-#endif
-
-
 
 #endif // SYM6432_H_INCLUDED__

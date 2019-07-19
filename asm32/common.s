@@ -1,12 +1,12 @@
 [BITS 32]                       ; All instructions should be 32-bit.
 
-[GLOBAL outb32]
-[GLOBAL outw32]
-[GLOBAL outd32]
-[GLOBAL inb32]
-[GLOBAL inw32]
-[GLOBAL ind32]
-[GLOBAL idle_loop32]
+[GLOBAL outb]
+[GLOBAL outw]
+[GLOBAL outd]
+[GLOBAL inb]
+[GLOBAL inw]
+[GLOBAL ind]
+[GLOBAL idle_loop]
 [GLOBAL set_page_directory]
 [GLOBAL get_fault_addr]
 [GLOBAL set_page64_directory]
@@ -18,42 +18,52 @@
 [GLOBAL  p2_table]
 [GLOBAL  p1_table]
 
-outb32:
+[GLOBAL enable_interrupts]
+	enable_interrupts:
+		sti
+		ret
+
+[GLOBAL disable_interrupts]
+	disable_interrupts:
+		cli
+		ret
+
+outb:
 	mov edx, [esp+4]
 	mov eax, [esp+8]
 	out dx, al
 	ret
 	
-outw32:
+outw:
 	mov edx, [esp+4]
 	mov eax, [esp+8]
 	out dx, ax
 	ret
 
-outd32:
+outd:
 	mov edx, [esp+4]
 	mov eax, [esp+8]
 	out dx, eax
 	ret
 
-inb32:
+inb:
 	mov edx, [esp+4]
 	in al, dx
 	ret
 
-inw32:
+inw:
 	mov edx, [esp+4]
 	in ax, dx
 	ret
 
-ind32:
+ind:
 	mov edx, [esp+4]
 	in eax, dx
 	ret
 
-idle_loop32:
+idle_loop:
 	hlt
-	jmp idle_loop32
+	jmp idle_loop
 
 
 set_page_directory:

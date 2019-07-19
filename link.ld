@@ -9,8 +9,9 @@ SECTIONS
   .text 0x100000 :
   {
     code = .; _code = .; __code = .;
-    multibootheader.o(.data)
-    *.32.o(.text)
+    src/multibootheader.o(.data)
+    src/*.32.o(.text)
+    asm32/*.o(.text)
     *(.text)
     . = ALIGN(4096);
   }
@@ -37,5 +38,6 @@ SECTIONS
   }
   
   end = .; _end = .; __end = .;
+  
 }
 

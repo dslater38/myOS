@@ -5,7 +5,7 @@
 
 // Lets us access our ASM functions from our C code.
 extern "C" {
-extern void idt_flush64(void *);
+extern void idt_flush(void *);
 }
 
 extern isr64_t interrupt64_handlers[256] ;
@@ -36,7 +36,7 @@ extern "C"
 {
 	void flush_idt64(void *p)
 	{
-		idt_flush64(p);
+		idt_flush(p);
 	}
 }
 

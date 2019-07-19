@@ -104,12 +104,12 @@ void switch_page_directory64(DIR64 *dir)
 	
 	void initPaging32(uint32_t maxMem)
 	{
-		monitor_write32("initPaging32()\n");
+		monitor_write("initPaging32()\n");
 		auto *dir = getDIR32();
-		printf32("dir: 0x%08.8x, dir->physical 0x%08.8x, &dir 0x%08.8x, &(dir->physical): 0x%08.8x\n", (uint32_t)dir, (uint32_t)(dir->physical), (uint32_t)(&dir), (uint32_t)(&(dir->physical)) );
+		printf("dir: 0x%08.8x, dir->physical 0x%08.8x, &dir 0x%08.8x, &(dir->physical): 0x%08.8x\n", (uint32_t)dir, (uint32_t)(dir->physical), (uint32_t)(&dir), (uint32_t)(&(dir->physical)) );
 		
 		
-		printf32("init Placement: 0x%08.8x\n", placement_address);
+		printf("init Placement: 0x%08.8x\n", placement_address);
 
 		frames32 = new(reinterpret_cast<void *>(kmalloc(sizeof(Frames<uint32_t>)))) Frames<uint32_t>{maxMem};
 		// new(reinterpret_cast<void *>(&frames32)) Frames<uint32_t>{maxMem};
@@ -132,7 +132,7 @@ void switch_page_directory64(DIR64 *dir)
 			++pages_mapped;
 		}
 				
-		printf32("Mapped %d pages for %d bytes. final Placement: 0x%08.8x\n", pages_mapped, pages_mapped*4096, placement_address);
+		printf("Mapped %d pages for %d bytes. final Placement: 0x%08.8x\n", pages_mapped, pages_mapped*4096, placement_address);
 		
 		// Now, enable paging!	
 		switch_page_directory32(dir);
@@ -141,14 +141,14 @@ void switch_page_directory64(DIR64 *dir)
 	
 	void initPaging64(uint64_t maxMem)
 	{
-		monitor_write32("initPaging64()\n");
+		monitor_write("initPaging64()\n");
 		auto *dir = getDIR64();
 
-		printf32("dir: 0x%08.8x, dir->physical 0x%08.8x, &dir 0x%08.8x, &(dir->physical): 0x%08.8x\n", (uint32_t)dir, (uint32_t)(dir->physical), (uint32_t)(&dir), (uint32_t)(&(dir->physical)) );
-		printf32("init Placement: 0x%08.8x\n", placement_address);
+		printf("dir: 0x%08.8x, dir->physical 0x%08.8x, &dir 0x%08.8x, &(dir->physical): 0x%08.8x\n", (uint32_t)dir, (uint32_t)(dir->physical), (uint32_t)(&dir), (uint32_t)(&(dir->physical)) );
+		printf("init Placement: 0x%08.8x\n", placement_address);
 		auto *buffer = reinterpret_cast<void *>( kmalloc( sizeof(Frames<uint64_t>) ) );
 		
-		printf32("Creating Frames: maxMem == %d\n", (uint32_t)maxMem );
+		printf("Creating Frames: maxMem == %d\n", (uint32_t)maxMem );
 		
 		frames64 = new(buffer) Frames<uint64_t>{maxMem};
 		// new(reinterpret_cast<void *>(&frames32)) Frames<uint32_t>{maxMem};
@@ -169,14 +169,14 @@ void switch_page_directory64(DIR64 *dir)
 			auto *page = dir->getPage(i);
 			frames64->alloc(page, 1, 1);
 			++pages_mapped;
-//			printf32(" i == 0x%08.8x, place == 0x%08.8x, gap == %d\n", i, placement_address, (placement_address - i));
+//			printf(" i == 0x%08.8x, place == 0x%08.8x, gap == %d\n", i, placement_address, (placement_address - i));
 		}
 		
 //		printPageTables((uint32_t)maxMem, dir->physical );
 		
-		printf32("Mapped %d pages for %d bytes. final Placement: 0x%08.8x\n", pages_mapped, pages_mapped*4096, placement_address);
+		printf("Mapped %d pages for %d bytes. final Placement: 0x%08.8x\n", pages_mapped, pages_mapped*4096, placement_address);
 		
-		printf32("final Placement: 0x%08.8x\n", placement_address);
+		printf("final Placement: 0x%08.8x\n", placement_address);
 		// Now, enable paging!	
 		switch_page_directory64(dir);
 	}	
@@ -202,16 +202,16 @@ void switch_page_directory64(DIR64 *dir)
 		int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
 
 		// Output an error message.
-		monitor_write32("Page fault! ( ");
-		if (present) {monitor_write32("present ");} else {monitor_write32("absent ");}
-		if (rw) {monitor_write32("read-only ");} else {monitor_write32("read/write ");}
-		if (us) {monitor_write32("user-mode ");} else {monitor_write32("kernel-mode ");}
-		if (reserved) {monitor_write32("reserved ");} else {monitor_write32("not-reserved ");}
-		sprintf32(buf, ") at 0x%08x", faulting_address);
-		monitor_write32(buf);
+		monitor_write("Page fault! ( ");
+		if (present) {monitor_write("present ");} else {monitor_write("absent ");}
+		if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
+		if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
+		if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
+		sprintf(buf, ") at 0x%08x", faulting_address);
+		monitor_write(buf);
 		// monitor_write(") at 0x");
 		// monitor_write_hex(faulting_address);
-		monitor_write32("\n");
+		monitor_write("\n");
 		PANIC("Page fault");
 	}
 
@@ -227,8 +227,8 @@ uint64_t *PTR(uint64_t n)
 static
 void printPageTables(uint32_t maxMem, uint64_t *pml4e)
 {
-	printf32("PageTable: maxMem: %d\n", maxMem);
-	printf32("PML4E: %08.8x, PML4E[0]: %08.8x, PML4E[1]: %08.8x\n", (uint32_t)(pml4e), (uint32_t)(pml4e[0]), (uint32_t)(pml4e[1]) );
+	printf("PageTable: maxMem: %d\n", maxMem);
+	printf("PML4E: %08.8x, PML4E[0]: %08.8x, PML4E[1]: %08.8x\n", (uint32_t)(pml4e), (uint32_t)(pml4e[0]), (uint32_t)(pml4e[1]) );
 	
 	ASSERT(pml4e[1] == 0);
 	
@@ -236,7 +236,7 @@ void printPageTables(uint32_t maxMem, uint64_t *pml4e)
 
 	ASSERT(pdpte != nullptr);
 
-	printf32("\tPDPTE: %08.8x, PDPTE[0]: %08.8x, PDPTE[1]: %08.8x\n", (uint32_t)(pdpte), (uint32_t)(pdpte[0]), (uint32_t)(pdpte[1]) );
+	printf("\tPDPTE: %08.8x, PDPTE[0]: %08.8x, PDPTE[1]: %08.8x\n", (uint32_t)(pdpte), (uint32_t)(pdpte[0]), (uint32_t)(pdpte[1]) );
 	
 	uint64_t *pde = PTR(pdpte[0]);
 	
@@ -249,13 +249,13 @@ void printPageTables(uint32_t maxMem, uint64_t *pml4e)
 		uint64_t *pte = PTR(pde[i]);
 		if( pte != nullptr )
 		{
-			printf32("\t\tPTE[%d] %08.8x\n", i, (uint32_t)pte);
+			printf("\t\tPTE[%d] %08.8x\n", i, (uint32_t)pte);
 			for( auto j=0; j<512; ++j )
 			{
 				uint64_t uentry = pte[j];
-				printf32("\t\t\tPageEntry[%d,%d] 0x%08.8x%08.8x\n", i, j, HIDWORD(uentry),LODWORD(uentry));
+				printf("\t\t\tPageEntry[%d,%d] 0x%08.8x%08.8x\n", i, j, HIDWORD(uentry),LODWORD(uentry));
 			}
-			printf32("\t\t====================================\n");
+			printf("\t\t====================================\n");
 		}
 	}
 	
@@ -269,11 +269,11 @@ void printPageTables(uint32_t maxMem, uint64_t *pml4e)
 		if( page )
 		{
 			uint64_t n = *((uint64_t *)(page));
-			printf32("vaddr 0x%08.8x%08.8x ==> 0x%08.8x%08.8x\n", HIDWORD(i), LODWORD(i), HIDWORD(n), LODWORD(n));
+			printf("vaddr 0x%08.8x%08.8x ==> 0x%08.8x%08.8x\n", HIDWORD(i), LODWORD(i), HIDWORD(n), LODWORD(n));
 		}
 		else
 		{
-			printf32("vaddr 0x%08.8x%08.8x ==> <NULL>\n", HIDWORD(i), LODWORD(i));
+			printf("vaddr 0x%08.8x%08.8x ==> <NULL>\n", HIDWORD(i), LODWORD(i));
 		}
 	}
 }
