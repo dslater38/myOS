@@ -7,6 +7,8 @@ uint32_t placement_address = 0; // (uint32_t)end;
 
 static uint32_t kmalloc_generic(uint32_t sz, int align, uint32_t *phys);
 
+extern "C"
+{
 
 uint64_t kmalloc64(uint32_t sz)
 {
@@ -108,4 +110,5 @@ static uint32_t kmalloc_generic(uint32_t sz, int align, uint32_t *phys)
 	placement_address += sz;
 	// printf("Placement: 0x%08.8x\n", tmp);
 	return tmp;
+}
 }

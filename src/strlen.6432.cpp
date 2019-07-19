@@ -1,14 +1,12 @@
 #include <string.h>
+#include "sym6432.h"
 
 #undef strlen
 
-#ifndef STRLEN
-#ifdef __x86_64__
-# define STRLEN strlen
-#else
-# define STRLEN strlen32
-#endif	
-#endif
+#define STRLEN SYM6432(strlen)
+
+extern "C"
+{
 
 /* Return the length of the null-terminated string STR.  Scan for
    the null terminator quickly by testing four bytes at a time.  */
@@ -88,4 +86,6 @@ STRLEN (const char *str)
         }
     }
     }
+}
+
 }

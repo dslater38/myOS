@@ -2,6 +2,8 @@
 #include "serial.h"
 #include "sym6432.h"
 
+#define PRINTF SYM6432(printf)
+
 #define COM1 0x03f8   /* COM1 */
 #define COM2 0x02f8   /* COM1 */
 #define COM3 0x03e8   /* COM1 */
@@ -217,8 +219,6 @@ uint8_t SYM6432(init_serial)( uint16_t port, uint32_t speed, uint8_t bits, uint8
 	return init_serial_imp(port, speed, bits, parity, stop);
 }
 
-extern int printf(const char *fmt, ... );
-
 static
 inline
 void identify_uart_imp(uint16_t port)
@@ -232,16 +232,16 @@ void identify_uart_imp(uint16_t port)
 		{
 			if( 0 != (flags & 0x20) )
 			{
-				printf("UART 16750\n");
+				PRINTF("UART 16750\n");
 			}
 			else
 			{
-				printf("UART 16550A\n");
+				PRINTF("UART 16550A\n");
 			}
 		}
 		else
 		{
-			printf("UART 16550\n");
+			PRINTF("UART 16550\n");
 		}
 	}
 	else
@@ -249,11 +249,11 @@ void identify_uart_imp(uint16_t port)
 		OUTB( port + SCRATCH_REG, 0x2A );
 		if( INB(port + SCRATCH_REG) == 0x2A )
 		{
-			printf("UART 16450\n");
+			PRINTF("UART 16450\n");
 		}
 		else
 		{
-			printf("UART 8250\n");
+			PRINTF("UART 8250\n");
 		}
 	}
 }

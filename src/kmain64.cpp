@@ -1,6 +1,7 @@
 #include "common.h"
 #include "vesavga.h"
 #include "serial.h"
+#include "ata.h"
 
 void init_idt64_table();
 
@@ -27,6 +28,8 @@ void kmain64()
 	 	printf("Initialized COM1 port\n");
 	}
 
+	detectControllers();
+	
 	test_page_fault();
 	
 	// int *badPtr = reinterpret_cast<int *>(0x00F0F0F0F0F0F0F0u);

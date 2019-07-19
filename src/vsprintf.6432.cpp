@@ -15,6 +15,7 @@
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')
 
+
 static int skip_atoi(const char **s)
 {
 	int i=0;
@@ -236,6 +237,10 @@ int vsprintf_imp(char *buf, const char *fmt, va_list args)
 	return str-buf;
 }
 
+extern "C"
+{
+
+
 int SYM6432(vsprintf)(char *buf, const char *fmt, va_list args)
 {
 	return vsprintf_imp(buf, fmt, args);
@@ -261,4 +266,6 @@ int SYM6432(printf)(const char *fmt, ...)
 	va_end(args);
 	SYM6432(monitor_write)(buf);
 	return retVal;
+}
+
 }

@@ -1,8 +1,8 @@
 #ifndef SERIAL_H_INCLUDED
 #define SERIAL_H_INCLUDED
-#ifdef __cplusplus
-extern "C" {
-#endif
+//~ #ifdef __cplusplus
+//~ extern "C" {
+//~ #endif
 
 #include "common.h"
 #include "sym6432.h"
@@ -58,7 +58,7 @@ void  SYM6432(identify_uart)(uint16_t port);
 #undef IMPORT
 #undef CAT
 
-#ifdef __cplusplus
-}
-#endif
+//~ #ifdef __cplusplus
+//~ }
+//~ #endif
 #endif //SERIAL_H_INCLUDED

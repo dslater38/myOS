@@ -1,5 +1,8 @@
 #include "common.h"
 
+extern "C"
+{
+
 // Copy len bytes from src to dest.
 void *SYM6432(memcpy)(void *dest, const void *src, size_t len)
 {
@@ -63,4 +66,6 @@ void * SYM6432(memset)(void *vdest, int val, size_t len)
 		
 	}
 #endif
+}
+
 }

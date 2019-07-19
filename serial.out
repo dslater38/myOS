@@ -1,17 +1,19 @@
-init Placement: 0x00318000
+init Placement: 0x00319000
 Initialize Paging 64....
 initPaging64()
-dir: 0x00110000, dir->physical 0x00110000, &dir 0x0010efa4, &(dir->physical): 0x00110000
-init Placement: 0x00318000
+dir: 0x00111000, dir->physical 0x00111000, &dir 0x0010ffa4, &(dir->physical): 0x00111000
+init Placement: 0x00319000
 Creating Frames: maxMem == 268435456
 Frames::Frames: maxSize == 268435456
 maxzSize: 268435456
-frames: 00319000 to 0031b008 for 65600 bits, maxSize: 0
+frames: 0031a000 to 0031c008 for 65600 bits, maxSize: 0
 maxzSize: 268435456
-Mapped 800 pages for 3276800 bytes. final Placement: 0x00320000
-final Placement: 0x00320000
+Mapped 801 pages for 3280896 bytes. final Placement: 0x00321000
+final Placement: 0x00321000
 Initialize GDT
 Initialized COM1 port
+Primary IDE controller present.
+Secondary IDE controller absent.
 Testing Page Fault
 Page fault! ( present read/write kernel-mode not-reserved ) at 0x0a0000000
 ) at 0x00000000A0000000

@@ -1,6 +1,8 @@
 #include "common.h"
 #include "vesavga.h"
 
+extern "C"
+{
 
 void SYM6432(panic)(const char *message, const char *file, uint32_t line)
 {
@@ -37,4 +39,6 @@ void SYM6432(panic_assert)(const char *file, uint32_t line, const char *desc)
 	// monitor_write("\n");
 	// Halt by going into an infinite loop.
 	SYM6432(idle_loop)();
+}
+
 }
