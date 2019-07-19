@@ -1,3 +1,0 @@
-textFrameBuffer.o: textFrameBuffer.cpp \
-  /home/slaterd/repos/myOS/src/textFrameBuffer.h \
-  /home/slaterd/repos/myOS/src/types.h

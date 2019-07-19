@@ -1,6 +1,7 @@
 *.o
 kernel
 *.d
+*.*.d
 *.ds
 kernel.sym
 bochsout.txt
