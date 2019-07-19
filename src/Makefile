@@ -41,7 +41,6 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 	ld $(LDFLAGS) -o $@ $^
 	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
 
-
 .s.o:
 	nasm $(ASFLAGS) $<
 
@@ -99,28 +98,18 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 	 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	 rm -f $@.$$$$
 
-%.32.d: %.6432.cpp
-	@set -e; rm -f $@; \
-	 $(CXX) -MM $(CPPFLAGS) $< > $@.$$$$; \
-	 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	 rm -f $@.$$$$
-
-%.32.d: %.6432.c
+%.6432.d: %.6432.c
 	@set -e; rm -f $@; \
 	 $(CC) -MM $(CPPFLAGS) $< > $@.$$$$; \
-	 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	 sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g'  -e 's,\.6432\.,.64.,' < $@.$$$$ > $@; \
+	 sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g'  -e 's,\.6432\.,.32.,' < $@.$$$$ >> $@; \
 	 rm -f $@.$$$$
 
-%.64.d: %.6432.cpp
+%.6432.d: %.6432.cpp
 	@set -e; rm -f $@; \
 	 $(CXX) -MM $(CPPFLAGS) $< > $@.$$$$; \
-	 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-	 rm -f $@.$$$$
-
-%.64.d: %.6432.c
-	@set -e; rm -f $@; \
-	 $(CC) -MM $(CPPFLAGS) $< > $@.$$$$; \
-	 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	 sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g'  -e 's,\.6432\.,.64.,' < $@.$$$$ > $@; \
+	 sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g'  -e 's,\.6432\.,.32.,' < $@.$$$$ >> $@; \
 	 rm -f $@.$$$$
 
 %.ds : %.s
@@ -132,7 +121,5 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 -include $(CSOURCES32:.c=.d)
 -include $(CXXSOURCES32:.cpp=.d)
 -include $(SSOURCES:.s=.ds)
--include $(CSOURCES6432:.6432.c=.64.d)
--include $(CSOURCES6432:.6432.c=.32.d)
--include $(CXXSOURCES6432:.6432.cpp=.64.cpp)
--include $(CXXSOURCES6432:.6432.cpp=.32.cpp)
+-include $(CSOURCES6432:.6432.c=.6464.d)
+-include $(CXXSOURCES6432:.6432.cpp=.6432.d)

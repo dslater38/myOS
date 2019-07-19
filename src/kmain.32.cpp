@@ -95,6 +95,8 @@ extern "C"
 	
 	int kmain32(unsigned long magic, multiboot_tag *mboot_ptr)
 	{	
+		auto success = init_serial32(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
+		
 		placement_address = (uint32_t)&end;
 		printf32("init Placement: 0x%08.8x\n", placement_address);
 		init_gdt_table();

@@ -124,7 +124,7 @@ void switch_page_directory64(DIR64 *dir)
 
 		int pages_mapped = 0;
 		
-		for( auto i=0u; i<maxMem; i+= PAGE_SIZE)
+		for( auto i=0u; i<placement_address; i+= PAGE_SIZE)
 		{
 			// Kernel code is readable but not writeable from userspace.
 			auto *page = dir->getPage(i);
@@ -163,7 +163,7 @@ void switch_page_directory64(DIR64 *dir)
 
 		int pages_mapped = 0;
 		
-		for( auto i=0u; i<maxMem; i+= PAGE_SIZE)
+		for( auto i=0u; i<placement_address; i+= PAGE_SIZE)
 		{
 			// Kernel code is readable but not writeable from userspace.
 			auto *page = dir->getPage(i);

@@ -1,6 +1,7 @@
 #include "vesavga.h"
-#include "vesavga.h"
 #include "common.h"
+#include "serial.h"
+#include "sym6432.h"
 
 
 static uint16_t cursor_x;
@@ -16,11 +17,28 @@ static uint8_t foreColor = CYAN;
 
 static uint16_t *video_memory=(uint16_t *)0xB8000;
 
-static _Alignas(4) uint16_t back_buffer[VIDEO_MEM_COUNT] = {0};
+static uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
 static uint32_t	cur_line = 0;
 // static uint32_t	count = 0;
 
-bool set_foreground_color32(uint8_t clr)
+#define SET_FOREGROUND_COLOR SYM6432(set_foreground_color)
+#define SET_BACKGROUND_COLOR SYM6432(set_background_color)
+#define MONITOR_PUT SYM6432(monitor_put)
+#define MONITOR_CLEAR SYM6432(monitor_clear)
+#define MONITOR_WRITE SYM6432(monitor_write)
+#define MONITOR_WRITE_HEX SYM6432(monitor_write_hex)
+#define MONITOR_WRITE_DEC SYM6432(monitor_write_dec)
+#define PUTS SYM6432(puts)
+#define SPRINTF SYM6432(sprintf)
+#define OUTB SYM6432(outb)
+#define OUTW SYM6432(outw)
+#define SERIAL_PUTC SYM6432(serial_putc)
+
+
+extern "C"
+{
+
+bool SET_FOREGROUND_COLOR(uint8_t clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -31,7 +49,7 @@ bool set_foreground_color32(uint8_t clr)
 	return success;
 }
 
-bool set_background_color32(uint8_t clr)
+bool SET_BACKGROUND_COLOR(uint8_t clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -119,16 +137,19 @@ static void copy_buffer2()
 	}
 }
 
+// extern void memmove(void *dst, void *src, uint32_t size);
+
+
 
 // Updates the hardware cursor.
 static void move_cursor()
 {
    // The screen is COLS characters wide...
    uint16_t cursorLocation = cursor_y * COLS + cursor_x;
-   outb32(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
-   outb32(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
-   outb32(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
-   outb32(0x3D5, cursorLocation);      // Send the low cursor byte.
+   OUTB(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
+   OUTB(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
+   OUTB(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
+   OUTB(0x3D5, cursorLocation);      // Send the low cursor byte.
 }
 
 static void copy_line(int dstLine, int srcLine)
@@ -157,9 +178,10 @@ static void scroll()
 }
 
 // Writes a single character out to the screen.
-void monitor_put32(char c)
+void MONITOR_PUT(char c)
 {
-	outb32(0xe9, c);
+	OUTB(0xe9, c);
+	SERIAL_PUTC(1, c);
 	switch(c)
 	{
 		case 0x08:
@@ -219,7 +241,7 @@ void monitor_put32(char c)
 }
 
 // Clears the screen, by copying lots of spaces to the framebuffer.
-void monitor_clear32()
+void MONITOR_CLEAR()
 {
 	// uint8_t attributeByte = color_attribute();
 	// uint16_t blank = 0x20 /* space */ | (attributeByte << 8);
@@ -241,33 +263,38 @@ void monitor_clear32()
 }
 
 // Outputs a null-terminated ASCII string to the monitor.
-void monitor_write32(const char *c)
+void MONITOR_WRITE(const char *c)
 {
 	while(*c)
 	{
-		monitor_put32(*c);
+		MONITOR_PUT(*c);
 		++c;
 	}
 }
 
-void monitor_write_hex32(uint32_t n)
+void MONITOR_WRITE_HEX(uintptr_t n)
 {
 	// TODO: implement this yourself!
-	char buffer[32];
-	sprintf32(buffer, "%x", n);
-	monitor_write32(buffer);
+	uint32_t hi = static_cast<uint32_t>((n & 0xFFFFFFFF00000000ull) >> 32);
+	uint32_t lo = static_cast<uint32_t>(n & 0x00000000FFFFFFFFull);
+	char buffer[64];
+	SPRINTF(buffer, "%x%08.8x", hi, lo);
+	MONITOR_WRITE(buffer);
 }
 
-void monitor_write_dec32(uint32_t n)
+void MONITOR_WRITE_DEC(uintptr_t n)
 {
 	// TODO: implement this yourself!
-	char buffer[32];
-	sprintf32(buffer, "%d", n);
-	monitor_write32(buffer);
+	char buffer[64];
+	SPRINTF(buffer, "%d", static_cast<uint32_t>(n));
+	MONITOR_WRITE(buffer);
 }
 
-int puts32(const char *s)
+
+int PUTS(const char *s)
 {
-	monitor_write32(s);
+	MONITOR_WRITE(s);
 	return 1;
+}
+
 }
