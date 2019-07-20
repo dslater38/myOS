@@ -24,7 +24,7 @@ using PDPTE = PageDirectory<PDE, 30, 9>;
 using PML4E = PageDirectory<PDPTE, 39, 9>;
 
 using DIR32 = PageDirectory<PageTableT<uint32_t>, 10, 10>;
-using DIR64 = PageDirectory<PDPTE, 39, 9>;
+using DIR64 = PML4E; // PageDirectory<PDPTE, 39, 9>;
 
 static void printPageTables(uint32_t maxMem, uint64_t *PML4E);
 
@@ -207,6 +207,7 @@ void switch_page_directory64(DIR64 *dir)
 		if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
 		if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
 		if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
+		if(id) {monitor_write("fetching instruction\n");
 		sprintf(buf, ") at 0x%08x", faulting_address);
 		monitor_write(buf);
 		// monitor_write(") at 0x");

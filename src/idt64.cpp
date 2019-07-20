@@ -19,6 +19,7 @@ static void init_idt();
 static idt_entry64_t idt64_entries[256] = { 0 };
 static idt_ptr64_t   idt64_ptr{ 0 };
 void page_fault(registers64_t regs);
+void gpf(registers64_t regs);
 
 
 void init_idt64_table()
@@ -29,6 +30,7 @@ void init_idt64_table()
 		interrupt64_handlers[i] = nullptr;
 	}
 	register_interrupt_handler64(14, page_fault);
+	register_interrupt_handler64(13, gpf);
 	// memset(&interrupt64_handlers, 0, sizeof(isr64_t)*256);	
 }
 
@@ -170,6 +172,18 @@ static void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags
 #endif // 0
 }
 
+void gpf(registers64_t regs)
+{
+	monitor_write("GPF: error code: ");
+	monitor_write_dec(regs.err_code);
+	monitor_write(" ( 0x");
+	monitor_write_hex(regs.err_code);
+	monitor_write(" )\n");
+
+ 	PANIC("General Protection Failure (GPF)");
+
+}
+
 void page_fault(registers64_t regs)
 {
 	// Output an error message.
@@ -194,6 +208,7 @@ void page_fault(registers64_t regs)
 	if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
 	if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
 	if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
+	if(id) { monitor_write("fetching instruction "); }
 	monitor_write(") at 0x");
 	monitor_write_hex(faulting_address);
 	monitor_write("\n");
