@@ -93,6 +93,8 @@ extern void panic(const char *message, const char *file, uint32_t line)
     // We encountered a massive problem and have to stop.
     asm volatile("cli"); // Disable interrupts.
 
+    set_foreground_color(BLACK);
+    set_background_color(RED);
     monitor_write("PANIC(");
     monitor_write(message);
     monitor_write(") at ");

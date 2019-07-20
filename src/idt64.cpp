@@ -24,12 +24,13 @@ void page_fault(registers64_t regs);
 void init_idt64_table()
 {
 	init_idt();
-	for( auto i =0; i<256; ++i )
-	{
-		interrupt64_handlers[i] = nullptr;
-	}
-	register_interrupt_handler64(14, page_fault);
-	// memset(&interrupt64_handlers, 0, sizeof(isr64_t)*256);	
+	// for( auto i =0; i<256; ++i )
+	// {
+	// 	interrupt64_handlers[i] = nullptr;
+	// }
+	// register_interrupt_handler64(14, page_fault);
+	memset(&interrupt64_handlers, 0, sizeof(isr64_t)*256);
+	install_processor_handlers();
 }
 
 extern "C"
@@ -170,6 +171,7 @@ static void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags
 #endif // 0
 }
 
+#if 0
 void page_fault(registers64_t regs)
 {
 	// Output an error message.
@@ -209,4 +211,6 @@ void page_fault(registers64_t regs)
 	// monitor_write64("Page fault!!!!!!!!!!!!!!!!!!!!\n");
  	PANIC("Page fault");
 }
+
+#endif // 0
 
