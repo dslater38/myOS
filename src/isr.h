@@ -63,6 +63,31 @@ typedef struct registers64
 
 #define PIC_EOI		0x20		/* End-of-interrupt command code */
 
+
+constexpr uint16_t ISR_DIV_BY_ZERO = 0x00;
+constexpr uint16_t ISR_DEBUG_TRAP = 0x01;
+constexpr uint16_t ISR_NMI_INTERRUPT = 0x02;
+constexpr uint16_t ISR_BREAKPOINT_TRAP = 0x03;
+constexpr uint16_t ISR_OVERFLOW_TRAP = 0x04;
+constexpr uint16_t ISR_BOUND_RANGE_FAULT = 0x05;
+constexpr uint16_t ISR_INVALID_OPCODE_FAULT = 0x06;
+constexpr uint16_t ISR_DEVICE_NOT_AVAILABLE_FAULT = 0x07;
+constexpr uint16_t ISR_DOUBLE_FAULT_ABORT = 0x08;
+constexpr uint16_t ISR_FPU_OVERRUN_FAULT = 0x09;
+constexpr uint16_t ISR_TSS_INVALID_FAULT = 0x0A;
+constexpr uint16_t ISR_SEGMENT_NOT_PRESENT_FAULT = 0x0B;
+constexpr uint16_t ISR_STACK_SEGMENT_FAULT = 0x0C;
+constexpr uint16_t ISR_GPF_FAULT = 0x0D;
+constexpr uint16_t ISR_PAGE_FAULT = 0x0E;
+constexpr uint16_t ISR_RESERVED1 = 0x0F;
+constexpr uint16_t ISR_FPU_EXCEPTION_FAULT = 0x10;
+constexpr uint16_t ISR_ALIGNMENT_CHECK_FAULT = 0x11;
+constexpr uint16_t ISR_MACHINE_CHECK_ABORT = 0x12;
+constexpr uint16_t ISR_SIMD_EXCEPTION_FAULT = 0x13;
+constexpr uint16_t ISR_VIRTUALIZATION_FAULT = 0x14;
+constexpr uint16_t ISR_SECURITY_EXCEPTION = 0x30;
+constexpr uint16_t ISR_FPU_ERROR_INTERRUPT = IRQ13;
+
 // Enables registration of callbacks for interrupts or IRQs.
 // For IRQs, to ease confusion, use the #defines above as the
 // first parameter.
@@ -73,6 +98,8 @@ void register_interrupt_handler64(uint8_t n, isr64_t handler);
 
 extern isr_t interrupt_handlers[256] ;
 extern isr64_t interrupt64_handlers[256] ;
+
+void install_processor_handlers();
 
 #ifdef __cplusplus
 }
