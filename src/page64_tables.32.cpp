@@ -26,7 +26,7 @@ using PML4E = PageDirectory<PDPTE, 39, 9>;
 using DIR32 = PageDirectory<PageTableT<uint32_t>, 10, 10>;
 using DIR64 = PageDirectory<PDPTE, 39, 9>;
 
-static void printPageTables(uint32_t maxMem, uint64_t *PML4E);
+// static void printPageTables(uint32_t maxMem, uint64_t *PML4E);
 
 static DIR32 *initDir32()
 {
@@ -101,7 +101,7 @@ extern "C"
 	{
 		reinterpret_cast<DIR64 *>(p)->dump();
 	}
-	
+#if 1
 	void initPaging32(uint32_t maxMem)
 	{
 		monitor_write32("initPaging32()\n");
@@ -137,7 +137,7 @@ extern "C"
 		// Now, enable paging!	
 		switch_page_directory32(dir);
 	}	
-	
+#endif // 0
 	
 	void initPaging64(uint64_t maxMem)
 	{
@@ -179,44 +179,10 @@ extern "C"
 		printf32("final Placement: 0x%08.8x\n", placement_address);
 		// Now, enable paging!	
 		switch_page_directory64(dir);
-	}	
+	}
+}
 
 #if 0
-	void page_fault(registers_t regs)
-	{
-		// Output an error message.
-		//monitor_write("Page fault! ( ");
-		char buf[32];
-		// A page fault has occurred.#include "common.h"
-
-		// The faulting address is stored in the CR2 register.
-		uint32_t faulting_address = get_fault_addr();
-		// uint32_t faulting_address;
-		// asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
-
-		// The error code gives us details of what happened.
-		int present   = !(regs.err_code & 0x1); // Page not present
-		int rw = regs.err_code & 0x2;           // Write operation?
-		int us = regs.err_code & 0x4;           // Processor was in user-mode?
-		int reserved = regs.err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
-		int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
-
-		// Output an error message.
-		monitor_write32("Page fault! ( ");
-		if (present) {monitor_write32("present ");} else {monitor_write32("absent ");}
-		if (rw) {monitor_write32("read-only ");} else {monitor_write32("read/write ");}
-		if (us) {monitor_write32("user-mode ");} else {monitor_write32("kernel-mode ");}
-		if (reserved) {monitor_write32("reserved ");} else {monitor_write32("not-reserved ");}
-		sprintf32(buf, ") at 0x%08x", faulting_address);
-		monitor_write32(buf);
-		// monitor_write(") at 0x");
-		// monitor_write_hex(faulting_address);
-		monitor_write32("\n");
-		PANIC("Page fault");
-	}
-#endif // 0
-
-}
 
 static
 inline
@@ -278,4 +244,6 @@ void printPageTables(uint32_t maxMem, uint64_t *pml4e)
 		}
 	}
 }
+#endif // 0
+
 
