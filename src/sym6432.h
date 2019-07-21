@@ -8,8 +8,10 @@
 
 #ifdef __x86_64__
 #define SYM6432(a) a
+#define STATIC32
 #else
-#define SYM6432(a) CONCAT(a,32)
+#define SYM6432(a)  CONCAT(a,32)
+#define STATIC32 static
 #endif
 
 

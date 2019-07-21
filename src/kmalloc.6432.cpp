@@ -12,23 +12,23 @@ extern "C"
 {
 	extern uintptr_t placement_address;
 
-	uintptr_t SYM6432(kmalloc)(size_t sz)
+	STATIC32 uintptr_t SYM6432(kmalloc)(size_t sz)
 	{
 		return kmalloc_generic(sz,0,NULL);
 	}
 
-	uintptr_t SYM6432(kmalloc_aligned)(size_t sz)
+	STATIC32 uintptr_t SYM6432(kmalloc_aligned)(size_t sz)
 	{
 		return kmalloc_generic(sz,1,NULL);
 	}
 
-	uintptr_t SYM6432(kmalloc_phys)(size_t sz, uintptr_t *phys)
+	STATIC32 uintptr_t SYM6432(kmalloc_phys)(size_t sz, uintptr_t *phys)
 	{
 		auto retVal =  kmalloc_generic(sz,0,phys);
 		return retVal;
 	}
 
-	uintptr_t SYM6432(kmalloc_aligned_phys)(size_t sz, uintptr_t *phys)
+	STATIC32 uintptr_t SYM6432(kmalloc_aligned_phys)(size_t sz, uintptr_t *phys)
 	{
 		auto retVal = kmalloc_generic(sz, 1, phys);
 		//~ if(phys)

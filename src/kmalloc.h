@@ -8,10 +8,10 @@
 extern "C" {
 #endif
 
-uintptr_t SYM6432(kmalloc)(size_t sz);
-uintptr_t SYM6432(kmalloc_aligned)(size_t sz);
-uintptr_t SYM6432(kmalloc_phys)(size_t sz, size_t *phys);
-uintptr_t SYM6432(kmalloc_aligned_phys)(size_t sz, size_t *phys);
+STATIC32 uintptr_t SYM6432(kmalloc)(size_t sz);
+STATIC32 uintptr_t SYM6432(kmalloc_aligned)(size_t sz);
+STATIC32 uintptr_t SYM6432(kmalloc_phys)(size_t sz, size_t *phys);
+STATIC32 uintptr_t SYM6432(kmalloc_aligned_phys)(size_t sz, size_t *phys);
 
 #ifndef __x86_64__
 #define kmalloc(a) kmalloc32(a)

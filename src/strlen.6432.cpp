@@ -10,7 +10,7 @@ extern "C"
 
 /* Return the length of the null-terminated string STR.  Scan for
    the null terminator quickly by testing four bytes at a time.  */
-size_t
+STATIC32 size_t
 STRLEN (const char *str)
 {
   const char *char_ptr;

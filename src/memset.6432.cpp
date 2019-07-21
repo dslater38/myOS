@@ -4,7 +4,7 @@ extern "C"
 {
 
 // Copy len bytes from src to dest.
-void *SYM6432(memcpy)(void *dest, const void *src, size_t len)
+STATIC32 void *SYM6432(memcpy)(void *dest, const void *src, size_t len)
 {
     const uint8_t *sp = (const uint8_t *)src;
     uint8_t *dp = (uint8_t *)dest;

@@ -21,9 +21,9 @@ typedef		_Bool	bool;
 extern "C" {
 #endif
 
-void SYM6432(outb)(uint16_t port, uint8_t value);
-void SYM6432(outw)(uint16_t port, uint16_t value);
-void SYM6432(outd)(uint16_t port, uint32_t value);
+void outb(uint16_t port, uint8_t value);
+void outw(uint16_t port, uint16_t value);
+void outd(uint16_t port, uint32_t value);
 
 // void *memcpy(void *dest, const void *src, uint32_t len);
 // void *memset(void *dest, int val, uint32_t len);
@@ -37,9 +37,9 @@ extern uint64_t get_fault_addr64(void);
 uint8_t SYM6432(inb)(uint16_t port);
 uint16_t SYM6432(inw)(uint16_t port);
 
-int SYM6432(sprintf)(char *buf, const char *fmt, ...);
-int SYM6432(printf)(const char *fmt, ...);
-size_t SYM6432(strlen)(const char *str);
+STATIC32 int SYM6432(sprintf)(char *buf, const char *fmt, ...);
+STATIC32 int SYM6432(printf)(const char *fmt, ...);
+STATIC32 size_t SYM6432(strlen)(const char *str);
 
 #ifndef NULL
 #define NULL 0
@@ -48,8 +48,8 @@ size_t SYM6432(strlen)(const char *str);
 #define HIDWORD(a) ((uint32_t)(((a) & 0xFFFFFFFF00000000ull) >> 32))
 #define LODWORD(a) ((uint32_t)((a) & 0x00000000FFFFFFFFull))
 
-void SYM6432(panic)(const char *message, const char *file, uint32_t line);
-void SYM6432(panic_assert)(const char *file, uint32_t line, const char *desc);
+STATIC32 void SYM6432(panic)(const char *message, const char *file, uint32_t line);
+STATIC32 void SYM6432(panic_assert)(const char *file, uint32_t line, const char *desc);
 
 #define PANIC(msg) SYM6432(panic)(msg, __FILE__, __LINE__);
 #define ASSERT(b) ((b) ? (void)0 : SYM6432(panic_assert)(__FILE__, __LINE__, #b))

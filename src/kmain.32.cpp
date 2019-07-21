@@ -149,3 +149,13 @@ static void init_gdt_table64()
 
  	gdt_flush64((uint32_t)&gdt64_ptr);
 }
+
+#include "sym6432.h"
+#include "kmalloc.6432.cpp"
+#include "memset.6432.cpp"
+#include "panic.6432.cpp"
+#include "strlen.6432.cpp"
+#include "vesavga.6432.cpp"
+#include "vsprintf.6432.cpp"
+#include "page64_tables.32.cpp"
+

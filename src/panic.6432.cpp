@@ -4,7 +4,7 @@
 extern "C"
 {
 
-void SYM6432(panic)(const char *message, const char *file, uint32_t line)
+STATIC32 void SYM6432(panic)(const char *message, const char *file, uint32_t line)
 {
 	// We encountered a massive problem and have to stop.
 	// asm volatile("cli"); // Disable interrupts.
@@ -28,7 +28,7 @@ void SYM6432(panic)(const char *message, const char *file, uint32_t line)
 	SYM6432(idle_loop)();
 }
 
-void SYM6432(panic_assert)(const char *file, uint32_t line, const char *desc)
+STATIC32 void SYM6432(panic_assert)(const char *file, uint32_t line, const char *desc)
 {
 	// An assertion failed, and we have to panic.
 	// asm volatile("cli"); // Disable interrupts.

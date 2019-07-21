@@ -75,29 +75,29 @@ static void switch_page_directory32(DIR32 *dir)
 extern "C"
 {
 
-void switch_page_directory64(DIR64 *dir)
-{
-	current_directory64 = dir;
-	set_page64_directory( dir );
-}
+	static void switch_page_directory64(DIR64 *dir)
+	{
+		current_directory64 = dir;
+		set_page64_directory( dir );
+	}
 
 	
-	void *get_directory32()
+	static void *get_directory32()
 	{
 		return getDIR32();
 	}
 	
-	void *get_directory64()
+	static void *get_directory64()
 	{
 		return getDIR64();
 	}
 	
-	void dumpDir(void *p)
+	static void dumpDir(void *p)
 	{
 		reinterpret_cast<DIR32 *>(p)->dump();
 	}
 	
-	void dumpDir64(void *p)
+	static void dumpDir64(void *p)
 	{
 		reinterpret_cast<DIR64 *>(p)->dump();
 	}
@@ -181,7 +181,7 @@ void switch_page_directory64(DIR64 *dir)
 		switch_page_directory64(dir);
 	}	
 
-	
+#if 0
 	void page_fault(registers_t regs)
 	{
 		// Output an error message.
@@ -214,6 +214,7 @@ void switch_page_directory64(DIR64 *dir)
 		monitor_write32("\n");
 		PANIC("Page fault");
 	}
+#endif // 0
 
 }
 

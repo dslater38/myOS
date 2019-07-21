@@ -22,7 +22,7 @@ extern "C"
 
 #endif
 
-void *SYM6432(memset)(void *dest, uint8_t val, uint32_t size);
+STATIC32 void *SYM6432(memset)(void *dest, uint8_t val, uint32_t size);
 
 
 #ifdef __cplusplus

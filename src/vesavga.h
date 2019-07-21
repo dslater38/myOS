@@ -11,18 +11,18 @@ extern "C" {
 #endif
 
 // Write a single character out to the screen.
-void SYM6432(monitor_put)(char c);
+STATIC32 void SYM6432(monitor_put)(char c);
 
 // Clear the screen to all black.
-void SYM6432(monitor_clear)();
+STATIC32 void SYM6432(monitor_clear)();
 
 // Output a null-terminated ASCII string to the monitor.
-void SYM6432(monitor_write)(const char *c);
-void SYM6432(monitor_write_hex)(uintptr_t n);
-void SYM6432(monitor_write_dec)(uintptr_t n);
+STATIC32 void SYM6432(monitor_write)(const char *c);
+STATIC32 void SYM6432(monitor_write_hex)(uintptr_t n);
+STATIC32 void SYM6432(monitor_write_dec)(uintptr_t n);
 
-bool SYM6432(set_foreground_color)(uint8_t clr);
-bool SYM6432(set_background_color)(uint8_t clr);
+STATIC32 bool SYM6432(set_foreground_color)(uint8_t clr);
+STATIC32 bool SYM6432(set_background_color)(uint8_t clr);
 
 
 #define BLACK 0

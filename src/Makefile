@@ -7,16 +7,18 @@ CC=clang
 CXX=clang++
 
 CSOURCES=$(shell find . -maxdepth 1 -name '*.c' -a -not -name '*.32.c' -a -not -name '*.6432.c' -print)
-CSOURCES32=$(wildcard *.32.c)
+# CSOURCES32=$(wildcard *.32.c)
 CSOURCES6432=$(wildcard *.6432.c)
 
 CXXSOURCES=$(shell find . -maxdepth 1 -name '*.cpp' -a -not -name '*.32.cpp' -a -not -name '*.6432.cpp' -print)
-CXXSOURCES32=$(wildcard *.32.cpp)
+# CXXSOURCES32=$(wildcard *.32.cpp)
+CXXSOURCES32=kmain.32.cpp
 CXXSOURCES6432=$(wildcard *.6432.cpp)
 
 SSOURCES=$(wildcard *.s)
 
-OBJECTS32=$(CXXSOURCES32:%.cpp=%.o)  $(CXXSOURCES6432:%.6432.cpp=%.32.o) $(CSOURCES32:%.c=%.o) $(CSOURCES6432:%.6432.c=%.32.o)
+# OBJECTS32=$(CXXSOURCES32:%.cpp=%.o)  $(CXXSOURCES6432:%.6432.cpp=%.32.o) $(CSOURCES32:%.c=%.o) $(CSOURCES6432:%.6432.c=%.32.o)
+OBJECTS32=$(CXXSOURCES32:%.cpp=%.o) $(CSOURCES32:%.c=%.o)
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CXXSOURCES6432:%.6432.cpp=%.64.o) $(CSOURCES:%.c=%.o) $(CSOURCES6432:%.6432.c=%.64.o) $(SSOURCES:%.s=%.o)
 
 CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
@@ -55,10 +57,10 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
 	-rm $@.o
 
-%.32.o : %.6432.c
-	$(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
-	-rm $@.o
+#~ %.32.o : %.6432.c
+	#~ $(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
+	#~ x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
+	#~ -rm $@.o
 
 %.64.o : %.6432.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
@@ -68,10 +70,10 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
 	-rm $@.o
 
-%.32.o: %.6432.cpp
-	$(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
-	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
-	-rm $@.o
+#~ %.32.o: %.6432.cpp
+	#~ $(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
+	#~ x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
+	#~ -rm $@.o
 
 %.64.o: %.6432.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
