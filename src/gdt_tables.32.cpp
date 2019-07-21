@@ -6,15 +6,15 @@
 // Lets us access our ASM functions from our C code.
 
 extern "C" {
-extern void gdt_flush(uint32_t);
+//~ extern void gdt_flush(uint32_t);
 extern void gdt_flush64(uint32_t);
 // extern void idt_flush(uint32_t);
 }
 
 // Internal function prototypes.
-static void init_gdt();
+//~ static void init_gdt();
 static void init_gdt64();
-static void gdt_set_gate(int32_t,uint32_t,uint32_t,uint8_t,uint8_t);
+//~ static void gdt_set_gate(int32_t,uint32_t,uint32_t,uint8_t,uint8_t);
 // static void init_idt();
 // static void init_irqs();
 // static void idt_set_gate(uint8_t,uint32_t,uint16_t,uint8_t);
@@ -23,25 +23,25 @@ static void gdt_set_gate(int32_t,uint32_t,uint32_t,uint8_t,uint8_t);
 gdt_entry_t gdt_entries[7] = { 0 };
 
 // 32-bit GDT entries
-gdt_entry_t gdt_entries32[5] = { 0 };
+//~ gdt_entry_t gdt_entries32[5] = { 0 };
 
-gdt_ptr_t   gdt_ptr{ 0 };
+//~ gdt_ptr_t   gdt_ptr{ 0 };
 
 gdt64_ptr_t   gdt64_ptr{ 0 };
 
-idt_entry_t idt_entries[256] = { 0 };
+//~ idt_entry_t idt_entries[256] = { 0 };
 
-idt_ptr_t   idt_ptr{ 0 };
+//~ idt_ptr_t   idt_ptr{ 0 };
 
 
 // Initialisation routine - zeroes all the interrupt service routines,
 // initialises the GDT and IDT.
 extern "C"
 {
-	void init_gdt_table()
-	{
-		init_gdt();
-	}
+	//~ void init_gdt_table()
+	//~ {
+		//~ init_gdt();
+	//~ }
 	
 	void init_gdt_table64()
 	{
@@ -64,19 +64,19 @@ extern "C"
 	// }
 }
 
-static void init_gdt()
-{
- 	gdt_ptr.limit() = (sizeof(gdt_entry_t) * 5) - 1;
-	gdt_ptr.base()  = (uint32_t)&gdt_entries32; 
+//~ static void init_gdt()
+//~ {
+ 	//~ gdt_ptr.limit() = (sizeof(gdt_entry_t) * 5) - 1;
+	//~ gdt_ptr.base()  = (uint32_t)&gdt_entries32; 
 
-	gdt_set_gate(0, 0, 0, 0, 0);                // Null segment
-	gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code segment
-	gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Data segment
-	gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
-	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
+	//~ gdt_set_gate(0, 0, 0, 0, 0);                // Null segment
+	//~ gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code segment
+	//~ gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Data segment
+	//~ gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
+	//~ gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
 
-	gdt_flush((uint32_t)&gdt_ptr);
-}
+	//~ gdt_flush((uint32_t)&gdt_ptr);
+//~ }
 
 
 static void init_gdt64()
@@ -97,10 +97,10 @@ static void init_gdt64()
 }
 
 // Set the value of one GDT entry.
-static void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)
-{
-	gdt_entries32[num].set(base, limit, access, gran);
-}
+//~ static void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran)
+//~ {
+	//~ gdt_entries32[num].set(base, limit, access, gran);
+//~ }
 
 /* reinitialize the PIC controllers, giving them specified vector offsets
    rather than 8h and 70h, as configured by default */

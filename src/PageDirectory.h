@@ -21,8 +21,12 @@ struct PageDirectory
 
 	PageDirectory()
 	{
+		for( auto i=0u; i<NUM_ENTRIES; ++i )
+		{
+			physical[i] = 0;
+		}
 //		memset32(tables, '\0', sizeof(tables));
-		memset32(physical, '\0', sizeof(physical));
+//		memset32(physical, '\0', sizeof(physical));
 //		physicalAddr = 0;
 		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (uint32_t)this);
 	}
@@ -104,7 +108,12 @@ public:
 
 	PageTableT()
 	{
-		memset32(pages, '\0', sizeof(pages));
+		// memset32(pages, '\0', sizeof(pages));
+		UINT *p = reinterpret_cast<UINT *>(pages);
+		for( auto i=0; i<NUM_PAGES; ++i )
+		{
+			p[i] = 0;
+		}
 	}
 
 	using PageType=PageT<UINT>;
@@ -121,14 +130,14 @@ public:
 		return *(UINT *)(&pages[n]);
 	}
 
-	void dump()
-	{
-		for (auto i = 0u; i < NUM_PAGES; ++i)
-		{
-			printf32("\tpage: %d == 0x%08.8x\n", i, *(uint32_t *)&(pages[i]) );
-		}
-		printf32("\t+++++++++++++++++++++++\n");
-	}
+	//~ void dump()
+	//~ {
+		//~ for (auto i = 0u; i < NUM_PAGES; ++i)
+		//~ {
+			//~ printf32("\tpage: %d == 0x%08.8x\n", i, *(uint32_t *)&(pages[i]) );
+		//~ }
+		//~ printf32("\t+++++++++++++++++++++++\n");
+	//~ }
 
 
 private:

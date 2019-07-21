@@ -6,7 +6,7 @@
 #include "multiboot2.h"
 #include "timer.h"
 #include "isr.h"
-#include "serial.h"
+// #include "serial.h"
 	
 extern void beep( uint16_t freq );
 extern void vga43(void);
@@ -95,16 +95,16 @@ extern "C"
 	
 	int kmain32(unsigned long magic, multiboot_tag *mboot_ptr)
 	{	
-		auto success = init_serial32(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
+		// auto success = init_serial32(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
 		
 		placement_address = (uint32_t)&end;
-		printf32("init Placement: 0x%08.8x\n", placement_address);
-		init_gdt_table();
+		//~ printf32("init Placement: 0x%08.8x\n", placement_address);
+		//~ init_gdt_table();
 		
 		
 //		init_serial32(1, 38400, 8, 1, 0);
 		
-		init_monitor();
+		//~ init_monitor();
 		init_page64();
 
 		init_GDT();
@@ -112,10 +112,10 @@ extern "C"
 //		handle_page_faults();
 		// init_page32();
 		
-		monitor_write_hex32((uint32_t)p4_table);
-		monitor_write_hex32((uint32_t)p3_table);
-		monitor_write_hex32((uint32_t)p2_table);
-		monitor_write_hex32((uint32_t)p1_table);
+		//~ monitor_write_hex32((uint32_t)p4_table);
+		//~ monitor_write_hex32((uint32_t)p3_table);
+		//~ monitor_write_hex32((uint32_t)p2_table);
+		//~ monitor_write_hex32((uint32_t)p1_table);
 		
 		
 //		monitor_write32("Hello, paging world!\n");	

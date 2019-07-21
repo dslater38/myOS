@@ -10,11 +10,13 @@ void SYM6432(panic)(const char *message, const char *file, uint32_t line)
 	// asm volatile("cli"); // Disable interrupts.
 	disable_interrupts();
 
-    SYM6432(set_foreground_color)(BLACK);
-    SYM6432(set_background_color)(RED);
+#ifdef __x86_64__
+	
+	SYM6432(set_foreground_color)(BLACK);
+	SYM6432(set_background_color)(RED);
 
 	SYM6432(printf)("PANIC(%s) at %s : %d\n",message,file,line);
-
+#endif
 	// monitor_write("PANIC(");
 	// monitor_write(message);
 	// monitor_write(") at ");
@@ -32,11 +34,14 @@ void SYM6432(panic_assert)(const char *file, uint32_t line, const char *desc)
 	// asm volatile("cli"); // Disable interrupts.
 	
 	disable_interrupts();
-
+#ifdef __x86_64__
+	
     SYM6432(set_foreground_color)(BLACK);
     SYM6432(set_background_color)(RED);
 
 	SYM6432(printf)("ASSERTION-FAILED(%s) at %s : %d\n", desc, file, line);
+#endif
+	
 	// monitor_write("ASSERTION-FAILED(");
 	// monitor_write(desc);
 	// monitor_write(") at ");

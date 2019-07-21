@@ -32,8 +32,16 @@ static uint32_t	cur_line = 0;
 #define SPRINTF SYM6432(sprintf)
 #define OUTB SYM6432(outb)
 #define OUTW SYM6432(outw)
+
+#ifdef __x86_64__
+
 #define SERIAL_PUTC SYM6432(serial_putc)
 
+#else
+
+#define SERIAL_PUTC(a,b)
+
+#endif
 
 extern "C"
 {
