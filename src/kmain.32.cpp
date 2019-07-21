@@ -6,7 +6,7 @@
 #include "multiboot2.h"
 #include "timer.h"
 #include "isr.h"
-// #include "serial.h"
+#include "descriptor_tables.h"
 	
 extern void beep( uint16_t freq );
 extern void vga43(void);
@@ -17,8 +17,12 @@ extern void vga43(void);
 void helloWorld();
 volatile int foobar = 0;
 
+
+
 extern "C" 
 {
+	
+	extern void gdt_flush64(uint32_t);
 
 	extern uint32_t end;
 	
@@ -32,7 +36,7 @@ extern "C"
 
 	void page_fault(registers_t regs);
 	void init_gdt_table();
-	void init_gdt_table64();
+	static void init_gdt_table64();
 	void init_idt_table();
 	void initPaging32(uint32_t maxMem);
 	void initPaging64(uint64_t maxMem);
@@ -107,7 +111,7 @@ extern "C"
 		//~ init_monitor();
 		init_page64();
 
-		init_GDT();
+		init_gdt_table64();
 //		init_IDT();
 //		handle_page_faults();
 		// init_page32();
@@ -122,5 +126,26 @@ extern "C"
 //		test_page_fault();
 		return 0;
 	}
+}
 
+// 64-bit GDT entries
+static gdt_entry_t gdt_entries[7] = { 0 };
+static gdt64_ptr_t   gdt64_ptr{ 0 };
+
+
+static void init_gdt_table64()
+{
+	gdt64_ptr.limit() = sizeof(gdt_entries) - 1;
+	gdt64_ptr.base()  = (uint64_t)&gdt_entries; 
+
+	gdt_entries[0].set(0, 0, 0, 0, SYSTEM_DESCRIPTOR);
+	gdt_entries[1].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_CODE|SEGMENT_EXECUTE_ENABLED|IS_64BITS|CODE_SEGMENT_CONFORMING_BIT), RING0, (SEGMENT_PRESENT|GRAN_1K));
+	gdt_entries[2].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_DATA|SEGMENT_WRITE_ENABLED|IS_64BITS), RING0, (SEGMENT_PRESENT|GRAN_1K));
+	gdt_entries[3].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_CODE|SEGMENT_EXECUTE_ENABLED|IS_64BITS|CODE_SEGMENT_CONFORMING_BIT), RING3, (SEGMENT_PRESENT|GRAN_1K));
+	gdt_entries[4].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_DATA|SEGMENT_WRITE_ENABLED|IS_64BITS), RING3, (SEGMENT_PRESENT|GRAN_1K));
+	gdt_entries[5].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_CODE|SEGMENT_EXECUTE_ENABLED|CODE_SEGMENT_CONFORMING_BIT), RING3, (SEGMENT_PRESENT|GRAN_1K|OPERAND_SIZE_32));
+	gdt_entries[6].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_DATA|SEGMENT_WRITE_ENABLED), RING3, (SEGMENT_PRESENT|GRAN_1K|OPERAND_SIZE_32));
+
+
+ 	gdt_flush64((uint32_t)&gdt64_ptr);
 }
