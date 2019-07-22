@@ -13,7 +13,7 @@ extern "C"
 	
 	extern void gdt_flush64(uint32_t);
 	extern uint32_t end;
-	extern uint32_t placement_address;
+	extern uint64_t placement_address;
 	static void init_gdt_table64();
 	void init_idt_table();
 	void initPaging64(uint64_t maxMem);
@@ -21,7 +21,9 @@ extern "C"
 	int kmain32(unsigned long magic, multiboot_tag *mboot_ptr)
 	{	
 
-		placement_address = (uint32_t)&end;
+		printf32("placement_address: 0x%08.8x\n", (uint32_t)placement_address);
+		// placement_address = (uint64_t)&end;
+		// printf32("placement_address: 0x%08.8x\n", (uint32_t)placement_address);
 		
 		initPaging64(0x10000000);
 

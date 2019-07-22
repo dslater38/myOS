@@ -15,8 +15,6 @@ struct PageDirectory
 	static constexpr decltype(sizeof(int)) NUM_ENTRIES = 4096 / sizeof(Pointer);
 
 	Pointer physical[NUM_ENTRIES];
-//	Pointer tables[NUM_ENTRIES];
-//	Pointer physicalAddr;
 
 
 	PageDirectory()
@@ -25,16 +23,10 @@ struct PageDirectory
 		{
 			physical[i] = 0;
 		}
-//		memset32(tables, '\0', sizeof(tables));
-//		memset32(physical, '\0', sizeof(physical));
-//		physicalAddr = 0;
-		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (uint32_t)this);
 	}
 
 	void setPhys(Pointer p)
 	{
-		// printf("setPhys: this: 0x%08.8x, phys: 0x%08.8x\n", (uint32_t)this, (uint32_t)p);
-//		physicalAddr = p;
 	}
 
 	Pointer index(Pointer vaddr)const
@@ -129,16 +121,6 @@ public:
 	{
 		return *(UINT *)(&pages[n]);
 	}
-
-	//~ void dump()
-	//~ {
-		//~ for (auto i = 0u; i < NUM_PAGES; ++i)
-		//~ {
-			//~ printf32("\tpage: %d == 0x%08.8x\n", i, *(uint32_t *)&(pages[i]) );
-		//~ }
-		//~ printf32("\t+++++++++++++++++++++++\n");
-	//~ }
-
 
 private:
 	PageType pages[NUM_PAGES];

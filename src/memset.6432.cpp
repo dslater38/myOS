@@ -13,7 +13,8 @@ STATIC32 void *SYM6432(memcpy)(void *dest, const void *src, size_t len)
 }
 
 // Write len copies of val into dest.
-void * SYM6432(memset)(void *vdest, int val, size_t len)
+// void * SYM6432(memset)(void *vdest, int val, size_t len)
+void * memset(void *vdest, int val, size_t len)
 {
 #ifndef  FAST_MEMCPY
 	uint8_t *ptr,*pEnd;

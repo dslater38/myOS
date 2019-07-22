@@ -10,7 +10,7 @@
 
 start:
 	cli                   					; Disable interrupts.
-	mov	esp, end					; setup kmalloc's placement_address 1 page beyong end
+	mov	esp, end					; setup kmalloc's placement_address 1 page beyond end
 	add esp, 0x1000				; 
 	mov [placement_address], esp;	;
 	mov esp, init_stack32			; set up the initial stack. init_stack32 defines  16K stack

@@ -23,8 +23,8 @@ OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CXXSOURCES6432:%.6432.cpp=%.64.o) $(CSOURCES:%
 
 CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
 
-CFLAGS=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -I.
-CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -Wno-main -I.
+CFLAGS=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -I.
+CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -Wno-main -I.
 LDFLAGS=-Tlink.ld
 ASFLAGS=-felf64
 
@@ -55,7 +55,7 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 %.32.o: %.32.c
 	$(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
 	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS) $@.o $@
-	-rm $@.o
+#	-rm $@.o
 
 #~ %.32.o : %.6432.c
 	#~ $(CC) $(CPPFLAGS) $(CFLAGS32) -c $< -o $@.o
@@ -68,7 +68,7 @@ kernel: $(OBJECTS32) $(OBJECTS) | link.ld
 %.32.o: %.32.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
 	x86_64-linux-gnu-objcopy $(OBJCOPYFLAGS)  $@.o $@
-	-rm $@.o
+#	-rm $@.o
 
 #~ %.32.o: %.6432.cpp
 	#~ $(CC) $(CPPFLAGS) $(CXXFLAGS32) -c $< -o $@.o
