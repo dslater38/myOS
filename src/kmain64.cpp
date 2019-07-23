@@ -2,11 +2,17 @@
 #include "vesavga.h"
 #include "serial.h"
 #include "ata.h"
+#include "multiboot2.h"
 
 void init_idt64_table();
 
+uint32_t mboot_header=0;
+
 volatile int foo___ = 0;
 static void test_page_fault();
+
+void cmain (unsigned long magic, unsigned long addr);
+
 
 extern "C"
 {
@@ -29,6 +35,17 @@ void kmain64()
 	}
 
 	detectControllers();
+
+	if( mboot_header != 0)
+	{
+		printf("Dump mboot_header\n");
+		cmain(MULTIBOOT2_BOOTLOADER_MAGIC, mboot_header);
+	}
+	else
+	{
+		printf("mboot_header is NULL\n");
+	}
+	
 	
 	test_page_fault();
 	

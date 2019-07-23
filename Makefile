@@ -30,7 +30,8 @@ export RENAME_SYMS=--redefine-sym _32_placement_address=placement_address \
 --redefine-sym _32_backColor=backColor \
 --redefine-sym _32_foreColor=foreColor \
 --redefine-sym _32_cur_line=cur_line \
---redefine-sym _32_back_buffer=back_buffer 
+--redefine-sym _32_back_buffer=back_buffer \
+--redefine-sym _32_mboot_header=mboot_header
 
 export OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes --prefix-symbols=_32_ 
 export OBJCOPYFLAGS2=-O elf64-x86-64 --elf-stt-common=yes $(RENAME_SYMS)

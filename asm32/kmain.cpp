@@ -17,6 +17,12 @@ extern void vga43(void);
 void helloWorld();
 volatile int foobar = 0;
 
+constexpr uint64_t	B=1;
+constexpr uint64_t	KB=1024*B;
+constexpr uint64_t	MB=1024*KB;
+constexpr uint64_t	GB=1024*MB;
+constexpr uint64_t	TB=1024*GB;
+
 extern "C" 
 {
 
@@ -72,7 +78,8 @@ extern "C"
 	static void init_page64()
 	{
 		monitor_write("Initialize Paging 64....\n");
-		initPaging64(0x10000000);
+		// initPaging64(0x10000000);
+		initPaging64(8*MB);
 		// enable_paging_64();
 		// enable_paging_64_2();
 	}

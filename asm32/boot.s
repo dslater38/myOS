@@ -7,6 +7,7 @@
 [EXTERN kmain32]                   ; This is the entry point of our C code
 [EXTERN placement_address]
 [EXTERN init_stack32]
+[EXTERN mboot_header]
 
 start:
 	cli                   					; Disable interrupts.
@@ -18,6 +19,7 @@ start:
 	push	0h					; reset EFLAGS
 	popf						;
 	push	ebx           			; Load multiboot header location
+	mov [mboot_header], ebx		; save the multiboot header
 	push	eax					; push the magic value.
 								; Execute the kernel:
 	call	kmain32           				; call our main() function.
