@@ -19,8 +19,8 @@ extern "C"
 void kmain64()
 {
 	
-	set_foreground_color(GREEN);
-	set_background_color(BLACK);
+	SYM6432(set_foreground_color)(GREEN);
+	SYM6432(set_background_color)(BLACK);
 //	monitor_clear();
 	printf("Hello World from 64-bit long mode!!!!!\n");
 	printf("Init the 64-bit interrupt table\n");

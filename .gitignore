@@ -1,6 +1,7 @@
 *.o
 kernel
 *.d
+*.d.*
 *.*.d
 *.ds
 kernel.sym

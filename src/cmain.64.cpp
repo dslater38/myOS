@@ -129,7 +129,7 @@ cmain (unsigned long magic, unsigned long addr)
 	{
 		uint8_t oldColor = set_foreground_color(RED);
 		printf ("Tag 0x%08.8x, Size 0x%08.8x\n", tag->type, tag->size);
-		if( oldColor >= 0 )
+		if( oldColor != 0xFF )
 		{
 			set_foreground_color(oldColor);
 		}

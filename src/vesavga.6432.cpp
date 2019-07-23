@@ -52,26 +52,26 @@ static uint16_t *video_memory=(uint16_t *)0xB8000;
 extern "C"
 {
 
-STATIC32 bool SET_FOREGROUND_COLOR(uint8_t clr)
+STATIC32 uint8_t SET_FOREGROUND_COLOR(uint8_t clr)
 {
-	bool success = false;
+	auto oldColor = static_cast<uint8_t>(-1);
 	if( clr < 16 )
 	{
+		oldColor = foreColor;
 		foreColor = clr;
-		success = true;
 	}
-	return success;
+	return oldColor;
 }
 
-STATIC32 bool SET_BACKGROUND_COLOR(uint8_t clr)
+STATIC32 uint8_t SET_BACKGROUND_COLOR(uint8_t clr)
 {
-	bool success = false;
+	auto oldColor = static_cast<uint8_t>(-1);
 	if( clr < 16 )
 	{
+		oldColor = backColor;
 		backColor = clr;
-		success = true;
 	}
-	return success;
+	return oldColor;
 }
 
 

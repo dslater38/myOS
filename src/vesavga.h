@@ -21,8 +21,8 @@ STATIC32 void SYM6432(monitor_write)(const char *c);
 STATIC32 void SYM6432(monitor_write_hex)(uintptr_t n);
 STATIC32 void SYM6432(monitor_write_dec)(uintptr_t n);
 
-STATIC32 bool SYM6432(set_foreground_color)(uint8_t clr);
-STATIC32 bool SYM6432(set_background_color)(uint8_t clr);
+STATIC32 uint8_t SYM6432(set_foreground_color)(uint8_t clr);
+STATIC32 uint8_t SYM6432(set_background_color)(uint8_t clr);
 
 
 #define BLACK 0
