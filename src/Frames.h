@@ -15,18 +15,23 @@ public:
 		:frames{nullptr}	// pointer to buffer
 		, count{0}		// number of frames (pages, bits )
 	{
-		printf("Frames::Frames: maxSize == %d\n", (uint32_t)maxSize);
+		//~ printf32("Frames::Frames: maxSize == %d\n", (uint32_t)maxSize);
 		count = (maxSize >> 12);	// maxSize / 4096 == count pages
 		auto numUints = INDEX_FROM_BIT(count) + 1;	// number of Uint's in the Frames == sizeof(Uint)*8 bits
 		auto allocSize = numUints*sizeof(Uint);			// number of bytes to allocate == allocSize*8 bits
 		frames = (Uint*)kmalloc_aligned(allocSize);		// frames buffer.
 
-		printf("maxzSize: %u\n",(uint32_t)maxSize);
+		//~ printf32("maxzSize: %u\n",(uint32_t)maxSize);
 		
-		printf("frames: %08.8x to %08.8x for %d bits, maxSize: %u\n", (uint32_t)frames, (uint32_t)(((unsigned char *)frames) + allocSize), allocSize*8, (uint32_t)maxSize);
-		memset(frames, 0, allocSize);
+		//~ printf32("frames: %08.8x to %08.8x for %d bits, maxSize: %u\n", (uint32_t)frames, (uint32_t)(((unsigned char *)frames) + allocSize), allocSize*8, (uint32_t)maxSize);
+		// memset32(frames, 0, allocSize);
+		unsigned char *p = reinterpret_cast<unsigned char *>(frames);
+		for( auto i=0; i<allocSize; ++i )
+		{
+			p[i] = '\0';
+		}
 		
-		printf("maxzSize: %u\n",(uint32_t)maxSize);
+		//~ printf32("maxzSize: %u\n",(uint32_t)maxSize);
 	}
 
 

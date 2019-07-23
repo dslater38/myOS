@@ -2,5 +2,6 @@
 
 extern "C"
 {
-	uint64_t placement_address = 0; 
+	extern uint32_t end;
+	uint64_t placement_address = (uint64_t)(&end);
 }

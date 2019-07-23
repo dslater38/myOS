@@ -123,7 +123,7 @@ cmain (unsigned long magic, unsigned long addr)
 	  size = *(unsigned *) addr;
 	  printf ("Announced mbi size 0x%d (%08.8x)\n", size, size);
 	  for (tag = (struct multiboot_tag *) (addr + 8);
-		   tag->type != MULTIBOOT_TAG_TYPE_END;
+		   tag->type != MULTIBOOT_TAG_TYPE_END ;
 		   tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 
 										   + ((tag->size + 7) & ~7)))
 	{

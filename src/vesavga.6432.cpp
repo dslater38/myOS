@@ -33,15 +33,26 @@ static uint16_t *video_memory=(uint16_t *)0xB8000;
 #define MONITOR_WRITE_DEC SYM6432(monitor_write_dec)
 #define PUTS SYM6432(puts)
 #define SPRINTF SYM6432(sprintf)
-#define OUTB SYM6432(outb)
-#define OUTW SYM6432(outw)
+
+#ifdef __x86_64__
+
 #define SERIAL_PUTC SYM6432(serial_putc)
 
+#define OUTB outb
+#define OUTW outw
+
+#else
+
+#define OUTB(a,b)
+#define OUTW(a,b)
+#define SERIAL_PUTC(a,b)
+
+#endif
 
 extern "C"
 {
 
-bool SET_FOREGROUND_COLOR(uint8_t clr)
+STATIC32 bool SET_FOREGROUND_COLOR(uint8_t clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -52,7 +63,7 @@ bool SET_FOREGROUND_COLOR(uint8_t clr)
 	return success;
 }
 
-bool SET_BACKGROUND_COLOR(uint8_t clr)
+STATIC32 bool SET_BACKGROUND_COLOR(uint8_t clr)
 {
 	bool success = false;
 	if( clr < 16 )
@@ -181,7 +192,7 @@ static void scroll()
 }
 
 // Writes a single character out to the screen.
-void MONITOR_PUT(char c)
+STATIC32 void MONITOR_PUT(char c)
 {
 	OUTB(0xe9, c);
 	SERIAL_PUTC(1, c);
@@ -244,7 +255,7 @@ void MONITOR_PUT(char c)
 }
 
 // Clears the screen, by copying lots of spaces to the framebuffer.
-void MONITOR_CLEAR()
+STATIC32 void MONITOR_CLEAR()
 {
 	// uint8_t attributeByte = color_attribute();
 	// uint16_t blank = 0x20 /* space */ | (attributeByte << 8);
@@ -266,7 +277,7 @@ void MONITOR_CLEAR()
 }
 
 // Outputs a null-terminated ASCII string to the monitor.
-void MONITOR_WRITE(const char *c)
+STATIC32 void MONITOR_WRITE(const char *c)
 {
 	while(*c)
 	{
@@ -275,7 +286,7 @@ void MONITOR_WRITE(const char *c)
 	}
 }
 
-void MONITOR_WRITE_HEX(uintptr_t n)
+STATIC32 void MONITOR_WRITE_HEX(uintptr_t n)
 {
 	// TODO: implement this yourself!
 	uint32_t hi = static_cast<uint32_t>((n & 0xFFFFFFFF00000000ull) >> 32);
@@ -285,7 +296,7 @@ void MONITOR_WRITE_HEX(uintptr_t n)
 	MONITOR_WRITE(buffer);
 }
 
-void MONITOR_WRITE_DEC(uintptr_t n)
+STATIC32 void MONITOR_WRITE_DEC(uintptr_t n)
 {
 	// TODO: implement this yourself!
 	char buffer[64];
@@ -294,7 +305,7 @@ void MONITOR_WRITE_DEC(uintptr_t n)
 }
 
 
-int PUTS(const char *s)
+STATIC32 int PUTS(const char *s)
 {
 	MONITOR_WRITE(s);
 	return 1;

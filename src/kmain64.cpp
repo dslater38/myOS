@@ -19,7 +19,7 @@ extern "C"
 void kmain64()
 {
 	
-	set_foreground_color(CYAN);
+	set_foreground_color(GREEN);
 	set_background_color(BLACK);
 //	monitor_clear();
 	printf("Hello World from 64-bit long mode!!!!!\n");

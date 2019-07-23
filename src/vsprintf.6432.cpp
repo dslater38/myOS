@@ -241,12 +241,12 @@ extern "C"
 {
 
 
-int SYM6432(vsprintf)(char *buf, const char *fmt, va_list args)
+STATIC32 int SYM6432(vsprintf)(char *buf, const char *fmt, va_list args)
 {
 	return vsprintf_imp(buf, fmt, args);
 }
 
-int SYM6432(sprintf)(char *buf, const char *fmt, ...)
+STATIC32 int SYM6432(sprintf)(char *buf, const char *fmt, ...)
 {
 	int retVal = 0;
 	va_list args;
@@ -256,7 +256,7 @@ int SYM6432(sprintf)(char *buf, const char *fmt, ...)
 	return retVal;
 }
 
-int SYM6432(printf)(const char *fmt, ...)
+STATIC32 int SYM6432(printf)(const char *fmt, ...)
 {
 	char buf[4096] = {0};
 	int retVal = 0;

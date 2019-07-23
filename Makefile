@@ -3,16 +3,16 @@ SUBDIRS:=$(MAKEFILES:/Makefile=)
 
 
 CSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.c' -a -not -name '*.32.c' -a -not -name '*.6432.c' -print)
-CSOURCES32:=$(wildcard $(SUBDIRS:%=%/*.32.c)) 
+# CSOURCES32:=$(wildcard $(SUBDIRS:%=%/*.32.c)) 
 CSOURCES6432:= $(wildcard $(SUBDIRS:%=%/*.6432.c))
 
 CXXSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.cpp' -a -not -name '*.32.cpp' -a -not -name '*.6432.cpp' -print)
-CXXSOURCES32:=$(wildcard $(SUBDIRS:%=%/*.32.cpp))
+# CXXSOURCES32:=$(wildcard $(SUBDIRS:%=%/*.32.cpp))
 CXXSOURCES6432:= $(wildcard $(SUBDIRS:%=%/*.6432.cpp))
 
 SSOURCES:=$(wildcard $(SUBDIRS:%=%/*.s)) 
 
-OBJECTS32:=$(CSOURCES32:%.c=%.o) $(CSOURCES6432:%.6432.c=%.32.o)  $(CXXSOURCES32:%.32.cpp=%.o) $(CXXSOURCES6432:%.6432.cpp=%.32.o) 
+OBJECTS32:=$(CSOURCES32:%.c=%.o) $(CXXSOURCES32:%.32.cpp=%.o) 
 OBJECTS64:=$(CSOURCES6432:%.6432.c=%.64.o) $(CXXSOURCES:%.cpp=%.o) $(CXXSOURCES6432:%.6432.cpp=%.64.o) 
 OBJECTS:=$(OBJECTS32) $(OBJECTS64) $(CSOURCES:%.c=%.o) $(CXXSOURCES:%.cpp=%.o) $(SSOURCES:%.s=%.o)
 
@@ -31,7 +31,8 @@ export RENAME_SYMS=--redefine-sym _32_placement_address=placement_address \
 --redefine-sym _32_foreColor=foreColor \
 --redefine-sym _32_cur_line=cur_line \
 --redefine-sym _32_back_buffer=back_buffer \
---redefine-sym _32_mboot_header=mboot_header
+--redefine-sym _32_mboot_header=mboot_header \
+--redefine-sym _32_kmain64=kmain64
 
 export OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes --prefix-symbols=_32_ 
 export OBJCOPYFLAGS2=-O elf64-x86-64 --elf-stt-common=yes $(RENAME_SYMS)

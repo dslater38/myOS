@@ -31,7 +31,11 @@ struct PageDirectory
 	PageDirectory()
 	{
 //		memset32(tables, '\0', sizeof(tables));
-		memset(physical, '\0', sizeof(physical));
+		// memset(physical, '\0', sizeof(physical));
+		for( auto i=0; i<NUM_ENTRIES; ++i )
+		{
+			physical[i] = static_cast<Pointer>(0);
+		}
 //		physicalAddr = 0;
 		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (uint32_t)this);
 	}
@@ -113,7 +117,11 @@ public:
 
 	PageTableT()
 	{
-		memset(pages, '\0', sizeof(pages));
+		UINT *p = reinterpret_cast<UINT *>(pages);
+		for( auto i=0; i<NUM_PAGES; ++i )
+		{
+			p[i] = 0u;
+		}
 	}
 
 	using PageType=PageT<UINT>;
