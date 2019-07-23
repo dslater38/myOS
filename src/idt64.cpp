@@ -19,6 +19,7 @@ static void init_idt();
 static idt_entry64_t idt64_entries[256] = { 0 };
 static idt_ptr64_t   idt64_ptr{ 0 };
 void page_fault(registers64_t regs);
+void gpf(registers64_t regs);
 
 
 void init_idt64_table()
@@ -196,6 +197,7 @@ void page_fault(registers64_t regs)
 	if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
 	if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
 	if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
+	if(id) { monitor_write("fetching instruction "); }
 	monitor_write(") at 0x");
 	monitor_write_hex(faulting_address);
 	monitor_write("\n");
