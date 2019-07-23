@@ -7,5 +7,11 @@
 # sudo bochs -f bochsrc.txt
 # sudo /sbin/losetup -d /dev/loop0
 
+set -x
 
-bochs -q -dbglog debug.log -f bochsrc.txt
+if [ "$1" == "-g" ]; then
+	PATH=/home/slaterd/.local/bochs269/bin:${PATH} /home/slaterd/.local/bochs269/bin/bochs -q -f bochsrc-gdb.txt
+else
+	bochs -q -dbglog debug.log -f bochsrc.txt
+fi
+

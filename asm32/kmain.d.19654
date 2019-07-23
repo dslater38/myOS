@@ -1,0 +1,9 @@
+kmain.o: kmain.cpp /home/slaterd/repos/myOS/src/vesavga.h \
+  /home/slaterd/repos/myOS/src/common.h \
+  /home/slaterd/repos/myOS/src/sym6432.h \
+  /home/slaterd/repos/myOS/src/multiboot2.h \
+  /home/slaterd/repos/myOS/src/timer.h \
+  /home/slaterd/repos/myOS/src/isr.h \
+  /home/slaterd/repos/myOS/src/serial.h \
+  /home/slaterd/repos/myOS/src/descriptor_tables.h \
+  /home/slaterd/repos/myOS/src/types.h
