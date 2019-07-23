@@ -5,7 +5,7 @@
 #include "common.h"
 
 
-template<class UINT, const size_t OFFBITS=12>
+template<class UINT, const size_t OFFBITS_=12>
 struct PageT
 {
 	//~ static constexpr UINT PRESENT_BIT = (UINT{1})<<0;
@@ -17,9 +17,13 @@ struct PageT
 	//~ static constexpr UINT FRAME_BITS = (static_cast<UINT>(-1) << 12);
 	
 	using  Pointer=UINT;
+	static constexpr size_t OFFBITS=OFFBITS_;
 	static constexpr size_t offset_bits=OFFBITS;
 	static constexpr size_t shift=OFFBITS;
 	static constexpr bool is_huge=(OFFBITS > 12);
+	
+	using PageType=PageT<UINT,OFFBITS>;
+	
 
 	Pointer present : 1;
 	Pointer rw : 1;

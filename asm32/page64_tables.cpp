@@ -18,12 +18,12 @@ extern "C" {
 
 const uint64_t PAGE_SIZE = 0x1000;
 
-using PTE = PageTableT<uint64_t>; // PageDirectory<PageTableT<uint64_t>, 12, 9>;
+using PTE = PageTableT<uint64_t,12>; // PageDirectory<PageTableT<uint64_t>, 12, 9>;
 using PDE = PageDirectory<PTE, 21, 9>;
 using PDPTE = PageDirectory<PDE, 30, 9>;
 using PML4E = PageDirectory<PDPTE, 39, 9>;
 
-using DIR32 = PageDirectory<PageTableT<uint32_t>, 10, 10>;
+using DIR32 = PageDirectory<PageTableT<uint32_t,10>, 10, 10>;
 using DIR64 = PML4E; // PageDirectory<PDPTE, 39, 9>;
 
 static void printPageTables(uint32_t maxMem, uint64_t *PML4E);
@@ -277,5 +277,6 @@ void printPageTables(uint32_t maxMem, uint64_t *pml4e)
 			printf("vaddr 0x%08.8x%08.8x ==> <NULL>\n", HIDWORD(i), LODWORD(i));
 		}
 	}
+}
 }
 

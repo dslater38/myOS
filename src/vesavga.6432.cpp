@@ -3,22 +3,25 @@
 #include "serial.h"
 #include "sym6432.h"
 
-
-static uint16_t cursor_x;
-static uint16_t cursor_y;
-static uint8_t backColor = BLACK;
-static uint8_t foreColor = CYAN;
-
 #define COLS 80
 #define COLS2 (COLS/2)
 #define ROWS 25
 
 #define VIDEO_MEM_COUNT ROWS*COLS
 
+
+extern uint16_t cursor_x;
+extern uint16_t cursor_y;
+extern uint8_t backColor;
+extern uint8_t foreColor;
+extern uint32_t cur_line;
+extern uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT];
+
+
 static uint16_t *video_memory=(uint16_t *)0xB8000;
 
-static uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
-static uint32_t	cur_line = 0;
+// static uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
+// static uint32_t	cur_line = 0;
 // static uint32_t	count = 0;
 
 #define SET_FOREGROUND_COLOR SYM6432(set_foreground_color)

@@ -20,7 +20,18 @@ export CC=clang
 export CXX=clang++
 export OBJCOPY=objcopy
 
-export RENAME_SYMS=--redefine-sym _32_placement_address=placement_address --redefine-sym _32_end=end --redefine-sym _32_start=start --redefine-sym _32_long_mode_start=long_mode_start --redefine-sym _32_init_stack32=init_stack32
+export RENAME_SYMS=--redefine-sym _32_placement_address=placement_address \
+--redefine-sym _32_end=end \
+--redefine-sym _32_start=start \
+--redefine-sym _32_long_mode_start=long_mode_start \
+--redefine-sym _32_init_stack32=init_stack32 \
+--redefine-sym _32_cursor_x=cursor_x \
+--redefine-sym _32_cursor_y=cursor_y \
+--redefine-sym _32_backColor=backColor \
+--redefine-sym _32_foreColor=foreColor \
+--redefine-sym _32_cur_line=cur_line \
+--redefine-sym _32_back_buffer=back_buffer 
+
 export OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes --prefix-symbols=_32_ 
 export OBJCOPYFLAGS2=-O elf64-x86-64 --elf-stt-common=yes $(RENAME_SYMS)
 

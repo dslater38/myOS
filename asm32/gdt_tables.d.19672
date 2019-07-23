@@ -1,6 +1,0 @@
-gdt_tables.o: gdt_tables.cpp /home/slaterd/repos/myOS/src/common.h \
-  /home/slaterd/repos/myOS/src/sym6432.h \
-  /home/slaterd/repos/myOS/src/descriptor_tables.h \
-  /home/slaterd/repos/myOS/src/types.h \
-  /home/slaterd/repos/myOS/src/isr.h \
-  /home/slaterd/repos/myOS/src/memcpy.h

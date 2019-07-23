@@ -149,13 +149,13 @@ private:
 template<class T, const int BITS=9>
 using PageTable64 = PageTableT<uint64_t,BITS>;
 
-template<typename T, const int SHIFT,>
+template<typename T, const int SHIFT>
 using PageDirectory64 = PageDirectory<T, SHIFT, 9>;
 
-using PTE=PageTable64<uint64_t>;
+using PTE_=PageTable64<uint64_t>;
 
 template<typename T>
-using PDE = PageDirectory64<T, 21>;
+using PDE_ = PageDirectory64<T, 21>;
 
 template<const int BITS=10>
 using PageTable32 = PageTableT<uint32_t,BITS>;
@@ -164,15 +164,15 @@ template<typename T, const int SHIFT>
 using PageDirectory32 = PageDirectory<T, SHIFT, 10>;
 
 template<typename T>
-using PDPTE = PageDirectory64<T, 30>;
+using PDPTE_ = PageDirectory64<T, 30>;
 
 template<typename T>
-using PML4E=PageDirectory64<T,39>;
+using PML4E_=PageDirectory64<T,39>;
 
 
 
 
-using PageTable32_2M = PageDirectory32<Page2M, 
+using PageTable32_4M = PageDirectory32<Page4M, 22>;
 
 
 
@@ -186,7 +186,7 @@ using PDE32_4K = PDE32<PTE32>;
 using PDE32_2M = PageTable32<22>;
 
 // 32-bit PAE paging ( 4K or 2MB pages )
-using PDPTE_PAE = PageDirectory32<PDE32<PageTable32>, 30>;
+using PDPTE_PAE = PageDirectory32<PDE32<PTE32>, 30>;
 using PDPTE_PAE_ = PageDirectory<PageDirectory<Page4K<uint32_t>, 12,10>,30,10>;
 
 
@@ -202,7 +202,7 @@ using Page64_4K=Page4K<uint64_t>;
 // 64-bit 2M page
 using Page64_2M=Page2M<uint64_t>;
 // 64-bit 1G page
-using Page64_1G=Page2G<uint64_t>;
+using Page64_1G=Page1G<uint64_t>;
 
 // 32-bit 4k page table
 using PTE_32_4K=PageDirectory<Page32_4K,Page32_4K::shift,10>;

@@ -15,7 +15,7 @@ void kmain64()
 	
 	set_foreground_color(CYAN);
 	set_background_color(BLACK);
-	monitor_clear();
+//	monitor_clear();
 	printf("Hello World from 64-bit long mode!!!!!\n");
 	printf("Init the 64-bit interrupt table\n");
 	init_idt64_table();
