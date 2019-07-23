@@ -7,5 +7,11 @@
 # sudo bochs -f bochsrc.txt
 # sudo /sbin/losetup -d /dev/loop0
 
+if [ "$1" == "-g" ]; then
+/usr/local/bochs269able-avx/bin/bochs -q -f bochsrc-gdb.txt
+else
 
 bochs -q -dbglog debug.log -f bochsrc.txt
+
+fi
+
