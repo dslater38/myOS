@@ -3,6 +3,9 @@
 # The only one that needs changing is the assembler 
 # rule, as we use nasm instead of GNU as.
 
+export CC:=i686-linux-gnu-gcc
+export CXX:=i686-linux-gnu-g++
+export LD:=i686-linux-gnu-ld
 
 CSOURCES=$(wildcard *.c)
 CXXSOURCES=$(wildcard *.cpp)
@@ -12,10 +15,10 @@ OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
 # CPPFLAGS+=-I../src
 
-CFLAGS:=-m32 $(CFLAGS)
-CXXFLAGS:=-m32 $(CXXFLAGS)
+CFLAGS:=$(CFLAGS)
+CXXFLAGS:=$(CXXFLAGS)
 ASFLAGS=-felf
-LDFLAGS=-Tlink.ld -m elf_i386 -L /usr/lib/gcc-cross/i686-linux-gnu/8 -lgcc /usr/lib/gcc-cross/i686-linux-gnu/8/crtbegin.o  /usr/lib/gcc-cross/i686-linux-gnu/8/crtend.o
+LDFLAGS=-Tlink.ld -m elf_i386 -L/usr/lib/gcc-cross/i686-linux-gnu/8/ -lgcc
 
 
 .PHONY: all
