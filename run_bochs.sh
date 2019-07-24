@@ -17,7 +17,8 @@
 
 
 if [ "$1" == "-g" ]; then
-/usr/local/bochs269able-avx/bin/bochs -q -f bochsrc-gdb.txt
+	/home/slaterd/.local/bochs269/bin/bochs -q -f bochsrc-gdb.txt
+#	/usr/local/bochs269able-avx/bin/bochs -q -f bochsrc-gdb.txt
 else
 
 bochs -q -dbglog debug.log -f bochsrc.txt

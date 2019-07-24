@@ -1,10 +1,10 @@
 megs: 2048
 
-# romimage: file=/home/slaterd/.local/bochs269/share/bochs/BIOS-bochs-latest
-# vgaromimage: file=/home/slaterd/.local/bochs269/share/bochs/VGABIOS-lgpl-latest
+romimage: file=/home/slaterd/.local/bochs269/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/home/slaterd/.local/bochs269/share/bochs/VGABIOS-lgpl-latest
 
-romimage: file=/usr/local/bochs269able-avx/share/bochs/BIOS-bochs-latest
-vgaromimage: file=/usr/local/bochs269able-avx/share/bochs/VGABIOS-lgpl-latest
+# romimage: file=/usr/local/bochs269able-avx/share/bochs/BIOS-bochs-latest
+# vgaromimage: file=/usr/local/bochs269able-avx/share/bochs/VGABIOS-lgpl-latest
 
 floppya: 1_44=floppy.img, status=inserted
 ata0-master: type=disk, path="hda.img", mode=flat, cylinders=20, heads=16, spt=63, translation=lba
@@ -16,7 +16,7 @@ clock: sync=realtime
 # cpu: ips=1000000, model=corei7_sandy_bridge_2600k
 cpu: ips=1000000
 # cpuid: level=6, mmx=1, sep=1, simd=sse4_2, apic=xapic, aes=1, movbe=1, xsave=1
-com1: enabled=1, mode=file, dev=serial.out
+com1: enabled=1, mode=file, dev=/dev/pts/1
 # speaker: enabled=1, mode=sound
 # debug: action=ignore, CPU0=report
 # info: action=ignore, BXVGA=report

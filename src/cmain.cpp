@@ -18,6 +18,12 @@
 #include "multiboot2.h"
 #include "vesavga.h"
 
+#ifndef __x86_64__
+
+#include <elf/elf.h>
+
+#endif
+
 /*  Macros. */
 
 /*  Some screen stuff. */
@@ -95,6 +101,170 @@ print_mem_size(uint64_t size, const char *type)
 		printf("%uT %s", (uint32_t)(size/(1024ull*1024ull*1024ull*1024ull)), type);
 	}
 }
+#if 0
+/* ELF standard typedefs (yet more proof that <stdint.h> was way overdue) */
+typedef uint16_t Elf64_Half;
+typedef int16_t Elf64_SHalf;
+typedef uint32_t Elf64_Word;
+typedef int32_t Elf64_Sword;
+typedef uint64_t Elf64_Xword;
+typedef int64_t Elf64_Sxword;
+
+typedef uint64_t Elf64_Off;
+typedef uint64_t Elf64_Addr;
+typedef uint16_t Elf64_Section;
+
+/* Lenght of magic at the start of a file */
+#define EI_NIDENT	16
+
+struct Elf64_Ehdr {
+    unsigned char e_ident[EI_NIDENT];
+    Elf64_Half e_type;
+    Elf64_Half e_machine;
+    Elf64_Word e_version;
+    Elf64_Addr e_entry;
+    Elf64_Off e_phoff;
+    Elf64_Off e_shoff;
+    Elf64_Word e_flags;
+    Elf64_Half e_ehsize;
+    Elf64_Half e_phentsize;
+    Elf64_Half e_phnum;
+    Elf64_Half e_shentsize;
+    Elf64_Half e_shnum;
+    Elf64_Half e_shstrndx;
+};
+
+/* 
+ * Section header
+*/
+struct Elf64_Shdr {
+	uint32_t        sh_name;
+	uint32_t        sh_type;
+	uint64_t        sh_flags;
+	uint64_t        sh_addr;
+	uint64_t        sh_offset;
+	uint64_t        sh_size;
+	uint32_t        sh_link;
+	uint32_t        sh_info;
+	uint64_t        sh_addralign;
+	uint64_t        sh_entsize;
+};
+
+/*
+ * Program header 
+ */
+struct Elf64_Phdr {
+	uint32_t        p_type;	/* Segment type: Loadable segment = 1 */
+	uint32_t        p_flags;	/* Flags: logical "or" of PF_
+					 * constants below */
+	uint64_t        p_offset;	/* Offset of segment in file */
+	uint64_t        p_vaddr;	/* Reqd virtual address of segment 
+					 * when loading */
+	uint64_t        p_paddr;	/* Reqd physical address of
+					 * segment */
+	uint64_t        p_filesz;	/* How many bytes this segment
+					 * occupies in file */
+	uint64_t        p_memsz;	/* How many bytes this segment
+					 * should occupy in * memory (when 
+					 * * loading, expand the segment
+					 * by * concatenating enough zero
+					 * bytes to it) */
+	uint64_t        p_align;	/* Reqd alignment of segment in
+					 * memory */
+};
+
+#endif // 0
+
+#ifndef __x86_64__
+
+void *x64entry = 0;
+
+extern "C"
+{
+
+	void *load_elf64_module(Elf64_Header *elfFile)
+	{
+		void *entry = nullptr;
+		auto success = elf_loadFile(elfFile, 1);
+		if( success )
+		{
+			entry = reinterpret_cast<void *>(elf64_getEntryPoint(elfFile));
+		}
+		else
+		{
+			monitor_write("elf_loadFile FAILED!!!!!!!");
+		}
+		return entry;
+	}
+//~ void *load_elf64_module(Elf64_Header *elfFile)
+//~ {
+	//~ auto entryPoint = elf64_getEntryPoint(elfFile);
+	//~ auto *segments = elf64_getProgramSegmentTable(elfFile);
+	//~ auto numSegments = elf64_getNumProgramHeaders(elfFile);
+	//~ auto sections = elf64_getSectionTable(elfFile);
+	//~ auto numSections = elf64_getNumSections(elfFile);
+	//~ for (auto i = 0; i < numSegments; i++)
+	//~ {
+		//~ const auto &seg = segments[i];
+		//~ if (seg.p_type != 1) {
+			//~ printf("segment %d is not loadable, skipping\n", i);
+		//~ } else {
+			//~ const auto *src = reinterpret_cast<void *>(reinterpret_cast<unsigned char *>(elfFile) + seg.p_offset);
+			//~ memcpy( reinterpret_cast<void *>(static_cast<uintptr_t>(seg.p_paddr)), src, seg.p_filesz );
+		//~ }
+	//~ }
+	//~ return reinterpret_cast<void *>(entryPoint);
+//~ }
+
+}
+
+#endif // #ifndef __x86_64__
+
+
+static
+void
+processModule(uint32_t start, uint32_t end)
+{
+#ifndef __x86_64__
+	Elf64_Header *pElf64 = reinterpret_cast<Elf64_Header *>(static_cast<uintptr_t>(start));
+	
+#if 0	
+	printf("Elf64: e_ident: %16s\n", pElf64->e_ident);
+	printf("Elf64: type: %x\n", pElf64->e_type);
+	printf("Elf64: machine: %x\n", pElf64->e_machine);
+	printf("Elf64: version: %x\n", pElf64->e_version);	
+	printf("Elf64: entry: 0x%08.8x%08.8x\n", HIDWORD(pElf64->e_entry),LODWORD(pElf64->e_entry));
+	printf("Elf64: phoffset: 0x%08.8x%08.8x\n", HIDWORD(pElf64->e_phoff),LODWORD(pElf64->e_phoff));
+	printf("Elf64: shoffset: 0x%08.8x%08.8x\n", HIDWORD(pElf64->e_shoff),LODWORD(pElf64->e_shoff));
+	printf("Elf64: flags: %x\n", pElf64->e_flags);	
+	printf("Elf64: ehsize: %x\n", pElf64->e_ehsize);	
+	printf("Elf64: phentsize: %x\n", pElf64->e_phentsize);	
+	printf("Elf64: phnum: %x\n", pElf64->e_phnum);	
+	printf("Elf64: shentsize: %x\n", pElf64->e_shentsize);	
+	printf("Elf64: shnum: %x\n", pElf64->e_shnum);	
+	printf("Elf64: shstrndx: %x\n", pElf64->e_shstrndx);	
+	
+	
+	
+	
+	Elf64_Phdr *phdr = reinterpret_cast<Elf64_Phdr *>(pElf64->e_phoff + reinterpret_cast<uint8_t *>(start));
+	printf("PHDR: type: 0x%0x\n", phdr->p_type);
+	printf("PHDR: flags: %x\n", phdr->p_flags);
+	
+	printf("PHDR: offset: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_offset), LODWORD(phdr->p_offset));
+	printf("PHDR: vaddr: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_vaddr), LODWORD(phdr->p_vaddr));
+	printf("PHDR: paddr: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_paddr), LODWORD(phdr->p_paddr));
+	
+	printf("PHDR: filesize: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_filesz), LODWORD(phdr->p_filesz));
+	printf("PHDR: memsize: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_memsz), LODWORD(phdr->p_memsz));
+	printf("PHDR: align: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_align), LODWORD(phdr->p_align));
+	#endif // 0
+	
+//	elf64_showDetails(pElf64, pElf64->e_shoff, "kernel" );
+	x64entry = load_elf64_module(pElf64);
+#endif // __x86_64__
+}
+
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -208,6 +378,7 @@ cmain (unsigned long magic, unsigned long addr)
 				  ((struct multiboot_tag_module *) tag)->mod_start,
 				  ((struct multiboot_tag_module *) tag)->mod_end,
 				  ((struct multiboot_tag_module *) tag)->cmdline);
+		processModule(((struct multiboot_tag_module *) tag)->mod_start, ((struct multiboot_tag_module *) tag)->mod_end);
 		  break;
 		case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
 		  printf ("mem_lower = %uKB, (0x%08.8xKB) mem_upper = %uKB (0x%08.8xKB)\n",

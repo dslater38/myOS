@@ -6,7 +6,7 @@
 [GLOBAL inb]
 [GLOBAL inw]
 [GLOBAL ind]
-[GLOBAL start]
+; [GLOBAL start]
 [GLOBAL get_fault_addr64]
 [GLOBAL idle_loop]
 [EXTERN kmain64]
@@ -24,11 +24,11 @@
 ; backColor 	db	0x00
 ; foreColor 		db	0x03
 
-start:
-	call kmain64
-.loop:
-	hlt
-	jmp .loop
+; start:
+	; call kmain64
+; .loop:
+	; hlt
+	; jmp .loop
 
 
 outb:

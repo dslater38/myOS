@@ -13,7 +13,7 @@ SSOURCES=$(wildcard *.s)
 
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
-# CPPFLAGS+=-I../src
+CPPFLAGS+=-I../include
 
 CFLAGS:=$(CFLAGS)
 CXXFLAGS:=$(CXXFLAGS)

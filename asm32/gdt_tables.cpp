@@ -13,7 +13,7 @@ extern void gdt_flush64(uint32_t, uint32_t);
 
 // Internal function prototypes.
 //~ static void init_gdt();
-static void init_gdt64();
+static void init_gdt64(uint32_t);
 static void gdt_set_gate(int32_t,uint32_t,uint32_t,uint8_t,uint8_t);
 // static void init_idt();
 // static void init_irqs();
@@ -43,9 +43,9 @@ extern "C"
 		//~ init_gdt();
 	//~ }
 	
-	void init_gdt_table64()
+	void init_gdt_table64(uint32_t entryPoint)
 	{
-		init_gdt64();
+		init_gdt64(entryPoint);
 	}
 	
 	
@@ -79,7 +79,7 @@ extern "C"
 //~ }
 
 
-static void init_gdt64()
+static void init_gdt64(uint32_t entryPoint)
 {
 	gdt64_ptr.limit() = sizeof(gdt_entries) - 1;
 	gdt64_ptr.base()  = (uint64_t)&gdt_entries; 
@@ -93,7 +93,7 @@ static void init_gdt64()
 	gdt_entries[6].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_DATA|SEGMENT_WRITE_ENABLED), RING3, (SEGMENT_PRESENT|GRAN_1K|OPERAND_SIZE_32));
 
 
- 	gdt_flush64((uint32_t)&gdt64_ptr, 0);
+ 	gdt_flush64((uint32_t)&gdt64_ptr, entryPoint);
 }
 
 // Set the value of one GDT entry.

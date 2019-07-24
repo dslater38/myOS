@@ -14,6 +14,12 @@ extern void end(void);
 
 #define alignas(a) _Alignas(a)
 
+struct myInfoRequest
+{
+	alignas(8) struct multiboot_header_tag_information_request header;
+	multiboot_uint32_t requests[6];
+};
+
 struct MultiBoot
 {
 	alignas(8) struct multiboot_header header;
@@ -21,6 +27,7 @@ struct MultiBoot
 //	alignas(8) struct multiboot_header_tag_entry_address entry;
 	alignas(8) struct multiboot_header_tag_console_flags console;
 	alignas(8) struct multiboot_header_tag_module_align align;
+	alignas(8) struct myInfoRequest info;
 #ifdef ENABLE_FRAME_BUFFER		
 	alignas(8) struct multiboot_header_tag_framebuffer	frame;
 #endif	
@@ -48,6 +55,21 @@ alignas(8) struct MultiBoot header = {
 		MULTIBOOT_HEADER_TAG_MODULE_ALIGN,
 		MULTIBOOT_HEADER_TAG_OPTIONAL,
 		sizeof(header.align)
+	},
+	{
+		{ 
+			MULTIBOOT_HEADER_TAG_INFORMATION_REQUEST,
+			MULTIBOOT_HEADER_TAG_OPTIONAL,
+			sizeof(header.info)
+		},
+		{
+			MULTIBOOT_TAG_TYPE_CMDLINE,
+			MULTIBOOT_TAG_TYPE_MODULE,
+			MULTIBOOT_TAG_TYPE_BOOTDEV,
+			MULTIBOOT_TAG_TYPE_MMAP,
+			MULTIBOOT_TAG_TYPE_ELF_SECTIONS,
+			MULTIBOOT_TAG_TYPE_APM
+		}
 	},
 	// {
 	// 	MULTIBOOT_HEADER_TAG_ADDRESS,

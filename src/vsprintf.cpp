@@ -262,7 +262,7 @@ STATIC32 int SYM6432(printf)(const char *fmt, ...)
 	va_start(args, fmt);
 	retVal = vsprintf_imp(buf, fmt, args);
 	va_end(args);
-	SYM6432(monitor_write)(buf);
+	monitor_write(buf);
 	return retVal;
 }
 

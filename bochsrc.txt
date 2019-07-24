@@ -11,7 +11,8 @@ clock: sync=realtime
 # cpu: ips=1000000, model=corei7_sandy_bridge_2600k
 cpu: ips=1000000
 # cpuid: level=6, mmx=1, sep=1, simd=sse4_2, apic=xapic, aes=1, movbe=1, xsave=1
-com1: enabled=1, mode=file, dev=serial.out
+# com1: enabled=1, mode=file, dev=serial.out
+com1: enabled=1, mode=file, dev=/dev/pts/1
 # speaker: enabled=1, mode=sound
 # debug: action=ignore, CPU0=report
 # info: action=ignore, BXVGA=report

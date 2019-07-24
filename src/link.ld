@@ -3,12 +3,15 @@
 /*            Original file taken from Bran's Kernel Development */
 /*            tutorials: http://www.osdever.net/bkerndev/index.php. */
 
-ENTRY(start)
+ENTRY(long_mode_start)
 SECTIONS
 {
-	.text 0x00120000 :
+	/* .text 0x120000 : */
+	
+	.text 0x32d000 :
 	{
 		code = .; _code = .; __code = .;
+		start64.o(.text)
 		*(.text)
 		. = ALIGN(4096);
 	}

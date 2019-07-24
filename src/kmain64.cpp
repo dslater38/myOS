@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "common.h"
 #include "vesavga.h"
 #include "serial.h"
@@ -18,32 +19,42 @@ extern "C"
 {
 void kmain64()
 {
+
+	char buffer[1024];
+	sprintf(buffer, "1\n");
+	monitor_write(buffer);
 	
 	SYM6432(set_foreground_color)(GREEN);
 	SYM6432(set_background_color)(BLACK);
-//	monitor_clear();
-	printf("Hello World from 64-bit long mode!!!!!\n");
-	printf("Init the 64-bit interrupt table\n");
+	monitor_clear();
+	sprintf(buffer, "%s", "Hello World from 64-bit long mode!!!!!\n");
+	monitor_write(buffer);
+	sprintf(buffer, "%s", "Init the 64-bit interrupt table\n");
+	monitor_write(buffer);
 	init_idt64_table();
-	printf("64-bit interrupt table is initailzed!!!\n");
+	sprintf(buffer, "%s", "64-bit interrupt table is initailzed!!!\n");
+	monitor_write(buffer);
 	
 	auto success = init_serial(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
 
 	if( success == SUCCESS)
 	{
-	 	printf("Initialized COM1 port\n");
+	 	sprintf(buffer, "%s", "Initialized COM1 port\n");
+		monitor_write(buffer);
 	}
 
 	detectControllers();
 
 	if( mboot_header != 0)
 	{
-		printf("Dump mboot_header\n");
+		sprintf(buffer, "%s", "Dump mboot_header\n");
+		monitor_write(buffer);
 		cmain(MULTIBOOT2_BOOTLOADER_MAGIC, mboot_header);
 	}
 	else
 	{
-		printf("mboot_header is NULL\n");
+		sprintf(buffer, "%s", "mboot_header is NULL\n");
+		monitor_write(buffer);
 	}
 	
 	

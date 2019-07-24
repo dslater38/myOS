@@ -11,8 +11,8 @@ OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
 # CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
 
-CFLAGS=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -I.
-CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -Wno-main -I.
+CFLAGS=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -g -I.
+CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -g -Wno-main -I.
 LDFLAGS=-Tlink.ld -L /usr/lib/gcc/x86_64-linux-gnu/8  -lgcc
 ASFLAGS=-felf64
 
