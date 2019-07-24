@@ -10,24 +10,26 @@ SSOURCES=$(wildcard *.s)
 
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
-# CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
+# CPPFLAGS+=-I../src
 
 CFLAGS:=-m32 $(CFLAGS)
 CXXFLAGS:=-m32 $(CXXFLAGS)
-ASFLAGS=-felf64
+ASFLAGS=-felf
+LDFLAGS=-Tlink.ld -m elf_i386 -L /usr/lib/gcc-cross/i686-linux-gnu/8 -lgcc /usr/lib/gcc-cross/i686-linux-gnu/8/crtbegin.o  /usr/lib/gcc-cross/i686-linux-gnu/8/crtend.o
 
 
 .PHONY: all
-all: $(OBJECTS)
+all: kernel32
 
 clean:
-	@rm -f *.o *.d *.d.* *.ds kernel
+	@rm -f *.o *.d *.d.* *.ds 
 
 %.o: %.s
-	nasm $(ASFLAGS) -o $@.o $<
-	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@.oo
-	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
-	-rm $@.o $@.oo
+	nasm $(ASFLAGS) -o $@ $<
+
+kernel32 : $(OBJECTS) | link.ld
+	$(LD) $(LDFLAGS) -o $@ $^
+	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
 
 %.d: %.c
 	@set -e; rm -f $@; \
@@ -36,16 +38,10 @@ clean:
 	 rm -f $@.$$$$
 
 %.o: %.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@.o
-	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@.oo
-	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
-	-rm $@.o $@.oo
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 %.o: %.cpp
-	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@.o
-	$(OBJCOPY) $(OBJCOPYFLAGS)  $@.o $@.oo
-	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
-	-rm $@.o $@.oo
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 %.d: %.cpp
 	@set -e; rm -f $@; \

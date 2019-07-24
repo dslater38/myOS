@@ -7,7 +7,7 @@
 
 extern "C" {
 //~ extern void gdt_flush(uint32_t);
-extern void gdt_flush64(uint32_t);
+extern void gdt_flush64(uint32_t, uint32_t);
 // extern void idt_flush(uint32_t);
 }
 
@@ -93,7 +93,7 @@ static void init_gdt64()
 	gdt_entries[6].set(0, 0xFFFFFFFF, (SEGMENT_TYPE_DATA|SEGMENT_WRITE_ENABLED), RING3, (SEGMENT_PRESENT|GRAN_1K|OPERAND_SIZE_32));
 
 
- 	gdt_flush64((uint32_t)&gdt64_ptr);
+ 	gdt_flush64((uint32_t)&gdt64_ptr, 0);
 }
 
 // Set the value of one GDT entry.

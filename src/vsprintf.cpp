@@ -5,9 +5,7 @@
 
 // #define strlen(a) strlen32(a)
 #include "stdarg.h"
-#define memset memset32
 #include <string.h>
-#undef memset
 #include "common.h"
 #include "vesavga.h"
 #include "sym6432.h"

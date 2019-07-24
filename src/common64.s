@@ -6,22 +6,30 @@
 [GLOBAL inb]
 [GLOBAL inw]
 [GLOBAL ind]
-
+[GLOBAL start]
 [GLOBAL get_fault_addr64]
 [GLOBAL idle_loop]
-[GLOBAL cursor_x]
-[GLOBAL cursor_y]
-[GLOBAL backColor]
-[GLOBAL foreColor]
-[GLOBAL cur_line]
-[GLOBAL back_buffer]
+[EXTERN kmain64]
+; [GLOBAL cursor_x]
+; [GLOBAL cursor_y]
+; [GLOBAL backColor]
+; [GLOBAL foreColor]
+; [GLOBAL cur_line]
+; [GLOBAL back_buffer]
 
-back_buffer	times 2048	dw	0
-cur_line		dd	0x00000000
-cursor_x 		dw	0x0000
-cursor_y 		dw	0x0000
-backColor 	db	0x00
-foreColor 		db	0x03
+; back_buffer	times 2048	dw	0
+; cur_line		dd	0x00000000
+; cursor_x 		dw	0x0000
+; cursor_y 		dw	0x0000
+; backColor 	db	0x00
+; foreColor 		db	0x03
+
+start:
+	call kmain64
+.loop:
+	hlt
+	jmp .loop
+
 
 outb:
 	mov rdx, rdi

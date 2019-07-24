@@ -1,3 +1,5 @@
+#if 1
+
 #include "sym6432.h"
 #include <stdint.h>
 #include <stddef.h>
@@ -72,3 +74,6 @@ void * memset(void *vdest, int val, size_t len)
 }
 
 }
+
+#endif // 0
+

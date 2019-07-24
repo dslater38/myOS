@@ -7,14 +7,15 @@
 
 
 #define SYM6432(a) a
-
-#ifdef __x86_64__
-// #define SYM6432(a) a
 #define STATIC32
-#else
+
+//#ifdef __x86_64__
+// #define SYM6432(a) a
+//#define STATIC32
+//#else
 // #define SYM6432(a)  CONCAT(a,32)
-#define STATIC32 static
-#endif
+// #define STATIC32 static
+//#endif
 
 // #define SYM6432(a) a
 

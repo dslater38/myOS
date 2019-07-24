@@ -2,6 +2,8 @@
 
 [EXTERN bss]                    ; Start of the .bss section.
 [EXTERN end]                    ; End of the last loadable section.
+[EXTERN _init]
+[EXTERN _fini]
 
 [GLOBAL start]                  ; Kernel entry point.
 [EXTERN kmain32]                   ; This is the entry point of our C code
@@ -22,7 +24,8 @@ start:
 	mov [mboot_header], ebx		; save the multiboot header
 	push	eax					; push the magic value.
 								; Execute the kernel:
-	call	kmain32           				; call our main() function.
+	call _init
+	call	kmain32           			; call our main() function.
 	; Enter an infinite loop, to stop the processor  executing whatever rubbish is in the memory after our kernel!
 idle_loop:
 	hlt
