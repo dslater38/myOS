@@ -319,6 +319,10 @@ uint8_t serial_putc_imp(uint16_t port, char c)
 	{
 		if( is_transmit_empty(port) )
 		{
+			if( c == '\n' )
+			{
+				OUTB(port, '\r');
+			}
 			OUTB(port,c);
 			return SUCCESS;
 		}

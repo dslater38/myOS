@@ -260,7 +260,7 @@ processModule(uint32_t start, uint32_t end)
 	printf("PHDR: align: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_align), LODWORD(phdr->p_align));
 	#endif // 0
 	
-//	elf64_showDetails(pElf64, pElf64->e_shoff, "kernel" );
+	elf64_showDetails(pElf64, pElf64->e_shoff, "kernel" );
 	x64entry = load_elf64_module(pElf64);
 #endif // __x86_64__
 }

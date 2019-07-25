@@ -18,7 +18,7 @@ uint32_t cur_line = 0;
 uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT];
 
 
-static uint16_t *video_memory=(uint16_t *)0xB8000;
+uint16_t *video_memory=(uint16_t *)0xB8000;
 
 // static uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
 // static uint32_t	cur_line = 0;

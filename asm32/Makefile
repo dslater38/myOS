@@ -7,6 +7,10 @@ export CC:=i686-linux-gnu-gcc
 export CXX:=i686-linux-gnu-g++
 export LD:=i686-linux-gnu-ld
 
+#~ export CC:=clang --target=i686-linux-gnu
+#~ export CXX:=clang++ --target=i686-linux-gnu
+#~ export LD:=ld
+
 CSOURCES=$(wildcard *.c)
 CXXSOURCES=$(wildcard *.cpp)
 SSOURCES=$(wildcard *.s)
@@ -40,11 +44,11 @@ kernel32 : $(OBJECTS) | link.ld
 	 sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	 rm -f $@.$$$$
 
-%.o: %.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+#~ %.o: %.c
+	#~ $(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-%.o: %.cpp
-	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+#~ %.o: %.cpp
+	#~ $(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 %.d: %.cpp
 	@set -e; rm -f $@; \
