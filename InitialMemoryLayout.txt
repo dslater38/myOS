@@ -1,0 +1,19 @@
+
+placement start: 0x00314000
+
+
+0x00314000 - PML4 table
+	0x00317000  - PDPE table
+		0x00318000 - PDE table
+			0x00319000 - PTE table
+			0x0031a000 - PTE table
+			0x0031b000 - PTE table
+			0x0031c000 - PTE table
+0x0031d000	- end of page tables
+
+mapped physical addresses from 0 to 0x007fffff (8 MB )
+
+final Placement: 0x0031d000 ( 36864 bytes )
+
+
+Multiboot : 0x0034dd40 to 0x0034eab8 (3448 bytes )

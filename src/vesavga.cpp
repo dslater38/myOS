@@ -95,6 +95,10 @@ static uint16_t colored_char(char c)
 
 static void copy_buffer()
 {
+#ifndef __x86_64__
+	return; 
+#endif
+
 	uint32_t *dst = (uint32_t *)video_memory;
 	uint32_t *src=(uint32_t *)back_buffer;
 	uint32_t *end = (uint32_t *)(back_buffer + ROWS*COLS);
@@ -137,6 +141,10 @@ static void blank_line(uint32_t line)
 
 static void copy_buffer2()
 {
+#ifndef __x86_64__	
+	return ;
+#endif
+
 	int i;
 	int j=0;
 	if(cursor_y == (ROWS-1))

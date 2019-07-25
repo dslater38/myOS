@@ -13,7 +13,7 @@ volatile int foo___ = 0;
 static void test_page_fault();
 
 void cmain (unsigned long magic, unsigned long addr);
-
+//void set_text_mode(int hi_res);
 
 extern "C"
 {
@@ -24,6 +24,10 @@ void kmain64()
 	sprintf(buffer, "1\n");
 	monitor_write(buffer);
 	
+	
+
+//	set_text_mode(0);
+
 	SYM6432(set_foreground_color)(GREEN);
 	SYM6432(set_background_color)(BLACK);
 	monitor_clear();

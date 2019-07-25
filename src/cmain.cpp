@@ -291,7 +291,7 @@ cmain (unsigned long magic, unsigned long addr)
 	}
 
 	  size = *(unsigned *) addr;
-	  printf ("Announced mbi size 0x%d (%08.8x)\n", size, size);
+	  printf ("Announced mbi size %d (%08.8x) bytes\n", size, size);
 	  for (tag = (struct multiboot_tag *) (addr + 8);
 		   tag->type != MULTIBOOT_TAG_TYPE_END ;
 		   tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 
@@ -451,6 +451,14 @@ cmain (unsigned long magic, unsigned long addr)
 		  // printf("Totals: %uK RAM, %uK ACPI, %uK Defective, %uK reserved\n", ram_size/1024, acpi_size/1024, defective_size/1024, reserved_size/1024 );
 		  }
 		  break;
+		case MULTIBOOT_TAG_TYPE_VBE:
+			{
+				multiboot_tag_vbe *vbe = reinterpret_cast<multiboot_tag_vbe *>(tag);
+				printf("vbe mode: 0x%x\n", vbe->vbe_mode);
+				printf("vbe_interface: seg: 0x%x, off: 0x%x, len: 0x%x\n", vbe->vbe_interface_seg, vbe->vbe_interface_off, vbe->vbe_interface_len);
+				printf("vbe_control_info 0x%08.8x, vbe_mode_info: 0x%08.8x\n", vbe->vbe_control_info.external_specification, vbe->vbe_mode_info.external_specification);
+				break;
+			}
 		case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
 		  {
 			multiboot_uint32_t color;
@@ -468,6 +476,7 @@ cmain (unsigned long magic, unsigned long addr)
 			  {
 			  case MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED:
 				{
+					printf("Indexed Frame Buffer.\n");
 				  unsigned best_distance, distance;
 				  struct multiboot_color *palette;
 			
@@ -493,15 +502,18 @@ cmain (unsigned long magic, unsigned long addr)
 				break;
 
 			  case MULTIBOOT_FRAMEBUFFER_TYPE_RGB:
+			  	printf("RGB Frame Buffer.\n");
 				color = ((1 << tagfb->framebuffer_blue_mask_size) - 1) 
 				  << tagfb->framebuffer_blue_field_position;
 				break;
 
 			  case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:
+			  	printf("EGA Text Frame Buffer.\n");
 				color = '\\' | 0x0100;
 				break;
 
 			  default:
+			  	printf("Unrecognized Frame Buffer.\n");
 				color = 0xffffffff;
 				break;
 			  }

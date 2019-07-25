@@ -36,7 +36,8 @@ extern "C"
 
 	int kmain32(unsigned long magic, multiboot_tag *mboot_ptr)
 	{	
-
+		printf("=============================================================\n");
+		printf("mboot_ptr: 0x%08.8x, size: %d, end 0x%08.8x\n", reinterpret_cast<uint32_t>(mboot_ptr), mboot_ptr->type, reinterpret_cast<uint32_t>(mboot_ptr) + mboot_ptr->type);
 		printf("placement_address: 0x%08.8x\n", (uint32_t)placement_address);
 		// placement_address = (uint64_t)&end;
 		// printf("placement_address: 0x%08.8x\n", (uint32_t)placement_address);

@@ -10,7 +10,7 @@ extern void end(void);
 
 /* #define MBOOT2_HEADER_MAGIC 0xe85250d6 */
 
-// #define ENABLE_FRAME_BUFFER 1
+#define ENABLE_FRAME_BUFFER 1
 
 #define alignas(a) _Alignas(a)
 
@@ -49,7 +49,7 @@ alignas(8) struct MultiBoot header = {
 		MULTIBOOT_HEADER_TAG_CONSOLE_FLAGS,
 		MULTIBOOT_HEADER_TAG_OPTIONAL,
 		sizeof(header.console),
-		MULTIBOOT_CONSOLE_FLAGS_EGA_TEXT_SUPPORTED
+		(MULTIBOOT_CONSOLE_FLAGS_EGA_TEXT_SUPPORTED|MULTIBOOT_CONSOLE_FLAGS_CONSOLE_REQUIRED)
 	},
 	{
 		MULTIBOOT_HEADER_TAG_MODULE_ALIGN,
@@ -91,9 +91,9 @@ alignas(8) struct MultiBoot header = {
 		MULTIBOOT_HEADER_TAG_FRAMEBUFFER,
 		MULTIBOOT_HEADER_TAG_OPTIONAL,
 		sizeof(header.frame),
-		80,
-		25,
-		16
+		0,
+		0,
+		0
 	},
 #endif // ENABLE_FRAME_BUFFER
 	{	/* end */
