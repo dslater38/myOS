@@ -22,7 +22,7 @@ extern void *x64entry;
 extern "C" 
 {
 	
-	static void *load_elf64_module(Elf64_Header *elfFile);
+	// static void *load_elf64_module(Elf64_Header *elfFile);
 	extern uint32_t end;
 	uint64_t placement_address = (uint64_t)(&end);
 	uint32_t mboot_header=0;
