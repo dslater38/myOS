@@ -16,12 +16,34 @@
 #~ fi
 
 
+BOCHS=bochs
+BOCHSRC=bochsrc.txt
+
 if [ "$1" == "-g" ]; then
-#	/home/slaterd/.local/bochs269/bin/bochs -q -f bochsrc-gdb.txt
-	/usr/local/bochs269able-avx/bin/bochs -q -f bochsrc-gdb.txt
-else
+	if [ -e /home/slaterd/.local/bochs269/bin/bochs ]; then
+		export BXSHARE=/home/slaterd/.local/bochs269/share/bochs
+		BOCHS=/home/slaterd/.local/bochs269/bin/bochs
+		BOCHSRC=bochsrc-gdb.txt
 
-bochs -q -dbglog debug.log -f bochsrc.txt
-
+	elif [ -e /usr/local/bochs269able-avx/bin/bochs ]; then
+		export BXSHARE=/usr/local/bochs269able-avx/share/bochs
+		BOCHS=/usr/local/bochs269able-avx/bin/bochs
+		BOCHSRC=bochsrc-gdb.txt
+	fi
 fi
+
+$BOCHS -q -f $BOCHSRC
+
+# if [ "$1" == "-g" ]; then
+#	if [ -e /home/slaterd/.local/bochs269/bin/bochs ]; then
+#		BXSHARE=/usr/local/bochs269able-avx/share/bochs 
+#	else
+#	fi
+##	/home/slaterd/.local/bochs269/bin/bochs -q -f bochsrc-gdb.txt
+#	/usr/local/bochs269able-avx/bin/bochs -q -f bochsrc-gdb.txt
+#else
+#
+#bochs -q -dbglog debug.log -f bochsrc.txt
+#
+#fi
 

@@ -21,8 +21,8 @@ CPPFLAGS+=-I../include
 
 CFLAGS:=$(CFLAGS)
 CXXFLAGS:=$(CXXFLAGS)
-ASFLAGS=-felf
-LDFLAGS=-Tlink.ld -m elf_i386 -L/usr/lib/gcc-cross/i686-linux-gnu/8/ -lgcc
+ASFLAGS=-felf -g
+LDFLAGS=-Tlink.ld -g -m elf_i386 -L/usr/lib/gcc-cross/i686-linux-gnu/8/ -lgcc
 
 
 .PHONY: all

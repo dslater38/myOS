@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "Makefile2": "makefile",
-        "type_traits": "cpp"
+        "type_traits": "cpp",
+        "stddef.h": "c",
+        "elf.h": "c"
     }
 }

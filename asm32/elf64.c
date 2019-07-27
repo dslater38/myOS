@@ -23,7 +23,7 @@
  * userspace, 64-bit mode
  */
 #include <assert.h>
-//~ #include <stdio.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
@@ -215,7 +215,7 @@ void elf64_relocate(genvaddr_t dst, genvaddr_t src,
             break;
 
         default:
-            printf("elf_relocate: relocation %d type %"PRIu32"\n", i, type);
+            printf("elf_relocate: relocation %d type 0x%08.8x\n", i, type);
             assert(!"Unimplemented: Cannot handle relocation type");
             break;
         }

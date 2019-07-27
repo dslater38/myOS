@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"Makefile2": "makefile",
+			"type_traits": "cpp",
+			"stddef.h": "c",
+			"elf.h": "c"
+		},
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/*.d": true,
+			"**/*.d.*": true,
+			"**/*.ds": true,
+			"**/*.o": true,
+			"**/CVS": true,
+			"**/.DS_Store": true
+		}
+	}
+}

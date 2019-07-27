@@ -17,6 +17,8 @@
 
 #include "multiboot2.h"
 #include "vesavga.h"
+#include "kmalloc.h"
+#include <assert.h>
 
 #ifndef __x86_64__
 
@@ -182,21 +184,31 @@ void *x64entry = 0;
 extern "C"
 {
 
-	void *load_elf64_module(Elf64_Header *elfFile)
+	static errval_t elfAlloc(void * /* state */, genvaddr_t /* base */, size_t size, uint32_t flags, void **ret)
 	{
-		void *entry = nullptr;
-		auto success = elf_loadFile(elfFile, 1);
+		*ret = reinterpret_cast<void *>(kmalloc(size));
+		return 0;
+	}
+	void *load_elf64_module(Elf64_Ehdr *elfFile, size_t size)
+	{
+		genvaddr_t entry = 0;
+		genvaddr_t tlsbase = 0;
+		size_t tlsinitlen = 0;
+		size_t tlstotallen = 0;
+		auto success = elf64_load(EM_X86_64, elfAlloc, nullptr, (lvaddr_t)elfFile, size, &entry, &tlsbase, &tlsinitlen, &tlstotallen);
+		// auto success = elf_loadFile(elfFile, 1);
+		// if( success )
+		// {
+		// 	entry = reinterpret_cast<void *>(elf64_getEntryPoint(elfFile));
+		// }
+		// else
 		if( success )
-		{
-			entry = reinterpret_cast<void *>(elf64_getEntryPoint(elfFile));
-		}
-		else
 		{
 			monitor_write("elf_loadFile FAILED!!!!!!!");
 		}
-		return entry;
+		return reinterpret_cast<void *>(entry);
 	}
-//~ void *load_elf64_module(Elf64_Header *elfFile)
+//~ void *load_elf64_module(Elf64_Ehdr *elfFile)
 //~ {
 	//~ auto entryPoint = elf64_getEntryPoint(elfFile);
 	//~ auto *segments = elf64_getProgramSegmentTable(elfFile);
@@ -226,7 +238,7 @@ void
 processModule(uint32_t start, uint32_t end)
 {
 #ifndef __x86_64__
-	Elf64_Header *pElf64 = reinterpret_cast<Elf64_Header *>(static_cast<uintptr_t>(start));
+	Elf64_Ehdr *pElf64 = reinterpret_cast<Elf64_Ehdr *>(static_cast<uintptr_t>(start));
 	
 #if 0	
 	printf("Elf64: e_ident: %16s\n", pElf64->e_ident);
@@ -260,8 +272,8 @@ processModule(uint32_t start, uint32_t end)
 	printf("PHDR: align: 0x%08.8x%08.8x\n", HIDWORD(phdr->p_align), LODWORD(phdr->p_align));
 	#endif // 0
 	
-	elf64_showDetails(pElf64, pElf64->e_shoff, "kernel" );
-	x64entry = load_elf64_module(pElf64);
+// 	elf64_showDetails(pElf64, pElf64->e_shoff, "kernel" );
+	x64entry = load_elf64_module(pElf64, end-start);
 #endif // __x86_64__
 }
 
@@ -570,6 +582,16 @@ cls (void)
 {
 	extern void monitor_clear(void);
 	monitor_clear();
+}
+
+extern "C"
+{
+	void __assert_fail(const char *__assertion, const char *__file,
+			   unsigned int __line, const char *__function)
+	{
+		printf("%s: FILE: %s, LINE: %d, FUNCTION: %s\n", __assertion, __file, __line, __function);
+		PANIC("Assertion Failed\n");
+	}
 }
 
 #if 0

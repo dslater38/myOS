@@ -10,7 +10,7 @@ extern void end(void);
 
 /* #define MBOOT2_HEADER_MAGIC 0xe85250d6 */
 
-#define ENABLE_FRAME_BUFFER 1
+// #define ENABLE_FRAME_BUFFER 1
 
 #define alignas(a) _Alignas(a)
 
