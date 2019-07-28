@@ -3,25 +3,15 @@
 # The only one that needs changing is the assembler 
 # rule, as we use nasm instead of GNU as.
 
-CSOURCES=$(shell find . -maxdepth 1 -name '*.c' -a -not -name '*.32.c' -a -not -name '*.6432.c' -print)
-# CSOURCES32=$(wildcard *.32.c)
-CSOURCES6432=$(wildcard *.6432.c)
-
-CXXSOURCES=$(shell find . -maxdepth 1 -name '*.cpp' -a -not -name '*.32.cpp' -a -not -name '*.6432.cpp' -print)
-# CXXSOURCES32=$(wildcard *.32.cpp)
-# CXXSOURCES32=kmain.32.cpp
-CXXSOURCES6432=$(wildcard *.6432.cpp)
+CSOURCES=$(wildcard *.c)
+CXXSOURCES=$(wildcard *.cpp)
 
 SSOURCES=$(wildcard *.s)
+OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
-# OBJECTS32=$(CXXSOURCES32:%.cpp=%.o)  $(CXXSOURCES6432:%.6432.cpp=%.32.o) $(CSOURCES32:%.c=%.o) $(CSOURCES6432:%.6432.c=%.32.o)
-OBJECTS32=$(CXXSOURCES32:%.cpp=%.o) $(CSOURCES32:%.c=%.o)
-OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CXXSOURCES6432:%.6432.cpp=%.64.o) $(CSOURCES:%.c=%.o) $(CSOURCES6432:%.6432.c=%.64.o) $(SSOURCES:%.s=%.o)
-
-# CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
-
-CFLAGS=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -I.
-CXXFLAGS=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -Wno-main -I.
+CPPFLAGS+=-I.
+# CFLAGS+=
+# CXXFLAGS+=
 LDFLAGS=-Tlink.ld
 ASFLAGS=-felf64
 

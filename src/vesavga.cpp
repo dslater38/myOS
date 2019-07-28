@@ -10,12 +10,12 @@
 #define VIDEO_MEM_COUNT ROWS*COLS
 
 
-extern uint16_t cursor_x;
-extern uint16_t cursor_y;
-extern uint8_t backColor;
-extern uint8_t foreColor;
-extern uint32_t cur_line;
-extern uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT];
+uint16_t cursor_x = 0;
+uint16_t cursor_y = 0;
+uint8_t backColor = BLACK;
+uint8_t foreColor = GREEN;
+uint32_t cur_line = 0;
+uint16_t back_buffer alignas(4) [VIDEO_MEM_COUNT] = {0};
 
 
 static uint16_t *video_memory=(uint16_t *)0xB8000;

@@ -5,12 +5,11 @@
 
 ENTRY(start)
 SECTIONS
-{
+{	
 	.text 0x100000 :
 	{
 		code = .; _code = .; __code = .;
 		src/multibootheader.o(.data)
-		src/*.32.o(.text)
 		asm32/*.o(.text)
 		*(.text)
 		. = ALIGN(4096);

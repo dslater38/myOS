@@ -10,11 +10,11 @@ SSOURCES=$(wildcard *.s)
 
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
-# CPPFLAGS+=-I/usr/include/x86_64-linux-gnu
+CPPFLAGS+=-I../src
 
 CFLAGS:=-m32 $(CFLAGS)
 CXXFLAGS:=-m32 $(CXXFLAGS)
-ASFLAGS=-felf64
+ASFLAGS=-felf64 -g 
 
 
 .PHONY: all
@@ -25,9 +25,8 @@ clean:
 
 %.o: %.s
 	nasm $(ASFLAGS) -o $@.o $<
-	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@.oo
-	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
-	-rm $@.o $@.oo
+	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@
+	-rm $@.o
 
 %.d: %.c
 	@set -e; rm -f $@; \
@@ -37,15 +36,13 @@ clean:
 
 %.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@.o
-	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@.oo
-	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
-	-rm $@.o $@.oo
+	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@
+	-rm $@.o
 
 %.o: %.cpp
 	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@.o
-	$(OBJCOPY) $(OBJCOPYFLAGS)  $@.o $@.oo
-	$(OBJCOPY) $(OBJCOPYFLAGS2) $@.oo $@
-	-rm $@.o $@.oo
+	$(OBJCOPY) $(OBJCOPYFLAGS)  $@.o $@
+	-rm $@.o
 
 %.d: %.cpp
 	@set -e; rm -f $@; \
