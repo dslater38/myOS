@@ -1,26 +1,18 @@
 #!/bin/bash
 
-# run_bochs.sh
-# mounts the correct loopback device, runs bochs, then unmounts.
 
-# sudo /sbin/losetup /dev/loop0 floppy.img
-# sudo bochs -f bochsrc.txt
-# sudo /sbin/losetup -d /dev/loop0
+BOCHS=bochs
+BOCHSRC=bochsrc.txt
 
-#~ set -x
-
-#~ if [ "$1" == "-g" ]; then
-	#~ PATH=/home/slaterd/.local/bochs269/bin:${PATH} /home/slaterd/.local/bochs269/bin/bochs -q -f bochsrc-gdb.txt
-#~ else
-	#~ bochs -q -dbglog debug.log -f bochsrc.txt
-#~ fi
-
-
-if [ "$1" == "-g" ]; then
-/usr/local/bochs269able-avx/bin/bochs -q -f bochsrc-gdb.txt
-else
-
-bochs -q -dbglog debug.log -f bochsrc.txt
-
+if [ "$1" == "-g" -o "$2" == "-g" ]; then
+	BOCHS=/usr/local/bochs-gdb/bin/bochs
+	BOCHSRC=bochsrc-gdb.txt
+	export BXSHARE=/usr/local/bochs-gdb/share/bochs
 fi
+
+if [ "$1" == "-t"  -o "$2" == "-t" ]; then
+	BOCHSRC=bochsrc-term.txt
+fi
+
+exec $BOCHS -q -f $BOCHSRC
 

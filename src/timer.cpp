@@ -5,14 +5,14 @@
 #include "isr.h"
 #include "vesavga.h"
 
-uint32_t tick = 0;
+uint64_t tick = 0;
 
 static void timer_callback(registers_t regs)
 {
 	tick++;
-	monitor_write("Tick: ");
-	monitor_write_dec(tick);
-	monitor_write("\n");
+	//~ monitor_write("Tick: ");
+	//~ monitor_write_dec(tick);
+	//~ monitor_write("\n");
 }
 
 static void set_repeat_mode()
