@@ -52,23 +52,30 @@ int printf (const char *format, ...);
 #define MMAP_ACPI 3
 #define MMAP_DEFECTIVE 5
 
+
+#define MULTIBOOT_MEMORY_AVAILABLE              1
+#define MULTIBOOT_MEMORY_RESERVED               2
+#define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
+#define MULTIBOOT_MEMORY_NVS                    4
+#define MULTIBOOT_MEMORY_BADRAM                 5
+
 static
 const char *mmap_type(int n)
 {
 	switch(n)
 	{
-		case MMAP_RAM:
-			return "RAM";
-		case MMAP_ACPI:
+		case MULTIBOOT_MEMORY_AVAILABLE:
+			return "available";
+		case MULTIBOOT_MEMORY_RESERVED:
+			return "reserved";
+		case MULTIBOOT_MEMORY_ACPI_RECLAIMABLE:
 			return "acpi";
-//        case 4:
-//            return "reserved";
-		case MMAP_DEFECTIVE:
-			return "defective";
-		default:
-			break;
+		case MULTIBOOT_MEMORY_NVS:
+			return "nvs";
+		case MULTIBOOT_MEMORY_BADRAM:
+			return "bad";
 	}
-	return "reserved";
+	return "unknown";
 }
 
 void
@@ -245,7 +252,7 @@ cmain (unsigned long magic, unsigned long addr)
 				  " length = 0x%08.8x%08.8x, type = %s\n",
 				HIDWORD(mmap->addr), LODWORD(mmap->addr) , 
 				HIDWORD(mmap->len), LODWORD(mmap->len),
-				reinterpret_cast<char *>(mmap->type) );
+				mmap_type( mmap->type) );
 				
 			  /* printf (" base_addr = 0x%08.8x%08.8x,"
 				  " length = 0x%08.8x%08.8x, type = %s\n",

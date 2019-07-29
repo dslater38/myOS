@@ -6,7 +6,7 @@
 
 void init_idt64_table();
 
-uint32_t mboot_header=0;
+// uint32_t mboot_header=0;
 
 volatile int foo___ = 0;
 static void test_page_fault();
@@ -16,12 +16,13 @@ void cmain (unsigned long magic, unsigned long addr);
 
 extern "C"
 {
-void kmain64()
+void kmain64(uint32_t magic, uint32_t mboot_header)
 {
 	
 	SYM6432(set_foreground_color)(GREEN);
 	SYM6432(set_background_color)(BLACK);
 //	monitor_clear();
+	printf("x\n");
 	printf("Hello World from 64-bit long mode!!!!!\n");
 	printf("Init the 64-bit interrupt table\n");
 	init_idt64_table();

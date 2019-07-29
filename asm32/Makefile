@@ -14,7 +14,7 @@ CPPFLAGS+=-I../src
 
 CFLAGS:=-m32 $(CFLAGS)
 CXXFLAGS:=-m32 $(CXXFLAGS)
-ASFLAGS=-felf64 -g 
+ASFLAGS=-felf64 
 
 
 .PHONY: all

@@ -50,6 +50,10 @@ start:
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
+	push esi
+	push 0
+	push edi
+	push 0
 	jmp 0x08:kmain64   ; 0x08 is the offset to our code segment: Far jump!
 .loop:
 	hlt				; should never get here
