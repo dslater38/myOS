@@ -5,7 +5,6 @@ vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 
 display_library:term
 
-
 floppya: 1_44=floppy.img, status=inserted
 
 ata0-master: type=disk, path="hda.img", mode=flat, cylinders=20, heads=16, spt=63, translation=lba
