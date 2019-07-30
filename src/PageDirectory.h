@@ -24,26 +24,14 @@ struct PageDirectory
 	static constexpr Pointer ATTRS = ((OFFSET_BITS >12 ) ? 0x43 : 0x03);
 
 	Pointer physical[NUM_ENTRIES];
-//	Pointer tables[NUM_ENTRIES];
-//	Pointer physicalAddr;
-
 
 	PageDirectory()
 	{
-//		memset32(tables, '\0', sizeof(tables));
-		// memset(physical, '\0', sizeof(physical));
-		for( auto i=0; i<NUM_ENTRIES; ++i )
-		{
-			physical[i] = static_cast<Pointer>(0);
-		}
-//		physicalAddr = 0;
-		// printf("PageDirectory<,%d,%d> ctor, this == 0x%08.8x\n", SHIFT,BITS, (uint32_t)this);
+		memset(physical, '\0', sizeof(physical));
 	}
 
 	void setPhys(Pointer p)
 	{
-		// printf("setPhys: this: 0x%08.8x, phys: 0x%08.8x\n", (uint32_t)this, (uint32_t)p);
-//		physicalAddr = p;
 	}
 
 	Pointer index(Pointer vaddr)const
@@ -62,11 +50,9 @@ struct PageDirectory
 		auto *page = findPage(vaddr);
 		if( page == nullptr)
 		{
-			uint32_t phys = 0;
+			void *phys = 0;
 			auto i = index(vaddr);
-			auto *table = new(reinterpret_cast<void *>(kmalloc_aligned_phys(sizeof(T), &phys))) T{};
-//			table->setPhys(phys);
-//			tables[i] = reinterpret_cast<Pointer>(table);
+			auto *table = AlignedNew<T>(&phys );
 			physical[i] = static_cast<Pointer>(phys|ATTRS); // PRESENT, RW, US.
 			page = table->getPage(vaddr);
 		}

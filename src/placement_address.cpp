@@ -2,6 +2,6 @@
 
 extern "C"
 {
-	extern uint32_t end;
-	uint64_t placement_address = (uint64_t)(&end);
+	extern void (*end)();
+	uint64_t placement_address = reinterpret_cast<uint64_t >(&end);
 }

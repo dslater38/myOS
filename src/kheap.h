@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "ordered_array.h"
+#include "NewObj.h"
 
 #define KHEAP_START         0xC0000000
 #define KHEAP_INITIAL_SIZE  0x100000
@@ -78,7 +79,8 @@ struct heap_t
 	
 	static heap_t *create(uint32_t start, uint32_t end_addr, uint32_t max_size, uint8_t supervisor, uint8_t readonly)
 	{
-		return new(kmalloc(sizeof(heap_t))) heap_t{start, end_addr, max_size, supervisor, readonly};
+		return New<heap_t>(start, end_addr, max_size, supervisor, readonly);
+//		return new(kmalloc(sizeof(heap_t))) heap_t{start, end_addr, max_size, supervisor, readonly};
 	}
 };
 

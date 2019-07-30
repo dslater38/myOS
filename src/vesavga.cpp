@@ -1,7 +1,7 @@
 #include "common.h"
 #include "kmalloc.h"
 #include "TextFrameBuffer.h"
-#include "new.h"
+#include "NewObj.h"
 
 TextFrameBuffer *video=nullptr;
 
@@ -9,8 +9,7 @@ extern "C"
 {
 	void initTextFrameBuffer()
 	{
-		void *buffer = reinterpret_cast<void *>(kmalloc(sizeof(TextFrameBuffer)) ); 
-		video = new(buffer) TextFrameBuffer{};
+		video = New<TextFrameBuffer>();
 	}
 	
 	uint8_t set_foreground_color(uint8_t c)

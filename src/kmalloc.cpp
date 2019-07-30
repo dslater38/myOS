@@ -7,28 +7,26 @@ extern "C"
 	constexpr uint64_t ALIGN_MASK = 0xFFFFFFFFFFFFF000ull;
 	constexpr uint64_t BITS_MASK = 0x0000000000000FFFull;
 	extern uint64_t placement_address;
-	static uintptr_t kmalloc_generic(size_t sz, int align, uintptr_t *phys);
+	static void *kmalloc_generic(size_t sz, bool align, void **phys);
 
-	STATIC32 uintptr_t SYM6432(kmalloc)(size_t sz)
+	void *kmalloc(size_t sz)
 	{
-		return kmalloc_generic(sz,0,NULL);
+		return kmalloc_generic(sz,false,nullptr);
 	}
 
-	STATIC32 uintptr_t SYM6432(kmalloc_aligned)(size_t sz)
+	void *kmalloc_aligned(size_t sz)
 	{
-		return kmalloc_generic(sz,1,NULL);
+		return kmalloc_generic(sz,true,nullptr);
 	}
 
-	STATIC32 uintptr_t SYM6432(kmalloc_phys)(size_t sz, uintptr_t *phys)
+	void *kmalloc_phys(size_t sz, void **phys)
 	{
-		auto retVal =  kmalloc_generic(sz,0,phys);
-		return retVal;
+		return kmalloc_generic(sz,false,phys);
 	}
 
-	STATIC32 uintptr_t SYM6432(kmalloc_aligned_phys)(size_t sz, uintptr_t *phys)
+	void *kmalloc_aligned_phys(size_t sz, void **phys)
 	{
-		auto retVal = kmalloc_generic(sz, 1, phys);
-		return retVal;
+		return kmalloc_generic(sz, true, phys);
 	}
 	
 	static void page_align_placement()
@@ -41,21 +39,20 @@ extern "C"
 		}
 	}
 
-	static uintptr_t kmalloc_generic(size_t sz, int align, uintptr_t *phys)
+	static void *kmalloc_generic(size_t sz, bool align, void **phys)
 	{
 		if( align )
 		{
 			page_align_placement();
 		}
 
-		uintptr_t tmp = static_cast<uintptr_t>(placement_address);
+		auto *tmp = reinterpret_cast<void *>(placement_address);
 		if (phys)
 		{
 			*phys = tmp;
 		}
 		
 		placement_address += sz;
-		// printf("Placement: 0x%08.8x\n", tmp);
 		return tmp;
 	}
 }
