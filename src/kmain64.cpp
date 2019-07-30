@@ -16,8 +16,10 @@ void cmain (unsigned long magic, unsigned long addr);
 
 extern "C"
 {
+	void initTextFrameBuffer();
 void kmain64(uint32_t magic, uint32_t mboot_header)
 {
+	initTextFrameBuffer();
 	
 	SYM6432(set_foreground_color)(GREEN);
 	SYM6432(set_background_color)(BLACK);
