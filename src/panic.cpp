@@ -53,4 +53,14 @@ STATIC32 void SYM6432(panic_assert)(const char *file, uint32_t line, const char 
 	SYM6432(idle_loop)();
 }
 
+
+void __assert_fail(const char *__assertion, const char *__file,
+		   unsigned int __line, const char *__function)
+{
+	char buffer[1024];
+	sprintf(buffer,"Assertion Failed: %s: FUNCTION: %s",__assertion,__function);
+	panic(buffer, __file, __line);
+}
+
+
 }

@@ -25,7 +25,7 @@ export OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes
 LDFLAGS=-Tlink.ld
 
 
-export CPPFLAGS:=
+export CPPFLAGS:=-I../include
 export CFLAGS:=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0
 export CXXFLAGS:=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -Wno-main
 
