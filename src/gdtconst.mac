@@ -1,0 +1,31 @@
+;
+;	GDT macro definitions
+;
+
+%define GDT_FLAG_ACCESSED 		(1<<40)
+%define GDT_READ_WRITE 			(1<<41)		; read access for code segments, write access for data segments
+
+%define GDT_CONFORMING 			(1<<42)		; for code segements only
+%define GDT_DIRECTION_DOWN 		(1<<42)		; for data segments only
+%define GDT_DIRECTION_UP	 		(0<<42)		; for data segments only
+
+%define GDT_CODE_SEGMENT 			(1<<43)		; for code segments only
+%define GDT_DATA_SEGMENT 			(0<<43)		; for data segments only
+
+%define GDT_DESCRIPTOR_CODE_DATA	(1<<44)		; always set for code & data segments. Cleared for system segments.
+%define GDT_DESCRIPTOR_SYSTEM 		(0<<44)		; system segment
+
+%define GDT_RING0					(0<<45)
+%define GDT_RING1					(1<<45)
+%define GDT_RING2					(2<<45)
+%define GDT_RING3					(3<<45)
+
+%define GDT_PRESENT 				(1<<47)
+
+; %define GDT_LONG_MODE			(1<<53)		; enable long (64-bit) mode	(long mode bit) - use GDT_64_BIT_OPERAND macro for this
+%define GDT_32_BIT_OPERAND 		(1<<54)		; 32-bit protected code	bit 54 set		bit 53 cleared
+%define GDT_16_BIT_OPERAND 		(0<<54)		; 16-bit protected code	bit 54 cleared	bit 53 cleared
+%define GDT_64_BIT_OPERAND 		(1<<53)		; 64-bit protected code 	bit 54 cleared	bit 53 set 
+
+%define GDT_GRAN_4K				(1<<55)		; Granularity 1 byre or 4k
+%define GDT_GRAN_1_BYTE			(0<<55)		; Granularity 1 byre or 4k

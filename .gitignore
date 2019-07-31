@@ -5,6 +5,7 @@ kernel
 *.*.d
 *.ds
 kernel.sym
+kernel.strip
 bochsout.txt
 os.iso
 bochsrun.log

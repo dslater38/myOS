@@ -9,8 +9,7 @@ SECTIONS
 	.text 0x100000 :
 	{
 		code = .; _code = .; __code = .;
-		/* src/multibootheader.o(.*) */
-		asm32/*.o(.text)
+		src/boot.o(.text)
 		*(.text)
 		. = ALIGN(4096);
 	}
@@ -25,9 +24,10 @@ SECTIONS
   
 	.stack :
 	{
+		kernel_stack_base = .; _kernel_stack_base = .; __kernel_stack_base = .; 
 		. += 16384; 
 		. = ALIGN(4096);
-		init_stack32 = .; _init_stack32 = .; __init_stack32 = .;
+		kernel_stack = .; _kernel_stack = .; __kernel_stack = .;
 	}
 	.bss :
 	{

@@ -25,6 +25,7 @@ extern "C"
 	int puts(const char *s)
 	{
 		video->write(s);
+		video->put('\n');
 		return 1;
 	}
 	

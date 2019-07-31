@@ -20,7 +20,7 @@ cpu: ips=1000000
 cpuid: level=6, mmx=1, sep=1, simd=avx512, apic=xapic, aes=1, sha=1, adx=1, movbe=1, xsave=1, xsaveopt=1, avx_fma=1, bmi=1, x86_64=1, 1g_pages=1, pcid=1, smep=1, smap=1, mwait=1
 # vmx=1
 
-# com1: enabled=1, mode=file, dev=serial.out
+com1: enabled=1, mode=file, dev=serial.out
 port_e9_hack: enabled=1
 debug_symbols: file=kernel.sym
 debug: action=ignore, pci=report

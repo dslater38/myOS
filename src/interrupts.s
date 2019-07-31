@@ -1,151 +1,23 @@
+section .text
 [BITS 64]
 
-%macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
-  [GLOBAL isr%1]        ; %1 accesses the first parameter.
-  isr%1:
-    cli
-    push byte 0
-    push byte %1
-    jmp isr_common_stub
-%endmacro
-
-%macro ISR_ERRCODE 1
-  [GLOBAL isr%1]
-  isr%1:
-    cli
-    push qword %1
-    jmp isr_common_stub
-%endmacro
-
-; This macro creates a stub for an IRQ - the first parameter is
-; the IRQ number, the second is the ISR number it is remapped to.
-%macro IRQ 2
-  [GLOBAL irq%1]
-  irq%1:
-	cli
-	push byte 0
-	push byte %2
-	jmp irq_common_stub
-%endmacro
-
-
-%macro COMMON_STUB 2
-[EXTERN %2]
-
-%1:
-;	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
-
-
-	push qword r15
-	push qword r14
-	push qword r13
-	push qword r12
-	push qword r11
-	push qword r10
-	push qword r9
-	push qword r8
-
-	push qword rax
-	push qword rcx
-	push qword rdx
-	push qword rbx
-	push qword rsp
-	push qword rbp
-	push qword rsi
-	push qword rdi
-	
-	mov ax, ds
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	
-	push qword rax
-	mov rdi, rsp
-
-	; mov ax, ds               ; Lower 16-bits of eax = ds.
-	; push rax                 ; save the data segment descriptor
-
-	; mov ax, 0x10  ; load the kernel data segment descriptor
-	; mov ds, ax
-	; mov es, ax
-	; mov fs, ax
-	; mov gs, ax
-
-	call %2
-
-	pop rax
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	
-	pop rdi
-	pop rsi
-	pop rbp
-	add rsp,8
-	pop rbx
-	pop rdx
-	pop rcx
-	pop rax
-	
-	pop r8
-	pop r9
-	pop r10
-	pop r11
-	pop r12
-	pop r13
-	pop r14
-	pop r15
-
-	; pop rbx        ; reload the original data segment descriptor
-	; mov ds, bx
-	; mov es, bx
-	; mov fs, bx
-	; mov gs, bx
-
-	pop qword r15
-	pop qword r14
-	pop qword r13
-	pop qword r12
-	pop qword r11
-	pop qword r10
-	pop qword r9
-	pop qword r8
-	pop qword rax
-	pop qword rcx
-	pop qword rdx
-	pop qword rbx
-	pop qword rbp
-	add rsp, 8	; don't actually pop rsp
-	pop qword rsi
-	pop qword rdi
-	
-	add rsp, 8	; pop the error code pushed by the stub
-
-	mov ds, rax
-	pop qword rax
-	mov es, rax
-	pop qword rax
-
-;	popa                     ; Pops edi,esi,ebp...
-	add rsp,16	     ; Cleans up the pushed error code and pushed ISR number
-	sti
-	iretq           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
-%endmacro
-
+%include "macros.mac"
 
 [GLOBAL enable_interrupts]
-	enable_interrupts:
-		sti
-		ret
+enable_interrupts:
+	sti
+	ret
 
 
 [GLOBAL disable_interrupts]
-	disable_interrupts:
-		cli
-		ret
+disable_interrupts:
+	cli
+	ret
 
+[GLOBAL idt_flush]
+idt_flush:
+	lidt [rdi]        ; Load the IDT pointer.
+	ret
 
 ISR_ERRCODE 0
 ISR_ERRCODE 1

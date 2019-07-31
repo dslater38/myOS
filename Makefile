@@ -2,32 +2,19 @@ MAKEFILES:=$(wildcard */Makefile)
 SUBDIRS:=$(MAKEFILES:/Makefile=)
 
 
-CSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.c' -a -not -name '*.32.c' -a -not -name '*.6432.c' -print)
-# CSOURCES32:=$(wildcard $(SUBDIRS:%=%/*.32.c)) 
-CSOURCES6432:= $(wildcard $(SUBDIRS:%=%/*.6432.c))
-
-CXXSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.cpp' -a -not -name '*.32.cpp' -a -not -name '*.6432.cpp' -print)
-# CXXSOURCES32:=$(wildcard $(SUBDIRS:%=%/*.32.cpp))
-CXXSOURCES6432:= $(wildcard $(SUBDIRS:%=%/*.6432.cpp))
-
-SSOURCES:=$(wildcard $(SUBDIRS:%=%/*.s)) 
-
-OBJECTS32:=$(CSOURCES32:%.c=%.o) $(CXXSOURCES32:%.32.cpp=%.o) 
-OBJECTS64:=$(CSOURCES6432:%.6432.c=%.64.o) $(CXXSOURCES:%.cpp=%.o) $(CXXSOURCES6432:%.6432.cpp=%.64.o) 
-OBJECTS:=$(OBJECTS32) $(OBJECTS64) $(CSOURCES:%.c=%.o) $(CXXSOURCES:%.cpp=%.o) $(SSOURCES:%.s=%.o)
+CSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.c' -print)
+CXXSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.cpp' -print)
+SSOURCES:=$(wildcard $(SUBDIRS:%=%/*.s))
+OBJECTS:=$(CSOURCES:%.c=%.o) $(CXXSOURCES:%.cpp=%.o) $(SSOURCES:%.s=%.o)
 
 export CC=clang
 export CXX=clang++
-# export OBJCOPY=objcopy
-
-export OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes 
-
+export CPPFLAGS:=-I../include
+export CFLAGS:=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -g
+export CXXFLAGS:=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -g -Wno-main
+export ASFLAGS=-felf64 
 LDFLAGS=-Tlink.ld
 
-
-export CPPFLAGS:=-I../include
-export CFLAGS:=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2
-export CXXFLAGS:=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -Wno-main
 
 .PHONY: all $(SUBDIRS) clean
 

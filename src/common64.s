@@ -1,5 +1,5 @@
+section .text
 [BITS 64]                       ; All instructions should be 32-bit.
-
 [GLOBAL outb]
 [GLOBAL outw]
 [GLOBAL outd]

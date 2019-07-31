@@ -33,7 +33,7 @@ fi
 #~ /usr/local/bochs269able-avx/bin/bochs -q -f bochsrc-gdb.txt
 #~ else
 
-${BOCHS} -q -dbglog debug.log -f ${BOCHSRC}
+${BOCHS} -q -f ${BOCHSRC}
 
 #~ fi
 

@@ -227,11 +227,10 @@ void TextFrameBuffer::clear()
 }
 
 // Outputs a null-terminated ASCII string to the monitor.
-void TextFrameBuffer::write(const char *c)
+void TextFrameBuffer::write(const char *str)
 {
-	while(*c)
+	for( char c = *str; c!='\0'; c=*(++str) )
 	{
-		put(*c);
-		++c;
+		put(c);
 	}
 }
