@@ -1,11 +1,8 @@
-#include "sym6432.h"
 #include <stdint.h>
 #include <stddef.h>
 
 extern "C"
 {
-
-
 	int strcmp(const char *str1, const char *str2)
 	{
 		while(*str1)
@@ -25,7 +22,7 @@ extern "C"
 
 
 // Copy len bytes from src to dest.
-STATIC32 void *SYM6432(memcpy)(void *dest, const void *src, size_t len)
+void *memcpy(void *dest, const void *src, size_t len)
 {
     const uint8_t *sp = (const uint8_t *)src;
     uint8_t *dp = (uint8_t *)dest;
@@ -34,7 +31,6 @@ STATIC32 void *SYM6432(memcpy)(void *dest, const void *src, size_t len)
 }
 
 // Write len copies of val into dest.
-// void * SYM6432(memset)(void *vdest, int val, size_t len)
 void * memset(void *vdest, int val, size_t len)
 {
 #ifndef  FAST_MEMCPY

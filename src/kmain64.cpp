@@ -21,8 +21,8 @@ void kmain64(uint32_t magic, uint32_t mboot_header)
 {
 	initTextFrameBuffer();
 	
-	SYM6432(set_foreground_color)(GREEN);
-	SYM6432(set_background_color)(BLACK);
+	set_foreground_color(GREEN);
+	set_background_color(BLACK);
 //	monitor_clear();
 	printf("x\n");
 	printf("Hello World from 64-bit long mode!!!!!\n");

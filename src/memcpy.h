@@ -5,8 +5,6 @@
 
 #if 0
 
-#include "sym6432.h"
-
 #ifndef __cplusplus
 
 template<class T>
@@ -26,7 +24,7 @@ extern "C"
 
 #endif
 
-STATIC32 void *SYM6432(memset)(void *dest, uint8_t val, uint32_t size);
+void *memset(void *dest, uint8_t val, uint32_t size);
 
 
 #ifdef __cplusplus

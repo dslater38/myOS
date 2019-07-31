@@ -27,6 +27,27 @@ enum class TextColors : uint8_t
 	ERROR = 0xFF
 };
 
+enum class TextFlags : uint8_t
+{
+	ENABLE_DEBUG=(1<<0),
+	ENABLE_SERIAL=(1<<1),
+};
+
+inline
+uint8_t operator|(TextFlags a, TextFlags b)
+{ return (static_cast<uint8_t>(a) | static_cast<uint8_t>(b) ); }
+inline
+uint8_t operator&(TextFlags a, TextFlags b)
+{ return (static_cast<uint8_t>(a) & static_cast<uint8_t>(b) ); }	
+inline
+uint8_t operator~(TextFlags a)
+{ return (~static_cast<uint8_t>(a) ); }
+inline
+bool test(uint8_t flags, TextFlags f)
+{
+	return ((flags & static_cast<uint8_t>(f)) == static_cast<uint8_t>(f));
+}
+
 class alignas(8) TextFrameBuffer
 {
 public:
@@ -51,14 +72,17 @@ private:
 	void move_cursor();
 	void copy_line(int dstLine, int srcLine);
 	void scroll();
+	void debug_out(char c);
+	void serial_out(char c);
 private:
 	uint16_t back_buffer [VIDEO_MEM_COUNT] = {0};
 	uint16_t *video_memory{reinterpret_cast<uint16_t *>(0x00000000000B8000)};
+	TextColors backColor{TextColors::BLACK};
+	TextColors foreColor {TextColors::GREEN};	
+	uint32_t cur_line = 0;
 	uint16_t cursor_x{0};
 	uint16_t cursor_y {0};
-	TextColors backColor{TextColors::BLACK};
-	TextColors foreColor {TextColors::GREEN};
-	uint32_t cur_line = 0;
+	uint8_t	flags{TextFlags::ENABLE_SERIAL|TextFlags::ENABLE_DEBUG};
 };
 
 #endif // TEXTFRAMEBUFFER_H_INCLUDED

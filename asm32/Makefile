@@ -12,8 +12,8 @@ OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
 CPPFLAGS+=-I../src
 
-CFLAGS:=-m32 $(CFLAGS)
-CXXFLAGS:=-m32 $(CXXFLAGS)
+# CFLAGS+=
+# CXXFLAGS+=
 ASFLAGS=-felf64 
 
 
@@ -24,9 +24,7 @@ clean:
 	@rm -f *.o *.d *.d.* *.ds kernel
 
 %.o: %.s
-	nasm $(ASFLAGS) -o $@.o $<
-	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@
-	-rm $@.o
+	nasm $(ASFLAGS) -o $@ $<
 
 %.d: %.c
 	@set -e; rm -f $@; \
@@ -35,14 +33,10 @@ clean:
 	 rm -f $@.$$$$
 
 %.o: %.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@.o
-	$(OBJCOPY) $(OBJCOPYFLAGS) $@.o $@
-	-rm $@.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 %.o: %.cpp
-	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@.o
-	$(OBJCOPY) $(OBJCOPYFLAGS)  $@.o $@
-	-rm $@.o
+	$(CC) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 %.d: %.cpp
 	@set -e; rm -f $@; \

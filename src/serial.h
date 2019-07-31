@@ -5,14 +5,12 @@
 //~ #endif
 
 #include "common.h"
-#include "sym6432.h"
 
-
-uint8_t SYM6432(init_serial)( uint16_t port, uint32_t speed, uint8_t bits, uint8_t parity, uint8_t stop);
-uint8_t SYM6432(serial_putc)(uint16_t port, char c);
-uint8_t SYM6432(serial_write)(uint16_t port, const char *str);
-uint8_t SYM6432(serial_getc)( uint16_t port, char *c );
-void  SYM6432(identify_uart)(uint16_t port);
+uint8_t init_serial( uint16_t port, uint32_t speed, uint8_t bits, uint8_t parity, uint8_t stop);
+uint8_t serial_putc(uint16_t port, char c);
+uint8_t serial_write(uint16_t port, const char *str);
+uint8_t serial_getc( uint16_t port, char *c );
+void  identify_uart(uint16_t port);
 
 /* valid baud rates */
 #define BAUD_50 50

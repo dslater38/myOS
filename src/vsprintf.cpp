@@ -10,7 +10,6 @@
 #undef memset
 #include "common.h"
 #include "vesavga.h"
-#include "sym6432.h"
 
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')
@@ -173,7 +172,7 @@ int vsprintf_imp(char *buf, const char *fmt, va_list args)
 
 		case 's':
 			s = va_arg(args, char *);
-			len = SYM6432(strlen)(s);
+			len = strlen(s);
 			if (precision < 0)
 				precision = len;
 			else if (len > precision)
@@ -241,12 +240,12 @@ extern "C"
 {
 
 
-STATIC32 int SYM6432(vsprintf)(char *buf, const char *fmt, va_list args)
+int vsprintf(char *buf, const char *fmt, va_list args)
 {
 	return vsprintf_imp(buf, fmt, args);
 }
 
-STATIC32 int SYM6432(sprintf)(char *buf, const char *fmt, ...)
+int sprintf(char *buf, const char *fmt, ...)
 {
 	int retVal = 0;
 	va_list args;
@@ -256,7 +255,7 @@ STATIC32 int SYM6432(sprintf)(char *buf, const char *fmt, ...)
 	return retVal;
 }
 
-STATIC32 int SYM6432(printf)(const char *fmt, ...)
+int printf(const char *fmt, ...)
 {
 	char buf[4096] = {0};
 	int retVal = 0;
@@ -264,7 +263,7 @@ STATIC32 int SYM6432(printf)(const char *fmt, ...)
 	va_start(args, fmt);
 	retVal = vsprintf_imp(buf, fmt, args);
 	va_end(args);
-	SYM6432(monitor_write)(buf);
+	monitor_write(buf);
 	return retVal;
 }
 

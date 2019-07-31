@@ -2,7 +2,6 @@
 #define KMALLOC_H_INCLUDED
 
 #include "common.h"
-#include "sym6432.h"
 
 #ifdef __cplusplus
 extern "C" {

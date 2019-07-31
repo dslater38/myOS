@@ -18,7 +18,7 @@ OBJECTS:=$(OBJECTS32) $(OBJECTS64) $(CSOURCES:%.c=%.o) $(CXXSOURCES:%.cpp=%.o) $
 
 export CC=clang
 export CXX=clang++
-export OBJCOPY=objcopy
+# export OBJCOPY=objcopy
 
 export OBJCOPYFLAGS=-O elf64-x86-64 --elf-stt-common=yes 
 
@@ -26,8 +26,8 @@ LDFLAGS=-Tlink.ld
 
 
 export CPPFLAGS:=-I../include
-export CFLAGS:=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0
-export CXXFLAGS:=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O0 -Wno-main
+export CFLAGS:=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2
+export CXXFLAGS:=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2  -O2 -Wno-main
 
 .PHONY: all $(SUBDIRS) clean
 
@@ -49,7 +49,9 @@ clean: $(SUBDIRS)
 
 kernel: $(OBJECTS) | link.ld
 	ld $(LDFLAGS) -o $@ $^
-	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
+	nm $@ | awk '{ print $$1" "$$3 }' > $@.sym
+	
+#	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
 
 
 .SUFFIXES:

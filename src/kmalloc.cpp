@@ -1,6 +1,5 @@
 #include "kmalloc.h"
 #include "vesavga.h"
-#include "sym6432.h"
 
 extern "C"
 {

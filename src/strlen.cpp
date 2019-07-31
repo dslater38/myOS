@@ -1,17 +1,12 @@
 #include <string.h>
-#include "sym6432.h"
-
-#undef strlen
-
-#define STRLEN SYM6432(strlen)
 
 extern "C"
 {
 
 /* Return the length of the null-terminated string STR.  Scan for
    the null terminator quickly by testing four bytes at a time.  */
-STATIC32 size_t
-STRLEN (const char *str)
+size_t
+strlen(const char *str)
 {
   const char *char_ptr;
   const unsigned long int *longword_ptr;

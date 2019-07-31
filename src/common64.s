@@ -8,20 +8,7 @@
 [GLOBAL ind]
 
 [GLOBAL get_fault_addr64]
-[GLOBAL idle_loop]
-; [GLOBAL cursor_x]
-; [GLOBAL cursor_y]
-; [GLOBAL backColor]
-; [GLOBAL foreColor]
-; [GLOBAL cur_line]
-; [GLOBAL back_buffer]
-
-; back_buffer	times 2048	dw	0
-; cur_line		dd	0x00000000
-; cursor_x 		dw	0x0000
-; cursor_y 		dw	0x0000
-; backColor 	db	0x00
-; foreColor 		db	0x03
+[GLOBAL halt]
 
 outb:
 	mov rdx, rdi
@@ -60,6 +47,6 @@ get_fault_addr64:
 	mov rax, cr2
 	ret
 	
-idle_loop:
+halt:
 	hlt
-	jmp idle_loop
+	jmp halt

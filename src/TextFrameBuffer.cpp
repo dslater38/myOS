@@ -125,11 +125,27 @@ void TextFrameBuffer::scroll()
 	}
 }
 
+void TextFrameBuffer::debug_out(char c)
+{
+	if( test(flags,TextFlags::ENABLE_DEBUG) )
+	{
+		outb(0xe9, c);
+	}
+}
+
+void TextFrameBuffer::serial_out(char c)
+{
+	if( test(flags,TextFlags::ENABLE_SERIAL) )
+	{
+		serial_putc(1, c);
+	}
+}
+
 // Writes a single character out to the screen.
 void TextFrameBuffer::put(char c)
 {
-	outb(0xe9, c);
-	serial_putc(1, c);
+	debug_out(c);
+	serial_out(c);
 	switch(c)
 	{
 		case 0x08:
