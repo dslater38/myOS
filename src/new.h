@@ -1,15 +1,8 @@
 #ifndef NEW_H_INCLUDED
 #define NEW_H_INCLUDED
 
-extern "C" {
-#include "common.h"
-}
-
-namespace std {
-	
-using size_t = decltype(sizeof(int));
-	
-}
+#include <cstdint>
+#include <cstddef>
 
 using size_t = std::size_t;
 
