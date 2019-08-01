@@ -37,6 +37,30 @@ uint32_t LODWORD(uint64_t n)
 	return static_cast<uint32_t>(n & 0x00000000FFFFFFFFull);
 }
 
+inline
+uint8_t HIBYTE(uint16_t w)
+{
+	return static_cast<uint8_t>((w & 0xFF00u)>>8);
+}
+
+inline
+uint8_t LOBYTE(uint16_t w)
+{
+	return static_cast<uint8_t>(w & 0x00FFu);
+}
+
+inline
+uint16_t HIWORD(uint32_t w)
+{
+	return static_cast<uint16_t>((w & 0xFFFF0000u)>>16);
+}
+
+inline
+uint16_t LOWORD(uint32_t w)
+{
+	return static_cast<uint16_t>(w & 0x0000FFFFu);
+}
+
 void panic(const char *message, const char *file, uint32_t line);
 void panic_assert(const char *file, uint32_t line, const char *desc);
 
