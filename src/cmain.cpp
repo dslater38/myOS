@@ -17,6 +17,8 @@
 
 #include "multiboot2.h"
 #include "vesavga.h"
+#include <errors/errno.h>
+#include "elf/elf.h"
 
 /*  Macros. */
 
@@ -103,6 +105,387 @@ print_mem_size(uint64_t size, const char *type)
 	}
 }
 
+static
+const char *sectionType(uint32_t n)
+{
+	switch(n)
+	{
+		case 0:
+			return "unused";
+		case 1:
+			return "program";
+		case 3:
+			return "string table";
+		case 8:
+			return "uninitialized";
+		default:
+			return "unknown";
+	}
+	return "unknown";
+}
+
+static
+void printFlagsStr(uint64_t flags)
+{
+	if( flags & 0x01 )
+	{
+		printf("W ");
+	}
+	else
+	{
+		printf("w ");
+	}
+	if( flags & 0x02 )
+	{
+		printf("L ");
+	}
+	else
+	{
+		printf("l ");
+	}
+	if( flags & 0x04 )
+	{
+		printf("E ");
+	}
+	else
+	{
+		printf("e ");
+	}
+}
+
+static
+const char *stringTable(Elf64_Shdr *headers, uint32_t entries)
+{
+	Elf64_Shdr *section = elf64_find_section_header_type(headers, entries, SHT_STRTAB);
+	const char* strings = nullptr;
+	if( section )
+	{
+		strings = reinterpret_cast<const char *>(section->sh_addr);
+	}
+	return strings;
+}
+
+static void print_section_header(Elf64_Shdr *header, const char *stringTable)
+{
+	if( stringTable )
+	{
+		printf("name: %s\n",  (stringTable + header->sh_name) );
+	}
+	else
+	{
+		printf("name: <null>\n");
+	}
+	printf( "\ttype: %s, flags: ", sectionType(header->sh_type));
+	printFlagsStr(header->sh_flags);
+	printf("\n\taddress: 0x%016.16lx, offset 0x%016.16lx, size: %lu\n", header->sh_addr, header->sh_offset, header->sh_size);
+	printf("\tlink: %u, info: %u, align: %lu, entry size: %lu\n", header->sh_link, header->sh_info, header->sh_addralign, header->sh_entsize);
+}
+
+static void print_elf_sections(multiboot_tag *tag)
+{
+	struct multiboot_tag_elf_sections *elf = (struct multiboot_tag_elf_sections *)tag;
+	printf("elf sections, num %d, entsize %d, shndx: %d\n", elf->num, elf->entsize, elf->shndx);
+	const char *strings = stringTable( (Elf64_Shdr *)(elf->sections), elf->num);
+	for( auto i=0; i<elf->num; ++i )
+	{
+		Elf64_Shdr *header = ((Elf64_Shdr *)(elf->sections) + i);
+		print_section_header(header, strings);
+	}
+}
+
+
+static void print_apm(multiboot_tag *tag)
+{
+	struct multiboot_tag_apm *apm = (struct multiboot_tag_apm *)tag;
+	printf("apm\n");
+	printf("Version: %d, cseg 0x%04.4x, offset 0x%08.8x\n", apm->version, apm->cseg, apm->offset);
+	printf("cseg16: 0x%04.4x, dseg: 0x%04.4x, flags: 0x%04.4x\n", apm->cseg_16, apm->dseg, apm->flags );
+	printf("cseg_len: %d, cseg_16_len: %d, dseg_len: %d\n", apm->cseg_len, apm->cseg_16_len, apm->dseg_len);
+}
+
+static void print_load_base_addr(multiboot_tag *tag)
+{
+	struct multiboot_tag_load_base_addr *info = (struct multiboot_tag_load_base_addr *)tag;
+	printf("load base addr: 0x%08.8x\n", info->load_base_addr);
+}
+
+static void print_acpi_old(multiboot_tag *tag)
+{
+	struct multiboot_tag_old_acpi *acpi = (struct multiboot_tag_old_acpi *)(tag);
+	unsigned char *ptr = acpi->rsdp;
+	printf("acpi old\n");
+	printf("Signature: %.8s, ", (char *)ptr );
+	ptr += 8;
+	printf("checksum: %d, ", (unsigned)(*ptr));
+	ptr++;
+	printf("OEMID: %.6s,\n", (char *)ptr );
+	ptr += 6;
+	printf("revision: %d, ", (unsigned)(*ptr));
+	++ptr;
+	printf("RstAddress: 0x%08.8x\n", *((multiboot_uint32_t *)ptr) );
+}
+
+static void print_acpi_new(multiboot_tag *tag)
+{
+	struct multiboot_tag_new_acpi *acpi = (struct multiboot_tag_new_acpi *)(tag);
+	unsigned char *ptr = acpi->rsdp;
+	printf("acpi new\n");
+	printf("Signature: %.8s, ", (char *)ptr );
+	ptr += 8;
+	printf("checksum: %d, ", (unsigned)(*ptr));
+	ptr++;
+	printf("OEMID: %.6s,\n", (char *)ptr );
+	ptr += 6;
+	printf("revision: %d, ", (unsigned)(*ptr));
+	++ptr;
+	printf("RstAddress: 0x%08.8x\n", *((multiboot_uint32_t *)ptr) );
+	ptr += 4;
+	printf("Length: %d\t", *((multiboot_uint32_t *)ptr) );
+	ptr += 4;
+	printf("XsdtAddress 0x08.8%x08.8%x\t", *((multiboot_uint32_t *)ptr+4), *((multiboot_uint32_t *)ptr) );
+	ptr += 8;
+	printf("reserved: {%d, %d, %d}\n", (unsigned)ptr[0], (unsigned)ptr[1], (unsigned)ptr[2]);
+}
+
+static void print_cmdline(multiboot_tag *tag)
+{
+	printf ("Command line = %s\n",
+		  ((struct multiboot_tag_string *) tag)->string);
+}
+
+static void print_bootloader_name(multiboot_tag *tag)
+{
+	printf ("Boot loader name = %s\n",
+		  ((struct multiboot_tag_string *) tag)->string);
+
+}
+
+
+static void print_module(multiboot_tag *tag)
+{
+	printf ("Module at 0x%08.8x-0x%08.8x. Command line %s\n",
+		  ((struct multiboot_tag_module *) tag)->mod_start,
+		  ((struct multiboot_tag_module *) tag)->mod_end,
+		  ((struct multiboot_tag_module *) tag)->cmdline);
+
+}
+
+static void print_basic_meminfo(multiboot_tag *tag)
+{
+	printf ("mem_lower = %uKB, (0x%08.8xKB) mem_upper = %uKB (0x%08.8xKB)\n",
+		((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
+		((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
+		((struct multiboot_tag_basic_meminfo *) tag)->mem_upper,
+		((struct multiboot_tag_basic_meminfo *) tag)->mem_upper);
+
+}
+
+
+static void print_boot_device(multiboot_tag *tag)
+{
+	printf ("Boot device 0x%08.8x, %u (0x%08.8x), %u (0x%08.8x)\n",
+		((struct multiboot_tag_bootdev *) tag)->biosdev,
+		((struct multiboot_tag_bootdev *) tag)->slice,
+		((struct multiboot_tag_bootdev *) tag)->slice,
+		((struct multiboot_tag_bootdev *) tag)->part,
+		((struct multiboot_tag_bootdev *) tag)->part);
+}
+
+static void print_mmap(multiboot_tag *tag)
+{
+	multiboot_memory_map_t *mmap;
+
+	uint64_t	ram_size = 0;
+	uint64_t	acpi_size = 0;
+	uint64_t	reserved_size = 0;
+	uint64_t	defective_size = 0;
+
+	printf ("mmap\n");
+
+	for (mmap = ((struct multiboot_tag_mmap *) tag)->entries;
+		 (multiboot_uint8_t *) mmap  < (multiboot_uint8_t *) tag + tag->size;
+		 mmap = (multiboot_memory_map_t *) ((unsigned long) mmap + ((struct multiboot_tag_mmap *) tag)->entry_size)) 
+	{
+		
+		uint64_t endAddr = (mmap->addr + mmap->len);
+		printf (" base_addr: 0x%016.16llx, length=%llu, end: 0x%016.16lx,\n\ttype: %s\n", mmap->addr, mmap->len, endAddr, mmap_type( mmap->type) );
+		
+		//~ printf (" base_addr = 0x%08.8x%08.8x, length = 0x%08.8x%08.8x, type = %s\n",
+		//~ HIDWORD(mmap->addr), LODWORD(mmap->addr) , 
+		//~ HIDWORD(mmap->len), LODWORD(mmap->len),
+		//~ mmap_type( mmap->type) );
+		  
+		  if( MMAP_RAM == mmap->type)
+		  {
+			  ram_size += mmap->len;
+		  }
+		  else if( MMAP_ACPI == mmap->type)
+		  {
+			  acpi_size += mmap->len;
+		  }
+		  else if( MMAP_DEFECTIVE == mmap->type)
+		  {
+			  defective_size += mmap->len;
+		  }
+		  else
+		  {
+			  reserved_size += mmap->len;
+		  }
+	}
+	printf("Totals: ");
+	print_mem_size(ram_size, "RAM, ");
+	print_mem_size(acpi_size, "ACPI, ");
+	print_mem_size(defective_size, "Defective, ");
+	print_mem_size(reserved_size, "reserved\n");
+
+}
+
+static uint32_t get_indexed_color(multiboot_tag_framebuffer *tagfb)
+{
+	uint32_t distance;
+
+	multiboot_color *palette = tagfb->framebuffer_palette;
+
+	uint32_t color = 0;
+	uint32_t best_distance = 4*256*256;
+
+	for (auto i = 0; i < tagfb->framebuffer_palette_num_colors; i++)
+	{
+		distance = (0xff - palette[i].blue) * (0xff - palette[i].blue) + 
+					palette[i].red * palette[i].red + 
+					palette[i].green * palette[i].green;
+		
+		if (distance < best_distance)
+		{
+			if (distance < best_distance)
+			{
+				color = i;
+				best_distance = distance;
+			}
+		}
+	}
+	return color;
+}
+
+template<typename Color, const int bpp>
+void set_pixel(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t x, multiboot_uint32_t y, multiboot_uint32_t c)
+{
+	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
+	multiboot_uint8_t *ptr = reinterpret_cast<multiboot_uint8_t *>(fb) + tagfb->common.framebuffer_pitch * x + ((tagfb->common.framebuffer_bpp+1) / 8) * y;
+	*reinterpret_cast<Color *>(ptr) = static_cast<Color>(c);
+}
+
+template<>
+void set_pixel<multiboot_uint32_t, 24>(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t x, multiboot_uint32_t y, multiboot_uint32_t c)
+{
+	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
+	multiboot_uint8_t *ptr = reinterpret_cast<multiboot_uint8_t *>(fb) + tagfb->common.framebuffer_pitch * x + ((tagfb->common.framebuffer_bpp+1) / 8) * y;
+	uint32_t *pixel = reinterpret_cast<uint32_t *>(ptr);
+	*pixel = ((c & 0x00FFFFFF) | (*pixel & 0xFF000000));
+}
+
+static void set_pixel_color(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color)
+{
+	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
+	
+	for (auto i = 0; i < tagfb->common.framebuffer_width && i < tagfb->common.framebuffer_height; i++)
+	{
+		multiboot_uint8_t *ptr = reinterpret_cast<multiboot_uint8_t *>(fb) + tagfb->common.framebuffer_pitch * i + ((tagfb->common.framebuffer_bpp+1) / 8) * i;
+		switch (tagfb->common.framebuffer_bpp)
+		{
+			case 8:
+				*ptr = color;
+				break;
+			case 15:
+			case 16:
+				*reinterpret_cast<multiboot_uint16_t *>(ptr) = color;
+				break;
+			case 24:
+				{
+					multiboot_uint32_t *pixel = reinterpret_cast<multiboot_uint32_t *>(ptr);
+					*pixel = ((color & 0x00FFFFFF) | (*pixel & 0xFF000000));
+				}
+				break;
+			case 32:
+				*reinterpret_cast<multiboot_uint32_t *>(ptr) = color;
+				break;
+		}
+	}
+}
+
+static void print_frame_buffer(multiboot_tag *tag)
+{
+	multiboot_uint32_t color;
+	unsigned i;
+	struct multiboot_tag_framebuffer *tagfb
+	  = (struct multiboot_tag_framebuffer *) tag;
+	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
+
+	printf("framebuffer: type: %d\n", tagfb->common.framebuffer_type);
+	printf("addr: 0x%08.8x%08.8x, ", HIDWORD(tagfb->common.framebuffer_addr), LODWORD(tagfb->common.framebuffer_addr));
+	printf("pitch: %d, width: %d, height: %d, bpp: %d\n", tagfb->common.framebuffer_pitch,
+	tagfb->common.framebuffer_width, tagfb->common.framebuffer_height, tagfb->common.framebuffer_bpp);
+
+	switch (tagfb->common.framebuffer_type)
+	  {
+	  case MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED:
+		color = get_indexed_color(tagfb);
+		break;
+
+	  case MULTIBOOT_FRAMEBUFFER_TYPE_RGB:
+		color = ((1 << tagfb->framebuffer_blue_mask_size) - 1)  << tagfb->framebuffer_blue_field_position;
+		break;
+
+	  case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:
+		color = '\\' | 0x0100;
+		break;
+
+	  default:
+		color = 0xffffffff;
+		break;
+	  }
+	
+	  set_pixel_color(tagfb, color);
+}
+
+#define STR(a) #a
+#define CONCAT(a,b) a##b
+
+#define CASE(a) case a: return #a;
+
+const char *
+tagType2String(multiboot_uint16_t type)
+{
+	switch(type)
+	{
+		CASE(MULTIBOOT_TAG_TYPE_END);
+		CASE(MULTIBOOT_TAG_TYPE_CMDLINE);
+		CASE(MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME);
+		CASE(MULTIBOOT_TAG_TYPE_MODULE);
+		CASE(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
+		CASE(MULTIBOOT_TAG_TYPE_BOOTDEV);
+		CASE(MULTIBOOT_TAG_TYPE_MMAP);
+		CASE(MULTIBOOT_TAG_TYPE_VBE);
+		CASE(MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
+		CASE(MULTIBOOT_TAG_TYPE_ELF_SECTIONS);
+		CASE(MULTIBOOT_TAG_TYPE_APM);
+		CASE(MULTIBOOT_TAG_TYPE_EFI32);
+		CASE(MULTIBOOT_TAG_TYPE_EFI64);
+		CASE(MULTIBOOT_TAG_TYPE_SMBIOS);
+		CASE(MULTIBOOT_TAG_TYPE_ACPI_OLD);
+		CASE(MULTIBOOT_TAG_TYPE_ACPI_NEW);
+		CASE(MULTIBOOT_TAG_TYPE_NETWORK);
+		CASE(MULTIBOOT_TAG_TYPE_EFI_MMAP);
+		CASE(MULTIBOOT_TAG_TYPE_EFI_BS);
+		CASE(MULTIBOOT_TAG_TYPE_EFI32_IH);
+		CASE(MULTIBOOT_TAG_TYPE_EFI64_IH);
+		CASE(MULTIBOOT_TAG_TYPE_LOAD_BASE_ADDR);
+		default:
+			break;
+	}
+	return "<unknown>";
+}
+
 /*  Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void
@@ -128,14 +511,15 @@ cmain (unsigned long magic, unsigned long addr)
 	}
 
 	  size = *(unsigned *) addr;
-	  printf ("Announced mbi size 0x%d (%08.8x)\n", size, size);
+	  printf ("Announced mbi size %d (%08.8x) bytes\n", size, size);
 	  for (tag = (struct multiboot_tag *) (addr + 8);
 		   tag->type != MULTIBOOT_TAG_TYPE_END ;
 		   tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 
 										   + ((tag->size + 7) & ~7)))
 	{
 		uint8_t oldColor = set_foreground_color(RED);
-		printf ("Tag 0x%08.8x, Size 0x%08.8x\n", tag->type, tag->size);
+		// printf ("Tag 0x%08.8x, Size %d\n", tag->type, tag->size);
+		printf("Tag: %s, Size %d\n",tagType2String(tag->type), tag->size);
 		if( oldColor != 0xFF )
 		{
 			set_foreground_color(oldColor);
@@ -143,244 +527,41 @@ cmain (unsigned long magic, unsigned long addr)
 		switch (tag->type)
 		{
 			case MULTIBOOT_TAG_TYPE_ELF_SECTIONS:
-			{
-				struct multiboot_tag_elf_sections *elf = (struct multiboot_tag_elf_sections *)tag;
-				printf("elf sections, num %d, entsize %d, shndx: %d\n", elf->num, elf->entsize, elf->shndx);
+				print_elf_sections(tag);
 				break;
-			}
 			case MULTIBOOT_TAG_TYPE_APM:
-			{
-				struct multiboot_tag_apm *apm = (struct multiboot_tag_apm *)tag;
-				printf("apm\n");
-				printf("Version: %d, cseg 0x%04.4x, offset 0x%08.8x\n", apm->version, apm->cseg, apm->offset);
-				printf("cseg16: 0x%04.4x, dseg: 0x%04.4x, flags: 0x%04.4x\n", apm->cseg_16, apm->dseg, apm->flags );
-				printf("cseg_len: %d, cseg_16_len: %d, dseg_len: %d\n", apm->cseg_len, apm->cseg_16_len, apm->dseg_len);
+				print_apm(tag);
 				break;
-			}
 			case MULTIBOOT_TAG_TYPE_LOAD_BASE_ADDR:
-			{
-				struct multiboot_tag_load_base_addr *info = (struct multiboot_tag_load_base_addr *)tag;
-				printf("load base addr: 0x%08.8x\n", info->load_base_addr);
+				print_load_base_addr(tag);
 				break;
-			}
 			case MULTIBOOT_TAG_TYPE_ACPI_OLD:
-			{
-				struct multiboot_tag_old_acpi *acpi = (struct multiboot_tag_old_acpi *)(tag);
-				unsigned char *ptr = acpi->rsdp;
-				printf("acpi old\n");
-				printf("Signature: %.8s, ", (char *)ptr );
-				ptr += 8;
-				printf("checksum: %d, ", (unsigned)(*ptr));
-				ptr++;
-				printf("OEMID: %.6s,\n", (char *)ptr );
-				ptr += 6;
-				printf("revision: %d, ", (unsigned)(*ptr));
-				++ptr;
-				printf("RstAddress: 0x%08.8x\n", *((multiboot_uint32_t *)ptr) );
+				print_acpi_old(tag);
 				break;
-			}
 			case MULTIBOOT_TAG_TYPE_ACPI_NEW:
-			{
-				struct multiboot_tag_new_acpi *acpi = (struct multiboot_tag_new_acpi *)(tag);
-				unsigned char *ptr = acpi->rsdp;
-				printf("acpi new\n");
-				printf("Signature: %.8s, ", (char *)ptr );
-				ptr += 8;
-				printf("checksum: %d, ", (unsigned)(*ptr));
-				ptr++;
-				printf("OEMID: %.6s,\n", (char *)ptr );
-				ptr += 6;
-				printf("revision: %d, ", (unsigned)(*ptr));
-				++ptr;
-				printf("RstAddress: 0x%08.8x\n", *((multiboot_uint32_t *)ptr) );
-				ptr += 4;
-				printf("Length: %d\t", *((multiboot_uint32_t *)ptr) );
-				ptr += 4;
-				printf("XsdtAddress 0x08.8%x08.8%x\t", *((multiboot_uint32_t *)ptr+4), *((multiboot_uint32_t *)ptr) );
-				ptr += 8;
-				printf("reserved: {%d, %d, %d}\n", (unsigned)ptr[0], (unsigned)ptr[1], (unsigned)ptr[2]);
+				print_acpi_new(tag);
 				break;
-			}
-
-		case MULTIBOOT_TAG_TYPE_CMDLINE:
-		  printf ("Command line = %s\n",
-				  ((struct multiboot_tag_string *) tag)->string);
-		  break;
-		case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-		  printf ("Boot loader name = %s\n",
-				  ((struct multiboot_tag_string *) tag)->string);
-		  break;
-		case MULTIBOOT_TAG_TYPE_MODULE:
-		  printf ("Module at 0x%08.8x-0x%08.8x. Command line %s\n",
-				  ((struct multiboot_tag_module *) tag)->mod_start,
-				  ((struct multiboot_tag_module *) tag)->mod_end,
-				  ((struct multiboot_tag_module *) tag)->cmdline);
-		  break;
-		case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-		  printf ("mem_lower = %uKB, (0x%08.8xKB) mem_upper = %uKB (0x%08.8xKB)\n",
-				  ((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
-		  ((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
-				  ((struct multiboot_tag_basic_meminfo *) tag)->mem_upper,
-		  ((struct multiboot_tag_basic_meminfo *) tag)->mem_upper);
-		  break;
-		case MULTIBOOT_TAG_TYPE_BOOTDEV:
-		  printf ("Boot device 0x%08.8x, %u (0x%08.8x), %u (0x%08.8x)\n",
-				  ((struct multiboot_tag_bootdev *) tag)->biosdev,
-				  ((struct multiboot_tag_bootdev *) tag)->slice,
-		  ((struct multiboot_tag_bootdev *) tag)->slice,
-				  ((struct multiboot_tag_bootdev *) tag)->part,
-			  ((struct multiboot_tag_bootdev *) tag)->part);
-		  break;
-		case MULTIBOOT_TAG_TYPE_MMAP:
-		  {
-			multiboot_memory_map_t *mmap;
-
-		uint64_t	ram_size = 0;
-			uint64_t	acpi_size = 0;
-		uint64_t	reserved_size = 0;
-		uint64_t	defective_size = 0;
-		  
-			printf ("mmap\n");
-	  
-			for (mmap = ((struct multiboot_tag_mmap *) tag)->entries;
-				 (multiboot_uint8_t *) mmap 
-				   < (multiboot_uint8_t *) tag + tag->size;
-				 mmap = (multiboot_memory_map_t *) 
-				   ((unsigned long) mmap
-					+ ((struct multiboot_tag_mmap *) tag)->entry_size)) {
-			  printf (" base_addr = 0x%08.8x%08.8x,"
-				  " length = 0x%08.8x%08.8x, type = %s\n",
-				HIDWORD(mmap->addr), LODWORD(mmap->addr) , 
-				HIDWORD(mmap->len), LODWORD(mmap->len),
-				mmap_type( mmap->type) );
-				
-			  /* printf (" base_addr = 0x%08.8x%08.8x,"
-				  " length = 0x%08.8x%08.8x, type = %s\n",
-				  HIDWORD(mmap->addr ),
-				  LODWORD(mmap->addr),
-				  HIDWORD (mmap->len),
-				  LODWORD (mmap->len),
-				  mmap_type( mmap->type) ) ; */
-				  
-				  if( MMAP_RAM == mmap->type)
-				  {
-					  ram_size += mmap->len;
-				  }
-				  else if( MMAP_ACPI == mmap->type)
-				  {
-					  acpi_size += mmap->len;
-				  }
-				  else if( MMAP_DEFECTIVE == mmap->type)
-				  {
-					  defective_size += mmap->len;
-				  }
-				  else
-				  {
-					  reserved_size += mmap->len;
-				  }
-		  }
-		  printf("Totals: ");
-		  print_mem_size(ram_size, "RAM, ");
-		  print_mem_size(acpi_size, "ACPI, ");
-		  print_mem_size(defective_size, "Defective, ");
-		  print_mem_size(reserved_size, "reserved\n");
-		  // printf("Totals: %uK RAM, %uK ACPI, %uK Defective, %uK reserved\n", ram_size/1024, acpi_size/1024, defective_size/1024, reserved_size/1024 );
-		  }
-		  break;
-		case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
-		  {
-			multiboot_uint32_t color;
-			unsigned i;
-			struct multiboot_tag_framebuffer *tagfb
-			  = (struct multiboot_tag_framebuffer *) tag;
-			void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
-
-			printf("framebuffer: type: %d\n", tagfb->common.framebuffer_type);
-			printf("addr: 0x%08.8x%08.8x, ", HIDWORD(tagfb->common.framebuffer_addr), LODWORD(tagfb->common.framebuffer_addr));
-			printf("pitch: %d, width: %d, height: %d, bpp: %d\n", tagfb->common.framebuffer_pitch,
-			tagfb->common.framebuffer_width, tagfb->common.framebuffer_height, tagfb->common.framebuffer_bpp);
-
-			switch (tagfb->common.framebuffer_type)
-			  {
-			  case MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED:
-				{
-				  unsigned best_distance, distance;
-				  struct multiboot_color *palette;
-			
-				  palette = tagfb->framebuffer_palette;
-
-				  color = 0;
-				  best_distance = 4*256*256;
-			
-				  for (i = 0; i < tagfb->framebuffer_palette_num_colors; i++)
-					{
-					  distance = (0xff - palette[i].blue) 
-						* (0xff - palette[i].blue)
-						+ palette[i].red * palette[i].red
-						+ palette[i].green * palette[i].green;
-					  if (distance < best_distance)
-					  if (distance < best_distance)
-						{
-						  color = i;
-						  best_distance = distance;
-						}
-					}
-				}
+			case MULTIBOOT_TAG_TYPE_CMDLINE:
+				print_cmdline(tag);
 				break;
-
-			  case MULTIBOOT_FRAMEBUFFER_TYPE_RGB:
-				color = ((1 << tagfb->framebuffer_blue_mask_size) - 1) 
-				  << tagfb->framebuffer_blue_field_position;
+			case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
+				print_bootloader_name(tag);
 				break;
-
-			  case MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT:
-				color = '\\' | 0x0100;
+			case MULTIBOOT_TAG_TYPE_MODULE:
+				print_module(tag);
 				break;
-
-			  default:
-				color = 0xffffffff;
+			case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
+				print_basic_meminfo(tag);
 				break;
-			  }
-			
-			for (i = 0; i < tagfb->common.framebuffer_width
-				   && i < tagfb->common.framebuffer_height; i++)
-			  {
-				switch (tagfb->common.framebuffer_bpp)
-				  {
-				  case 8:
-					{
-					  multiboot_uint8_t *pixel = reinterpret_cast<multiboot_uint8_t *>(fb)
-						+ tagfb->common.framebuffer_pitch * i + i;
-					  *pixel = color;
-					}
-					break;
-				  case 15:
-				  case 16:
-					{
-					  multiboot_uint16_t *pixel
-						= reinterpret_cast<multiboot_uint16_t *>(reinterpret_cast<multiboot_uint8_t *>(fb) + tagfb->common.framebuffer_pitch * i + 2 * i);
-					  *pixel = color;
-					}
-					break;
-				  case 24:
-					{
-					  multiboot_uint32_t *pixel
-						= reinterpret_cast<multiboot_uint32_t *>(reinterpret_cast<multiboot_uint8_t *>(fb) + tagfb->common.framebuffer_pitch * i + 3 * i);
-					  *pixel = (color & 0xffffff) | (*pixel & 0xff000000);
-					}
-					break;
-
-				  case 32:
-					{
-					  multiboot_uint32_t *pixel
-						= reinterpret_cast<multiboot_uint32_t *>(reinterpret_cast<multiboot_uint8_t *>(fb) + tagfb->common.framebuffer_pitch * i + 4 * i);
-					  *pixel = color;
-					}
-					break;
-				  }
-			  }
-			break;
-		  }
+			case MULTIBOOT_TAG_TYPE_BOOTDEV:
+				print_boot_device(tag);
+				break;
+			case MULTIBOOT_TAG_TYPE_MMAP:
+				print_mmap(tag);
+				break;
+			case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
+				print_frame_buffer(tag);
+				break;
 		}
 	}
 	tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 

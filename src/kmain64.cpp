@@ -5,6 +5,7 @@
 #include "multiboot2.h"
 
 void init_idt64_table();
+void  identify_uart(uint16_t port);
 
 // uint32_t mboot_header=0;
 
@@ -29,6 +30,11 @@ void kmain64(uint32_t magic, uint32_t mboot_header)
 	printf("Init the 64-bit interrupt table\n");
 	init_idt64_table();
 	printf("64-bit interrupt table is initailzed!!!\n");
+	
+	printf("COM1: "); identify_uart(1);
+	printf("COM2: "); identify_uart(2);
+	printf("COM3: "); identify_uart(3);
+	printf("COM4: "); identify_uart(4);
 	
 	auto success = init_serial(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
 

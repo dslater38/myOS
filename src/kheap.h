@@ -46,42 +46,24 @@ struct less<header_t>
 
 struct heap_t
 {
+public:	
+	heap_t(uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t super, uint8_t ro);	
+	static heap_t *create(uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t supervisor, uint8_t readonly);
+	void *alloc(uint32_t size, bool page_align);
+	void free(void *p);
+
+private:
+	int64_t find_smallest_hole(uint64_t size, bool page_align);
+	void expand(uint64_t new_size);
+	uint64_t contract(uint64_t new_size);
+private:
 	ordered_array_t<header_t> index{};
-	uint32_t start_address{0}; // The start of our allocated space.
-	uint32_t end_address{0};   // The end of our allocated space. May be expanded up to max_address.
-	uint32_t max_address{0};   // The maximum address the heap can be expanded to.
+	uint64_t start_address{0}; // The start of our allocated space.
+	uint64_t end_address{0};   // The end of our allocated space. May be expanded up to max_address.
+	uint64_t max_address{0};   // The maximum address the heap can be expanded to.
 	uint8_t supervisor{0};     // Should extra pages requested by us be mapped as supervisor-only?
 	uint8_t readonly{0};       // Should extra pages requested by us be mapped as read-only?
 	
-	heap_t(uint32_t start, uint32_t end_addr, uint32_t max_size, uint8_t super, uint8_t ro)
-		: index{place_ordered_array<header_t>((void*)start, HEAP_INDEX_SIZE)}
-		, start_address{start}
-		, end_address{end_addr}
-		, max_address{max_size}
-		, supervisor{super}
-		, readonly{ro}
-		{
-			// All our assumptions are made on startAddress and endAddress being page-aligned.
-			ASSERT(start%0x1000 == 0);
-			ASSERT(end_addr%0x1000 == 0);
-		
-			// Shift the start address forward to resemble where we can start putting data.
-			start_address += sizeof(type_t)*HEAP_INDEX_SIZE;
-			PAGE_ALIGN(start_address);
-				
-			// We start off with one large hole in the index.
-			header_t *hole = (header_t *)start_address;
-			hole->size = end_addr-start_address;
-			hole->magic = HEAP_MAGIC;
-			hole->is_hole = 1;
-			insert_ordered_array((void*)hole, &heap->index);
-		}
-	
-	static heap_t *create(uint32_t start, uint32_t end_addr, uint32_t max_size, uint8_t supervisor, uint8_t readonly)
-	{
-		return New<heap_t>(start, end_addr, max_size, supervisor, readonly);
-//		return new(kmalloc(sizeof(heap_t))) heap_t{start, end_addr, max_size, supervisor, readonly};
-	}
 };
 
 #endif // KHEAP_H_INCLUDED
