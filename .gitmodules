@@ -1,0 +1,3 @@
+[submodule "gdbstub"]
+	path = gdbstub
+	url = https://github.com/mborgerson/gdbstub.git
