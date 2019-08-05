@@ -412,7 +412,7 @@ bool freePages(uint64_t startAddress, size_t numPages)
 heap_t *initialKernelHeap()
 {
     debug_out("initialKernelHeap\n");
-    allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, 0, 0);
+    allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, 0, 1);
     pmle4->dump();
 	return heap_t::create(allocPages, freePages, KHEAP_START, KHEAP_START+KHEAP_INITIAL_SIZE, HEAK_MAX_SIZE, 0, 0 );
 }
