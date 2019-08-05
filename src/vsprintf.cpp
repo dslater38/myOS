@@ -407,4 +407,17 @@ extern "C"
 		return retVal;
 	}
 
+	void debug_out(const char *fmt,...)
+	{
+		char buffer[1024];
+		va_list args;
+		va_start(args, fmt);
+		(void)vsprintf_imp(buffer, fmt, args);
+		va_end(args);
+		char *s = buffer;
+		for(auto i=0; i<1024 && *s; ++i, ++s)
+		{
+			outb(0xe9, *s);
+		}
+	}
 }

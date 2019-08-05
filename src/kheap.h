@@ -4,12 +4,14 @@
 #include "common.h"
 #include "ordered_array.h"
 #include "NewObj.h"
+#include "Frames.h"
 
-#define KHEAP_START         0xC0000000
-#define KHEAP_INITIAL_SIZE  0x100000
-#define HEAP_INDEX_SIZE   0x20000
-#define HEAP_MAGIC        0x123890AB
-#define HEAP_MIN_SIZE     0x70000
+constexpr uint64_t KHEAP_START = 0x00000000C0000000;
+constexpr size_t KHEAP_INITIAL_SIZE = 0x200000;
+constexpr size_t HEAP_INDEX_SIZE = 0x20000;
+constexpr uint32_t HEAP_MAGIC = 0x123890AB;
+constexpr size_t HEAP_MIN_SIZE = 0x70000;
+constexpr size_t HEAK_MAX_SIZE = 0x200000000;
 
 struct header_t
 {
@@ -36,20 +38,23 @@ struct footer_t
 };
 
 template<>
-struct less<header_t>
+struct std::less<header_t>
 {
 	uint8_t operator()(const header_t &a, const header_t& b)
 	{
-		return a.size()<b.size() ? 1 : 0;
+		return a.size < b.size ? 1 : 0;
 	}
 };
+
+typedef bool (*PageAlloc)(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable);
+typedef bool (*PageFree)(uint64_t startAddress, size_t numPages);
 
 struct heap_t
 {
 public:	
-	heap_t(uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t super, uint8_t ro);	
-	static heap_t *create(uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t supervisor, uint8_t readonly);
-	void *alloc(uint32_t size, bool page_align);
+	heap_t(PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t super, uint8_t ro);	
+	static heap_t *create(PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t supervisor, uint8_t readonly);
+	void *alloc(uint64_t size, bool page_align);
 	void free(void *p);
 
 private:
@@ -57,7 +62,9 @@ private:
 	void expand(uint64_t new_size);
 	uint64_t contract(uint64_t new_size);
 private:
-	ordered_array_t<header_t> index{};
+	ordered_array_t<header_t *> index;
+	PageAlloc 		pageAlloc{nullptr};
+	PageFree 		pageFree{nullptr};
 	uint64_t start_address{0}; // The start of our allocated space.
 	uint64_t end_address{0};   // The end of our allocated space. May be expanded up to max_address.
 	uint64_t max_address{0};   // The maximum address the heap can be expanded to.
@@ -65,5 +72,7 @@ private:
 	uint8_t readonly{0};       // Should extra pages requested by us be mapped as read-only?
 	
 };
+
+heap_t *initialKernelHeap();
 
 #endif // KHEAP_H_INCLUDED

@@ -23,11 +23,33 @@ public:
 
 		printf("maxzSize: %u\n",(uint32_t)maxSize);
 		
-		printf("frames: %08.8x to %08.8x for %d bits, maxSize: %u\n", (uint32_t)frames, (uint32_t)(((unsigned char *)frames) + allocSize), allocSize*8, (uint32_t)maxSize);
+		printf("frames: %016.16lx to %016.16lx for %ld bits, maxSize: %lu\n", (uint64_t)frames, (uint64_t)(((unsigned char *)frames) + allocSize), allocSize*8, (uint64_t)maxSize);
 		memset(frames, 0, allocSize);
 		printf("maxzSize: %u\n",(uint32_t)maxSize);
+
 	}
 
+	static void debug_out(const char *s)
+	{
+		while(*s)
+		{
+			outb(0xe9, *s);
+			++s;
+		}
+	}
+
+	void mapInitialPages(Uint initialMappedPages)
+	{
+		// mark the pages that are already mapped as in use.
+		uint64_t addr = 0;
+		char buffer[32];
+		for( auto i=0; i<initialMappedPages; ++i, addr+=0x1000)
+		{
+			// sprintf(buffer,"%d\n",i);
+			// debug_out(buffer);
+			set(addr);
+		}
+	}
 
 	void alloc(PageT<Uint> *page, int isKernel, int isWritable)
 	{
@@ -57,7 +79,7 @@ public:
 
 	void free(PageT<Uint> *page)
 	{
-		auto frame = page->frame();
+		auto frame = page->frame;
 		if( frame != 0 )
 		{
 			clear(frame);

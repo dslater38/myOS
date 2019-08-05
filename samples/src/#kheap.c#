@@ -20,7 +20,7 @@ u32int kmalloc_int(u32int sz, int align, u32int *phys)
         if (phys != 0)
         {
             page_t *page = get_page((u32int)addr, 0, kernel_directory);
-            *phys = page->frame*0x1000 + (u32int)addr&0xFFF;
+            *phys = page->frame*0x1000 + (u32int)addr&0xFFFFF000;
         }
         return (u32int)addr;
     }
@@ -161,15 +161,6 @@ static s8int header_t_less_than(void*a, void *b)
 
 heap_t *create_heap(u32int start, u32int end_addr, u32int max, u8int supervisor, u8int readonly)
 {
-	
-	monitor_write("create_heap: start: ");
-	monitor_write_hex(start);
-	monitor_write(" end: ");
-	monitor_write_hex(end_addr);
-	monitor_write(" max: ");
-	monitor_write_hex(max);
-	monitor_write("\n");
-	
     heap_t *heap = (heap_t*)kmalloc(sizeof(heap_t));
 
     // All our assumptions are made on startAddress and endAddress being page-aligned.
@@ -181,8 +172,6 @@ heap_t *create_heap(u32int start, u32int end_addr, u32int max, u8int supervisor,
     
     // Shift the start address forward to resemble where we can start putting data.
     start += sizeof(type_t)*HEAP_INDEX_SIZE;
-	
-	
 
     // Make sure the start address is page-aligned.
     if (start & 0xFFFFF000 != 0)
@@ -190,11 +179,6 @@ heap_t *create_heap(u32int start, u32int end_addr, u32int max, u8int supervisor,
         start &= 0xFFFFF000;
         start += 0x1000;
     }
-    
-    monitor_write("hole: ");
-    monitor_write_hex(start);
-    monitor_write("\n");
-    
     // Write the start, end and max addresses into the heap structure.
     heap->start_address = start;
     heap->end_address = end_addr;

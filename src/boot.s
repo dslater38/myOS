@@ -4,6 +4,9 @@ section .text
 [GLOBAL start]
 [GLOBAL gdt_flush]
 [GLOBAL mboot_header]
+[GLOBAL p4_table]
+[GLOBAL p3_table]
+[GLOBAL p2_table]
 [EXTERN init_gdt]
 [EXTERN kmain64]
 [EXTERN kernel_stack];
@@ -133,18 +136,22 @@ gdt:
 ; Create initial identity mapped page table mapping the first 1GB of physical RAM
 ; the the first 1GB of virtual address space (i.e. virtual address == physical address )
 align 0x1000
-p4_table:			; PML4E
-	dq (p3_table + 3)
-	TIMES 511 dq 0
-p3_table:			; PDPTE
-	dq (p2_table + 3)
-	TIMES 511 dq 0
-p2_table:						; PDE with (PS=1 == 2mb pages, PS == 0 -> points to PTE)
-	%assign p 0x83			; set the PS bit (0x80), the rw & present bits (0x03) 
-	%rep 511					; write 511 of 512 entries to the PDE table
+p4_table:						; PML4E
+	dq (p3_table + 3)			; pointer to PDPTE table with rw & present bits set
+	TIMES 511 dq 0			; write 511 null entries to fill the table.
+p3_table:						; PDPTE
+	dq (p2_table + 3)			; pointer to PDE table with rw & present bits set.
+	TIMES 511 dq 0			; write 511 null entries to fill the table.
+p2_table:						; PDE 
+	dq (p1_table + 3)			; pointer to the PTE table with rw & present bits set
+	TIMES 511 dq 0			; write 511 null entries for a total of 512 entries
+p1_table:						; PTE 
+	%assign p 0x03			; set the rw & present bits (0x03) 
+	%rep 511					; write 511 of 512 entries to the PTE table
 	dq p						; write page entry
-	%assign p p+ 0x00200000	; increment page entry virtual ( and physical ) address by page size (2MB)
+	%assign p p+ 0x00001000	; increment page entry virtual ( and physical ) address by page size (4K)
 	%endrep					; end of loop
 	dq (p4_table + 3)			; recursive last table entry points back to p4_table
+	
 
 

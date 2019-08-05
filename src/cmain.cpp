@@ -19,6 +19,7 @@
 #include "vesavga.h"
 #include <errors/errno.h>
 #include "elf/elf.h"
+#include "TextFrameBuffer.h"
 
 /*  Macros. */
 
@@ -185,12 +186,12 @@ static void print_elf_sections(multiboot_tag *tag)
 {
 	struct multiboot_tag_elf_sections *elf = (struct multiboot_tag_elf_sections *)tag;
 	printf("elf sections, num %d, entsize %d, shndx: %d\n", elf->num, elf->entsize, elf->shndx);
-	const char *strings = stringTable( (Elf64_Shdr *)(elf->sections), elf->num);
-	for( auto i=0; i<elf->num; ++i )
-	{
-		Elf64_Shdr *header = ((Elf64_Shdr *)(elf->sections) + i);
-		print_section_header(header, strings);
-	}
+	// const char *strings = stringTable( (Elf64_Shdr *)(elf->sections), elf->num);
+	// for( auto i=0; i<elf->num; ++i )
+	// {
+	// 	Elf64_Shdr *header = ((Elf64_Shdr *)(elf->sections) + i);
+	// 	print_section_header(header, strings);
+	// }
 }
 
 
@@ -517,7 +518,7 @@ cmain (unsigned long magic, unsigned long addr)
 		   tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 
 										   + ((tag->size + 7) & ~7)))
 	{
-		uint8_t oldColor = set_foreground_color(RED);
+		uint8_t oldColor = set_foreground_color((uint8_t)TextColors::RED);
 		// printf ("Tag 0x%08.8x, Size %d\n", tag->type, tag->size);
 		printf("Tag: %s, Size %d\n",tagType2String(tag->type), tag->size);
 		if( oldColor != 0xFF )

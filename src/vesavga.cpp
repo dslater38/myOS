@@ -64,5 +64,6 @@ extern "C"
 	{
 		video->put(c);
 	}
+
 };
 

@@ -3,6 +3,9 @@
 #include "serial.h"
 #include "ata.h"
 #include "multiboot2.h"
+#include "PageDirectory.h"
+#include "Frames.h"
+#include "TextFrameBuffer.h"
 
 void init_idt64_table();
 void  identify_uart(uint16_t port);
@@ -14,16 +17,43 @@ static void test_page_fault();
 
 void cmain (unsigned long magic, unsigned long addr);
 
+struct BootInformation
+{
+	uint32_t		size;
+	uint32_t		reserved;
+	multiboot_tag	tags[0];
+};
+
+extern void initHeap();
 
 extern "C"
 {
 	void initTextFrameBuffer();
+	extern uint64_t placement_address;
+
+
 void kmain64(uint32_t magic, uint32_t mboot_header)
 {
+	if(mboot_header)
+	{
+		// copy the mboot header down to the bottom of our memory
+		// make sure kmalloc doesn't overwrite the boot information header
+		BootInformation *info = reinterpret_cast<BootInformation *>(static_cast<uint64_t>(mboot_header));
+		auto size = info->size;
+
+		if(placement_address < mboot_header)
+		{
+			memcpy(reinterpret_cast<void *>(placement_address), reinterpret_cast<const void *>(mboot_header), size);
+			mboot_header = static_cast<uint32_t>(placement_address);
+			placement_address += size;
+		}
+	}
 	initTextFrameBuffer();
+	initHeap();
 	
-	set_foreground_color(GREEN);
-	set_background_color(BLACK);
+	
+	set_foreground_color((uint8_t)TextColors::GREEN);
+	set_background_color((uint8_t)TextColors::BLACK);
 //	monitor_clear();
 	printf("x\n");
 	printf("Hello World from 64-bit long mode!!!!!\n");
@@ -55,7 +85,7 @@ void kmain64(uint32_t magic, uint32_t mboot_header)
 		printf("mboot_header is NULL\n");
 	}
 	
-	
+
 	test_page_fault();
 	
 	// int *badPtr = reinterpret_cast<int *>(0x00F0F0F0F0F0F0F0u);

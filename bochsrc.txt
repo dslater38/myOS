@@ -12,7 +12,7 @@ boot: cdrom
 
 log: bochsout.txt
 
-display_library: x, options="gui_debug"
+# display_library: x, options="gui_debug"
 
 mouse: enabled=0
 clock: sync=realtime
