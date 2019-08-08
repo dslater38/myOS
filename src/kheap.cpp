@@ -387,10 +387,10 @@ Page4K<uint64_t> *getPage(void *vaddr)
 
 bool allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable)
 {
-    debug_out("numPages: %d\n", numPages);
+//    debug_out("numPages: %d\n", numPages);
     for( auto i=0; i<numPages; ++i, startAddress+=0x1000)
     {
-        debug_out("mapped: 0x%016.16lx\n",startAddress);
+//        debug_out("mapped: 0x%016.16lx\n",startAddress);
         auto * page = pmle4->getPage(startAddress);
         frames->alloc(page, isKernel, isWritable);
         invalidate_tlb((uint64_t)&startAddress);
@@ -413,6 +413,6 @@ heap_t *initialKernelHeap()
 {
     debug_out("initialKernelHeap\n");
     allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, 0, 1);
-    pmle4->dump();
+//    pmle4->dump();
 	return heap_t::create(allocPages, freePages, KHEAP_START, KHEAP_START+KHEAP_INITIAL_SIZE, HEAK_MAX_SIZE, 0, 0 );
 }

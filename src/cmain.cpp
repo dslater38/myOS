@@ -17,8 +17,6 @@
 
 #include "multiboot2.h"
 #include "vesavga.h"
-#include <errors/errno.h>
-#include "elf/elf.h"
 #include "TextFrameBuffer.h"
 
 /*  Macros. */
@@ -106,92 +104,10 @@ print_mem_size(uint64_t size, const char *type)
 	}
 }
 
-static
-const char *sectionType(uint32_t n)
-{
-	switch(n)
-	{
-		case 0:
-			return "unused";
-		case 1:
-			return "program";
-		case 3:
-			return "string table";
-		case 8:
-			return "uninitialized";
-		default:
-			return "unknown";
-	}
-	return "unknown";
-}
-
-static
-void printFlagsStr(uint64_t flags)
-{
-	if( flags & 0x01 )
-	{
-		printf("W ");
-	}
-	else
-	{
-		printf("w ");
-	}
-	if( flags & 0x02 )
-	{
-		printf("L ");
-	}
-	else
-	{
-		printf("l ");
-	}
-	if( flags & 0x04 )
-	{
-		printf("E ");
-	}
-	else
-	{
-		printf("e ");
-	}
-}
-
-static
-const char *stringTable(Elf64_Shdr *headers, uint32_t entries)
-{
-	Elf64_Shdr *section = elf64_find_section_header_type(headers, entries, SHT_STRTAB);
-	const char* strings = nullptr;
-	if( section )
-	{
-		strings = reinterpret_cast<const char *>(section->sh_addr);
-	}
-	return strings;
-}
-
-static void print_section_header(Elf64_Shdr *header, const char *stringTable)
-{
-	if( stringTable )
-	{
-		printf("name: %s\n",  (stringTable + header->sh_name) );
-	}
-	else
-	{
-		printf("name: <null>\n");
-	}
-	printf( "\ttype: %s, flags: ", sectionType(header->sh_type));
-	printFlagsStr(header->sh_flags);
-	printf("\n\taddress: 0x%016.16lx, offset 0x%016.16lx, size: %lu\n", header->sh_addr, header->sh_offset, header->sh_size);
-	printf("\tlink: %u, info: %u, align: %lu, entry size: %lu\n", header->sh_link, header->sh_info, header->sh_addralign, header->sh_entsize);
-}
-
 static void print_elf_sections(multiboot_tag *tag)
 {
 	struct multiboot_tag_elf_sections *elf = (struct multiboot_tag_elf_sections *)tag;
-	printf("elf sections, num %d, entsize %d, shndx: %d\n", elf->num, elf->entsize, elf->shndx);
-	// const char *strings = stringTable( (Elf64_Shdr *)(elf->sections), elf->num);
-	// for( auto i=0; i<elf->num; ++i )
-	// {
-	// 	Elf64_Shdr *header = ((Elf64_Shdr *)(elf->sections) + i);
-	// 	print_section_header(header, strings);
-	// }
+	printf("elf sections, num %d, entsize %d, shndx: %d\n", elf->num, elf->entsize, elf->shndx);	
 }
 
 
@@ -307,14 +223,18 @@ static void print_mmap(multiboot_tag *tag)
 		 (multiboot_uint8_t *) mmap  < (multiboot_uint8_t *) tag + tag->size;
 		 mmap = (multiboot_memory_map_t *) ((unsigned long) mmap + ((struct multiboot_tag_mmap *) tag)->entry_size)) 
 	{
+		printf (" base_addr = 0x%08.8x%08.8x, length = 0x%08.8x%08.8x, type = %s\n",
+		HIDWORD(mmap->addr), LODWORD(mmap->addr) , 
+		HIDWORD(mmap->len), LODWORD(mmap->len),
+		mmap_type( mmap->type) );
 		
-		uint64_t endAddr = (mmap->addr + mmap->len);
-		printf (" base_addr: 0x%016.16llx, length=%llu, end: 0x%016.16lx,\n\ttype: %s\n", mmap->addr, mmap->len, endAddr, mmap_type( mmap->type) );
-		
-		//~ printf (" base_addr = 0x%08.8x%08.8x, length = 0x%08.8x%08.8x, type = %s\n",
-		//~ HIDWORD(mmap->addr), LODWORD(mmap->addr) , 
-		//~ HIDWORD(mmap->len), LODWORD(mmap->len),
-		//~ mmap_type( mmap->type) );
+	  /* printf (" base_addr = 0x%08.8x%08.8x,"
+		  " length = 0x%08.8x%08.8x, type = %s\n",
+		  HIDWORD(mmap->addr ),
+		  LODWORD(mmap->addr),
+		  HIDWORD (mmap->len),
+		  LODWORD (mmap->len),
+		  mmap_type( mmap->type) ) ; */
 		  
 		  if( MMAP_RAM == mmap->type)
 		  {
@@ -338,6 +258,7 @@ static void print_mmap(multiboot_tag *tag)
 	print_mem_size(acpi_size, "ACPI, ");
 	print_mem_size(defective_size, "Defective, ");
 	print_mem_size(reserved_size, "reserved\n");
+	// printf("Totals: %uK RAM, %uK ACPI, %uK Defective, %uK reserved\n", ram_size/1024, acpi_size/1024, defective_size/1024, reserved_size/1024 );
 
 }
 
@@ -383,6 +304,14 @@ void set_pixel<multiboot_uint32_t, 24>(multiboot_tag_framebuffer *tagfb, multibo
 	multiboot_uint8_t *ptr = reinterpret_cast<multiboot_uint8_t *>(fb) + tagfb->common.framebuffer_pitch * x + ((tagfb->common.framebuffer_bpp+1) / 8) * y;
 	uint32_t *pixel = reinterpret_cast<uint32_t *>(ptr);
 	*pixel = ((c & 0x00FFFFFF) | (*pixel & 0xFF000000));
+}
+
+static void draw_line(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color, void (*set)(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t x, multiboot_uint32_t y, multiboot_uint32_t c))
+{
+	for (auto i = 0; i < tagfb->common.framebuffer_width && i < tagfb->common.framebuffer_height; i++)
+	{
+		set(tagfb, i, i, color);
+	}
 }
 
 static void set_pixel_color(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color)
@@ -449,44 +378,6 @@ static void print_frame_buffer(multiboot_tag *tag)
 	  set_pixel_color(tagfb, color);
 }
 
-#define STR(a) #a
-#define CONCAT(a,b) a##b
-
-#define CASE(a) case a: return #a;
-
-const char *
-tagType2String(multiboot_uint16_t type)
-{
-	switch(type)
-	{
-		CASE(MULTIBOOT_TAG_TYPE_END);
-		CASE(MULTIBOOT_TAG_TYPE_CMDLINE);
-		CASE(MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME);
-		CASE(MULTIBOOT_TAG_TYPE_MODULE);
-		CASE(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
-		CASE(MULTIBOOT_TAG_TYPE_BOOTDEV);
-		CASE(MULTIBOOT_TAG_TYPE_MMAP);
-		CASE(MULTIBOOT_TAG_TYPE_VBE);
-		CASE(MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
-		CASE(MULTIBOOT_TAG_TYPE_ELF_SECTIONS);
-		CASE(MULTIBOOT_TAG_TYPE_APM);
-		CASE(MULTIBOOT_TAG_TYPE_EFI32);
-		CASE(MULTIBOOT_TAG_TYPE_EFI64);
-		CASE(MULTIBOOT_TAG_TYPE_SMBIOS);
-		CASE(MULTIBOOT_TAG_TYPE_ACPI_OLD);
-		CASE(MULTIBOOT_TAG_TYPE_ACPI_NEW);
-		CASE(MULTIBOOT_TAG_TYPE_NETWORK);
-		CASE(MULTIBOOT_TAG_TYPE_EFI_MMAP);
-		CASE(MULTIBOOT_TAG_TYPE_EFI_BS);
-		CASE(MULTIBOOT_TAG_TYPE_EFI32_IH);
-		CASE(MULTIBOOT_TAG_TYPE_EFI64_IH);
-		CASE(MULTIBOOT_TAG_TYPE_LOAD_BASE_ADDR);
-		default:
-			break;
-	}
-	return "<unknown>";
-}
-
 /*  Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void
@@ -512,15 +403,14 @@ cmain (unsigned long magic, unsigned long addr)
 	}
 
 	  size = *(unsigned *) addr;
-	  printf ("Announced mbi size %d (%08.8x) bytes\n", size, size);
+	  printf ("Announced mbi size 0x%d (%08.8x)\n", size, size);
 	  for (tag = (struct multiboot_tag *) (addr + 8);
 		   tag->type != MULTIBOOT_TAG_TYPE_END ;
 		   tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 
 										   + ((tag->size + 7) & ~7)))
 	{
 		uint8_t oldColor = set_foreground_color((uint8_t)TextColors::RED);
-		// printf ("Tag 0x%08.8x, Size %d\n", tag->type, tag->size);
-		printf("Tag: %s, Size %d\n",tagType2String(tag->type), tag->size);
+		printf ("Tag 0x%08.8x, Size 0x%08.8x\n", tag->type, tag->size);
 		if( oldColor != 0xFF )
 		{
 			set_foreground_color(oldColor);
