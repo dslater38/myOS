@@ -8,7 +8,6 @@
 #include "TextFrameBuffer.h"
 
 void init_idt64_table();
-void  identify_uart(uint16_t port);
 
 // uint32_t mboot_header=0;
 
@@ -34,10 +33,16 @@ extern "C"
 
 void kmain64(uint32_t magic, uint32_t mboot_header)
 {
+	// Entry - at this point, we're in 64-bit long mode with a basic
+	// page table that identity maps the first 2 MB or RAM
+	// install our interrupt handlers
+	init_idt64_table();
+
 	if(mboot_header)
 	{
-		// copy the mboot header down to the bottom of our memory
-		// make sure kmalloc doesn't overwrite the boot information header
+		// if the mboot header is higher up in memory that placement_address
+		// then copy the mboot header down to the bottom of our memory
+		// so we can allow placement_address to run across the header's memory.
 		BootInformation *info = reinterpret_cast<BootInformation *>(static_cast<uint64_t>(mboot_header));
 		auto size = info->size;
 
@@ -45,36 +50,34 @@ void kmain64(uint32_t magic, uint32_t mboot_header)
 		{
 			memcpy(reinterpret_cast<void *>(placement_address), reinterpret_cast<const void *>(mboot_header), size);
 			mboot_header = static_cast<uint32_t>(placement_address);
+			mboot_header = placement_address;
 			placement_address += size;
 		}
 	}
+	// set up our frame buffer
 	initTextFrameBuffer();
-	initHeap();
-	
-	
-	set_foreground_color((uint8_t)TextColors::GREEN);
-	set_background_color((uint8_t)TextColors::BLACK);
-//	monitor_clear();
-	printf("x\n");
-	printf("Hello World from 64-bit long mode!!!!!\n");
-	printf("Init the 64-bit interrupt table\n");
-	init_idt64_table();
-	printf("64-bit interrupt table is initailzed!!!\n");
-	
-	printf("COM1: "); identify_uart(1);
-	printf("COM2: "); identify_uart(2);
-	printf("COM3: "); identify_uart(3);
-	printf("COM4: "); identify_uart(4);
-	
+	// initialize COM1 for our serial console
 	auto success = init_serial(1, BAUD_38400, BITS_8, PARITY_NONE, NO_STOP_BITS);
 
 	if( success == SUCCESS)
 	{
 	 	printf("Initialized COM1 port\n");
 	}
+	
+	printf("Hello World from 64-bit long mode!!!!!\n");
+	set_foreground_color((uint8_t)TextColors::GREEN);
+	set_background_color((uint8_t)TextColors::BLACK);
+	
+	// Initialize our heap
+	initHeap();
 
+	printf("COM1: %s,\tCOM2: %s\n",identify_uart(1), identify_uart(2));
+	printf("COM3: %s,\tCOM4: %s\n",identify_uart(3), identify_uart(4));
+	
+	// detect ata disks & controllers.
 	detectControllers();
 
+	// process the mboot header.
 	if( mboot_header != 0)
 	{
 		printf("Dump mboot_header\n");
@@ -88,12 +91,7 @@ void kmain64(uint32_t magic, uint32_t mboot_header)
 
 	test_page_fault();
 	
-	// int *badPtr = reinterpret_cast<int *>(0x00F0F0F0F0F0F0F0u);
-	
-	// foo___ = *(badPtr);
-	
-	// monitor_write_dec(foo___);
-	
+
 }
 
 }
