@@ -109,7 +109,7 @@ void heap_t::expand(uint64_t new_size)
 	// This should always be on a page boundary.
 	auto old_size = end_address-start_address;
 	auto i = old_size;
-	if ( pageAlloc(start_address, new_size, supervisor, !readonly) )
+	if ( pageAlloc(start_address + i, new_size - old_size, supervisor, !readonly) )
 	{
 		end_address = start_address+new_size;
 	}

@@ -212,7 +212,7 @@ uint8_t init_serial( uint16_t port, uint32_t speed, uint8_t bits, uint8_t parity
 
 static
 inline
-void identify_uart_imp(uint16_t port)
+const char *identify_uart_imp(uint16_t port)
 {
 	port = encode_port(port);
 	outb( port + FIFO_CTL, 0xE7);
@@ -223,16 +223,16 @@ void identify_uart_imp(uint16_t port)
 		{
 			if( 0 != (flags & 0x20) )
 			{
-				printf("UART 16750\n");
+				return "UART 16750";
 			}
 			else
 			{
-				printf("UART 16550A\n");
+				return "UART 16550A";
 			}
 		}
 		else
 		{
-			printf("UART 16550\n");
+			return "UART 16550";
 		}
 	}
 	else
@@ -240,18 +240,18 @@ void identify_uart_imp(uint16_t port)
 		outb( port + SCRATCH_REG, 0x2A );
 		if( inb(port + SCRATCH_REG) == 0x2A )
 		{
-			printf("UART 16450\n");
+			return "UART 16450";
 		}
 		else
 		{
-			printf("UART 8250\n");
+			return "UART 8250";
 		}
 	}
 }
 
-void  identify_uart(uint16_t port)
+const char *  identify_uart(uint16_t port)
 {
-	identify_uart_imp(port);
+	return identify_uart_imp(port);
 }
 
 static
