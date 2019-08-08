@@ -371,6 +371,11 @@ Frames<uint64_t> *frames = nullptr; // {2ull*1024ull*1024ull*1024ull};
 
 heap_t *kernelHeap = nullptr;
 
+heap_t *getKernelHeap()
+{
+    return kernelHeap;
+}
+
 void initHeap()
 {
     frames = New<Frames<uint64_t>>( (uint64_t)(2ull*1024ull*1024ull*1024ull) );

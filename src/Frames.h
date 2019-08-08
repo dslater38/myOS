@@ -38,17 +38,26 @@ public:
 		}
 	}
 
-	void mapInitialPages(Uint initialMappedPages)
+	void markFrames(Uint addr, size_t count)
 	{
-		// mark the pages that are already mapped as in use.
-		uint64_t addr = 0;
-		char buffer[32];
-		for( auto i=0; i<initialMappedPages; ++i, addr+=0x1000)
+		for( auto i=0u; i<count; ++i, addr+=PAGE_SIZE)
 		{
-			// sprintf(buffer,"%d\n",i);
-			// debug_out(buffer);
 			set(addr);
 		}
+	}
+
+	void mapInitialPages(Uint initialMappedPages)
+	{
+		markFrames(0, initialMappedPages);
+		// // mark the pages that are already mapped as in use.
+		// uint64_t addr = 0;
+		// char buffer[32];
+		// for( auto i=0; i<initialMappedPages; ++i, addr+=PAGE_SIZE)
+		// {
+		// 	// sprintf(buffer,"%d\n",i);
+		// 	// debug_out(buffer);
+		// 	set(addr);
+		// }
 	}
 
 	void alloc(PageT<Uint> *page, int isKernel, int isWritable)
