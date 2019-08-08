@@ -71,9 +71,10 @@ private:
 	void blank_line(uint32_t line);
 	void move_cursor();
 	void copy_line(int dstLine, int srcLine);
-	void scroll();
+	bool scroll();
 	void debug_out(char c);
 	void serial_out(char c);
+	void copy_cur_line();
 private:
 	uint16_t back_buffer [VIDEO_MEM_COUNT] = {0};
 	uint16_t *video_memory{reinterpret_cast<uint16_t *>(0x00000000000B8000)};

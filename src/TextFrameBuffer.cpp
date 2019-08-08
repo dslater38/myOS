@@ -74,6 +74,17 @@ void TextFrameBuffer::blank_line(uint32_t line)
 	}
 }
 
+void TextFrameBuffer::copy_cur_line()
+{
+	int j = 0;
+	if(cursor_y == (ROWS-1))
+	{
+		j += (ROWS - (cur_line+1));
+	}
+	j += cur_line+1;
+	copy_line(j, cur_line);
+}
+
 void TextFrameBuffer::copy_buffer()
 {
 	int i;
@@ -104,25 +115,32 @@ void TextFrameBuffer::move_cursor()
 {
    // The screen is COLS characters wide...
    uint16_t cursorLocation = cursor_y * COLS + cursor_x;
-   outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
-   outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
-   outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
-   outb(0x3D5, cursorLocation);      // Send the low cursor byte.
+ //  outb(0x3D4, 14);                  // Tell the VGA board we are setting the high cursor byte.
+ //  outb(0x3D5, cursorLocation >> 8); // Send the high cursor byte.
+	
+   outw(0x3D4, ((cursorLocation & 0xFF00) | 14));
+	
+   // outb(0x3D4, 15);                  // Tell the VGA board we are setting the low cursor byte.
+   // outb(0x3D5, cursorLocation);      // Send the low cursor byte.
+	
+	outw( 0x3D4, ((cursorLocation & 0x00FF)<<8) | 15 );
 }
 
 
 // Scrolls the text on the screen up by one line.
-void TextFrameBuffer::scroll()
+bool TextFrameBuffer::scroll()
 {
+	bool scrolled = false;
 	// Row ROWS is the end, this means we need to scroll up
 	if(cursor_y >= ROWS)
 	{
-	   
+		scrolled = true;
 		// The last line should now be blank.
 		blank_line(cur_line);
 		// The cursor should now be on the last line.
 		cursor_y = (ROWS-1);
 	}
+	return scrolled;
 }
 
 void TextFrameBuffer::debug_out(char c)
@@ -197,9 +215,15 @@ void TextFrameBuffer::put(char c)
 	}
 
 	// Scroll the screen if needed.
-	scroll();
-	// copy the back buffer to frone
-	copy_buffer();
+	if( scroll() )
+	{
+		// copy the back buffer to front
+		copy_buffer();
+	}
+	else
+	{
+		copy_cur_line();
+	}
 	// Move the hardware cursor.
 	move_cursor();
 }
