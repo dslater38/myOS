@@ -35,7 +35,7 @@
  *******************************************************************/
 
 #include <stddef.h>
-
+#include <stdint.h>
 
 /********************************************************************
  **
@@ -56,7 +56,8 @@
 extern "C" {
 #endif
 
-void *memcpy(void *dest, const void *src, size_t count);
+void *memcpy(void *dest, const void *src, size_t count)noexcept;
+void page_copy(uint64_t dst_index, uint64_t src_index, size_t page_count)noexcept;
 
 #ifdef __cplusplus
 }
