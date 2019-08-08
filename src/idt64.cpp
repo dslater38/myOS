@@ -21,21 +21,20 @@ static idt_ptr64_t   idt64_ptr{ 0 };
 void page_fault(registers64_t regs);
 void gpf(registers64_t regs);
 
-
-void init_idt64_table()
-{
-	init_idt();
-	// for( auto i =0; i<256; ++i )
-	// {
-	// 	interrupt64_handlers[i] = nullptr;
-	// }
-	// register_interrupt_handler64(14, page_fault);
-	memset(&interrupt64_handlers, 0, sizeof(isr64_t)*256);
-	install_processor_handlers();
-}
-
 extern "C"
 {
+	void init_idt64_table()
+	{
+		init_idt();
+		// for( auto i =0; i<256; ++i )
+		// {
+		// 	interrupt64_handlers[i] = nullptr;
+		// }
+		// register_interrupt_handler64(14, page_fault);
+		memset(&interrupt64_handlers, 0, sizeof(isr64_t)*256);
+		install_processor_handlers();
+	}
+
 	void flush_idt64(void *p)
 	{
 		idt_flush(p);

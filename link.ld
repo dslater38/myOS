@@ -75,20 +75,33 @@ SECTIONS
  
 	.ctors :
 	{
-      __CTOR_LIST__ = .;
-      LONG((__CTOR_END__ - __CTOR_LIST__) / 8 - 2)
-      KEEP(*(.ctors))
-      LONG(0)
-      __CTOR_END__ = .;
+		/* gcc uses crtbegin.o to find the start of
+		the constructors, so we make sure it is
+		first.  Because this is a wildcard, it
+		doesn't matter if the user does not
+		actually link against crtbegin.o; the
+		linker won't look for a file to match a
+		wildcard.  The wildcard also means that it
+		doesn't matter which directory crtbegin.o
+		is in.  */
+		KEEP (*crtbegin.o(.ctors))
+		KEEP (*crtbegin?.o(.ctors))
+		/* We don't want to include the .ctor section from
+		the crtend.o file until after the sorted ctors.
+		The .ctor section from the crtend file contains the
+		end of ctors marker and it must be last */
+		KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .ctors))
+		KEEP (*(SORT(.ctors.*)))
+		KEEP (*(.ctors))
+		. = ALIGN(4096);
 	}
 	.dtors :
 	{
-      __DTOR_LIST__ = .;
-      QUAD((__DTOR_END__ - __DTOR_LIST__) / 8 - 2)
-      KEEP(*(.dtors))
-      QUAD(0)
-      __DTOR_END__ = .;  
-
+    KEEP (*crtbegin.o(.dtors))
+    KEEP (*crtbegin?.o(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*(.dtors))
 	  . = ALIGN(4096);
 	}
 

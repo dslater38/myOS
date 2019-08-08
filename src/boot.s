@@ -10,6 +10,8 @@ section .text
 [EXTERN init_gdt]
 [EXTERN kmain64]
 [EXTERN kernel_stack];
+[EXTERN init_idt64_table]
+[EXTERN __libc_init_array]
 
 %include "macros.mac"
 
@@ -71,7 +73,13 @@ start:
 [BITS 64]
 start64:
 	and edi, edi	; 32-bit magic value is in edi. Make sure high order DWORD of rdi is cleared
-	and esi,esi	; multiboot header pointer was put in esi. It's < 32 bits, make sure upper DWORD of rsi is cleared.
+	and esi, esi	; multiboot header pointer was put in esi. It's < 32 bits, make sure upper DWORD of rsi is cleared.
+	mov r14, rdi	; save rdi & rsi while we call init_idt64_table & __libc_init_array
+	mov r15, rsi
+	call init_idt64_table
+	call __libc_init_array
+	mov rdi, r14
+	mov rsi, r15
 	jmp kmain64	; Jump to kmain64
 	xchg bx,bx	
 .loop:
