@@ -21,14 +21,14 @@ extern "C"
 	}
 
 
-// Copy len bytes from src to dest.
-void *memcpy(void *dest, const void *src, size_t len)
-{
-    const uint8_t *sp = (const uint8_t *)src;
-    uint8_t *dp = (uint8_t *)dest;
-    for(; len != 0; len--) *dp++ = *sp++;
-     return dest;
-}
+//~ // Copy len bytes from src to dest.
+//~ void *memcpy(void *dest, const void *src, size_t len)
+//~ {
+    //~ const uint8_t *sp = (const uint8_t *)src;
+    //~ uint8_t *dp = (uint8_t *)dest;
+    //~ for(; len != 0; len--) *dp++ = *sp++;
+     //~ return dest;
+//~ }
 
 // Write len copies of val into dest.
 void * memset(void *vdest, int val, size_t len)

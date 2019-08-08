@@ -9,6 +9,17 @@ section .text
 
 [GLOBAL get_fault_addr64]
 [GLOBAL halt]
+[GLOBAL invalidate_tlb]
+[GLOBAL invalidate_all_tlbs]
+
+invalidate_tlb:
+	invlpg [rdi]
+	ret
+
+invalidate_all_tlbs:
+	mov rax, cr3
+	mov cr3, rax
+	ret
 
 outb:
 	mov rdx, rdi
@@ -48,5 +59,6 @@ get_fault_addr64:
 	ret
 	
 halt:
+	cli
 	hlt
 	jmp halt

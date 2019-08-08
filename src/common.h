@@ -37,6 +37,8 @@ uint32_t LODWORD(uint64_t n)
 	return static_cast<uint32_t>(n & 0x00000000FFFFFFFFull);
 }
 
+void debug_out(const char *fmt,...);
+
 void panic(const char *message, const char *file, uint32_t line);
 void panic_assert(const char *file, uint32_t line, const char *desc);
 

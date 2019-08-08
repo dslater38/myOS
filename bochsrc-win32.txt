@@ -12,8 +12,8 @@ boot: cdrom
 
 log: bochsout.txt
 
-# display_library: win32
-display_library: x, options="gui_debug"
+display_library: win32
+# display_library: x, options="gui_debug"
 
 mouse: enabled=0
 clock: sync=realtime
@@ -22,7 +22,6 @@ cpu: ips=1000000
 # vmx=1
 
 com1: enabled=1, mode=file, dev=serial.out
-com2: enabled=1, mode=file, dev=kdebug.log
 port_e9_hack: enabled=1
 debug_symbols: file=kernel.sym
 debug: action=ignore, pci=report

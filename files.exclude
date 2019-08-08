@@ -1,0 +1,7 @@
+{
+    "settings" : {
+        "files.exclude": {
+        "**/*.o": true
+        }
+    }
+}

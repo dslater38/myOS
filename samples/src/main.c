@@ -12,12 +12,22 @@ int main(struct multiboot *mboot_ptr)
     init_descriptor_tables();
     // Initialise the screen (by clearing it)
     monitor_clear();
-
+    u32int a = kmalloc(8);
     initialise_paging();
-    monitor_write("Hello, paging world!\n");
+    u32int b = kmalloc(8);
+    u32int c = kmalloc(8);
+    monitor_write("a: ");
+    monitor_write_hex(a);
+    monitor_write(", b: ");
+    monitor_write_hex(b);
+    monitor_write("\nc: ");
+    monitor_write_hex(c);
 
-    uint32_t *ptr = (uint32_t*)0xA0000000;
-    uint32_t do_page_fault = *ptr;
+    kfree(c);
+    kfree(b);
+    u32int d = kmalloc(12);
+    monitor_write(", d: ");
+    monitor_write_hex(d);
 
     return 0;
 }

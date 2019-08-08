@@ -1,0 +1,51 @@
+maxzSize: 2147483648
+frames: 0000000000125000 to 0000000000135008 for 524352 bits, maxSize: 2147483648
+maxzSize: 2147483648
+create_heap: start: 00000000c0000000, end: 00000000c0200000, max: 0000000200000000
+hole: 00000000c0101000
+Heap Initialized...
+Initialized COM1 port
+COM1: UART 16550A,	COM2: UART 16550A
+COM3: UART 16750,	COM4: UART 8250
+Primary IDE controller present.
+Secondary IDE controller absent.
+process mboot_header
+Announced mbi size 5896 (00001708)
+Tag 0x00000015, Size 0x0000000c
+load base addr: 0x00000000
+Tag 0x00000001, Size 0x00000009
+Command line = 
+Tag 0x00000002, Size 0x00000012
+Boot loader name = GRUB 2.04
+Tag 0x0000000a, Size 0x0000001c
+apm
+Version: 258, cseg 0xf000, offset 0x00009380
+cseg16: 0xf000, dseg: 0xf000, flags: 0x0003
+cseg_len: 65520, cseg_16_len: 65520, dseg_len: 65520
+Tag 0x00000006, Size 0x000000a0
+mmap
+ base_addr = 0x0000000000000000, length = 0x000000000009f000, type = available
+ base_addr = 0x000000000009f000, length = 0x0000000000001000, type = reserved
+ base_addr = 0x00000000000e8000, length = 0x0000000000018000, type = reserved
+ base_addr = 0x0000000000100000, length = 0x000000007fef0000, type = available
+ base_addr = 0x000000007fff0000, length = 0x0000000000010000, type = acpi
+ base_addr = 0x00000000fffc0000, length = 0x0000000000040000, type = reserved
+Totals: 2047M RAM, 64K ACPI, 0 Defective, 356K reserved
+Tag 0x00000009, Size 0x00001594
+elf sections, num 86, entsize 64, shndx: 85
+Tag 0x00000004, Size 0x00000010
+mem_lower = 636KB, (0x0000027cKB) mem_upper = 2096064KB (0x001ffbc0KB)
+Tag 0x00000005, Size 0x00000014
+Boot device 0x000000e0, 4294967295 (0xffffffff), 4294967295 (0xffffffff)
+Tag 0x00000008, Size 0x00000020
+framebuffer: type: 2
+addr: 0x00000000000b8000, pitch: 160, width: 80, height: 25, bpp: 16
+Tag 0x0000000e, Size 0x0000001c
+acpi old
+Signature: RSD PTR , checksum: 212, OEMID: BOCHS ,
+revision: 0, RstAddress: 0x7fff0000
+Total mbi size 5896 (0x00001708)
+Testing Page Fault
+Page fault! at 0x00000000A0000000
+	( present read/write kernel-mode not-reserved )
+PANIC(Page fault) at cpu_exceptions.cpp : 199

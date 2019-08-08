@@ -188,24 +188,14 @@ void page_fault(registers64_t regs)
 	int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
 
 	// Output an error message.
-	monitor_write("Page fault! ( ");
-	if (present) {monitor_write("present ");} else {monitor_write("absent ");}
-	if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
-	if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
-	if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
-	monitor_write(") at 0x");
-	monitor_write_hex(faulting_address);
-	monitor_write("\n");
-	
-	sprintf(buf, ") at 0x%08.8X%08.8X\n", HIDWORD(faulting_address), LODWORD(faulting_address) );
-	monitor_write(buf);
-	
-	//~ sprintf(buf, ") at 0x%08Lx\n", faulting_address);
-	//~ monitor_write(buf);
-	// monitor_write(") at 0x");
-	// monitor_write_hex(faulting_address);
+	printf("Page fault! at 0x%016.16lX\n\t( %s %s %s %s )\n", 
+        faulting_address,
+        present ? "present" : "absent",
+        rw ? "read-only" : "read/write",
+        us ? "user-mode" : "kernel-mode",
+        reserved ? "reserved" : "not-reserved"
+       );
 
-	// monitor_write64("Page fault!!!!!!!!!!!!!!!!!!!!\n");
  	PANIC("Page fault");
 
 }
