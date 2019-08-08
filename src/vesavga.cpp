@@ -10,6 +10,10 @@ extern "C"
 	void initTextFrameBuffer()
 	{
 		video = New<TextFrameBuffer>();
+		if(video)
+		{
+			video->clear();
+		}
 	}
 	
 	uint8_t set_foreground_color(uint8_t c)

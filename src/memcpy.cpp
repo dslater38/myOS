@@ -66,26 +66,27 @@
  *******************************************************************/
 
 #include <stddef.h>
+#include <stdint.h>
 
 
 /********************************************************************
  ** Typedefs
  *******************************************************************/
 
-typedef unsigned char       UInt8;
-typedef unsigned short      UInt16;
-typedef unsigned int        UInt32;
-#ifdef _WIN32
-typedef unsigned __int64    UInt64;
-#else
-typedef unsigned long long  UInt64;
-#endif
+//~ typedef unsigned char       uint8_t;
+//~ typedef unsigned short      uint16_t;
+//~ typedef unsigned int        uint32_t;
+//~ #ifdef _WIN32
+//~ typedef unsigned __int64    uint64_t;
+//~ #else
+//~ typedef unsigned long long  uint64_t;
+//~ #endif
 
 #ifdef MEMCPY_64BIT
-typedef UInt64              UIntN;
+// typedef uint64_t              uintptr_t;
 #define TYPE_WIDTH          8L
 #else
-typedef UInt32              UIntN;
+// typedef uint32_t              uintptr_t;
 #define TYPE_WIDTH          4L
 #endif
 
@@ -110,7 +111,7 @@ typedef UInt32              UIntN;
 
 #define START_VAL(x)            (x)--
 #define INC_VAL(x)              *++(x)
-#define CAST_TO_U8(p, o)        ((UInt8*)p + o + TYPE_WIDTH)
+#define CAST_TO_U8(p, o)        ((uint8_t*)p + o + TYPE_WIDTH)
 #define WHILE_DEST_BREAK        (TYPE_WIDTH - 1)
 #define PRE_LOOP_ADJUST         - (TYPE_WIDTH - 1)
 #define PRE_SWITCH_ADJUST       + 1
@@ -119,7 +120,7 @@ typedef UInt32              UIntN;
 
 #define START_VAL(x)
 #define INC_VAL(x)              *(x)++
-#define CAST_TO_U8(p, o)        ((UInt8*)p + o)
+#define CAST_TO_U8(p, o)        ((uint8_t*)p + o)
 #define WHILE_DEST_BREAK        0
 #define PRE_LOOP_ADJUST
 #define PRE_SWITCH_ADJUST
@@ -223,8 +224,8 @@ typedef UInt32              UIntN;
 }
 
 #define COPY_NO_SHIFT() {                                           \
-    UIntN* dstN = (UIntN*)(dst8 PRE_LOOP_ADJUST);                   \
-    UIntN* srcN = (UIntN*)(src8 PRE_LOOP_ADJUST);                   \
+    uintptr_t* dstN = (uintptr_t*)(dst8 PRE_LOOP_ADJUST);                   \
+    uintptr_t* srcN = (uintptr_t*)(src8 PRE_LOOP_ADJUST);                   \
     size_t length = count / TYPE_WIDTH;                             \
                                                                     \
     while (length & 7) {                                            \
@@ -259,13 +260,13 @@ typedef UInt32              UIntN;
 
 
 #define COPY_SHIFT(shift) {                                         \
-    UIntN* dstN  = (UIntN*)((((UIntN)dst8) PRE_LOOP_ADJUST) &       \
+    uintptr_t* dstN  = (uintptr_t*)((((uintptr_t)dst8) PRE_LOOP_ADJUST) &       \
                              ~(TYPE_WIDTH - 1));                    \
-    UIntN* srcN  = (UIntN*)((((UIntN)src8) PRE_LOOP_ADJUST) &       \
+    uintptr_t* srcN  = (uintptr_t*)((((uintptr_t)src8) PRE_LOOP_ADJUST) &       \
                              ~(TYPE_WIDTH - 1));                    \
     size_t length  = count / TYPE_WIDTH;                            \
-    UIntN srcWord = INC_VAL(srcN);                                  \
-    UIntN dstWord;                                                  \
+    uintptr_t srcWord = INC_VAL(srcN);                                  \
+    uintptr_t dstWord;                                                  \
                                                                     \
     while (length & 7) {                                            \
         CP_INCR_SH(8 * shift, 8 * (TYPE_WIDTH - shift));            \
@@ -315,10 +316,10 @@ typedef UInt32              UIntN;
 extern "C"
 {
 
-	void *memcpy(void *dest, const void *src, size_t count) 
+	void *memcpy(void *dest, const void *src, size_t count) noexcept
 	{
-		UInt8* dst8 = (UInt8*)dest;
-		UInt8* src8 = (UInt8*)src;
+		uint8_t* dst8 = (uint8_t*)dest;
+		uint8_t* src8 = (uint8_t*)src;
 
 		if (count < 8) {
 			COPY_REMAINING(count);
@@ -328,12 +329,12 @@ extern "C"
 		START_VAL(dst8);
 		START_VAL(src8);
 
-		while (((UIntN)dst8 & (TYPE_WIDTH - 1)) != WHILE_DEST_BREAK) {
+		while (((uintptr_t)dst8 & (TYPE_WIDTH - 1)) != WHILE_DEST_BREAK) {
 			INC_VAL(dst8) = INC_VAL(src8);
 			count--;
 		}
 
-		switch ((((UIntN)src8) PRE_SWITCH_ADJUST) & (TYPE_WIDTH - 1)) {
+		switch ( (((uintptr_t)src8) PRE_SWITCH_ADJUST) & (TYPE_WIDTH - 1) ) {
 		case 0: COPY_NO_SHIFT(); break;
 		case 1: COPY_SHIFT(1);   break;
 		case 2: COPY_SHIFT(2);   break;
@@ -345,5 +346,29 @@ extern "C"
 		case 7: COPY_SHIFT(7);   break;
 #endif
 	    }
+	    
+	    return dest;
+	}
+	
+	// dst_index is the index of the destination page (vaddr == dst_index<<12)
+	// src_index is the index of the destination page (vaddr == src_index<<12)
+	// page_count is the number of 4K pages to copy
+	void page_copy(uint64_t dst_index, uint64_t src_index, size_t page_count)noexcept
+	{		
+		auto *dstN = reinterpret_cast<uint64_t *>(dst_index<<12);
+		const auto *srcN = reinterpret_cast<const uint64_t *>(src_index<<12);
+		auto qword_count = (page_count << 9); // there are 512 qwords in a 4096 byte page, so multiply page_count by 512
+		auto length = qword_count / 8;	// unroll the loop. 
+		while(length--)
+		{
+			*dstN++ = *srcN++;
+			*dstN++ = *srcN++;
+			*dstN++ = *srcN++;
+			*dstN++ = *srcN++;
+			*dstN++ = *srcN++;
+			*dstN++ = *srcN++;
+			*dstN++ = *srcN++;
+			*dstN++ = *srcN++;
+		}
 	}
 }

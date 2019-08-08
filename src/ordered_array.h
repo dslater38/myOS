@@ -81,6 +81,10 @@ void destroy_ordered_array(ordered_array_t<T, Pred> *array)
 template<typename T, typename Pred=std::less<T> >
 void insert_ordered_array(T item, ordered_array_t<T, Pred> *array)
 {
+	if( array->last > array->end)
+	{
+		PANIC("insert_ordered_array: ARRAY IS FULL\n");
+	}
 	T *it = 0;
 	auto size = array->size();
 	for( it=array->start; it<array->last && array->pred(*it, item); ++it )

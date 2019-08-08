@@ -17,9 +17,9 @@
 
 #include "multiboot2.h"
 #include "vesavga.h"
-#include <errors/errno.h>
-#include "elf/elf.h"
 #include "TextFrameBuffer.h"
+#include "MultiBootInfoHeader.h"
+#include "BootInformation.h"
 
 /*  Macros. */
 
@@ -106,114 +106,28 @@ print_mem_size(uint64_t size, const char *type)
 	}
 }
 
-static
-const char *sectionType(uint32_t n)
+static void print_elf_sections(const multiboot_tag_elf_sections *elf)
 {
-	switch(n)
-	{
-		case 0:
-			return "unused";
-		case 1:
-			return "program";
-		case 3:
-			return "string table";
-		case 8:
-			return "uninitialized";
-		default:
-			return "unknown";
-	}
-	return "unknown";
-}
-
-static
-void printFlagsStr(uint64_t flags)
-{
-	if( flags & 0x01 )
-	{
-		printf("W ");
-	}
-	else
-	{
-		printf("w ");
-	}
-	if( flags & 0x02 )
-	{
-		printf("L ");
-	}
-	else
-	{
-		printf("l ");
-	}
-	if( flags & 0x04 )
-	{
-		printf("E ");
-	}
-	else
-	{
-		printf("e ");
-	}
-}
-
-static
-const char *stringTable(Elf64_Shdr *headers, uint32_t entries)
-{
-	Elf64_Shdr *section = elf64_find_section_header_type(headers, entries, SHT_STRTAB);
-	const char* strings = nullptr;
-	if( section )
-	{
-		strings = reinterpret_cast<const char *>(section->sh_addr);
-	}
-	return strings;
-}
-
-static void print_section_header(Elf64_Shdr *header, const char *stringTable)
-{
-	if( stringTable )
-	{
-		printf("name: %s\n",  (stringTable + header->sh_name) );
-	}
-	else
-	{
-		printf("name: <null>\n");
-	}
-	printf( "\ttype: %s, flags: ", sectionType(header->sh_type));
-	printFlagsStr(header->sh_flags);
-	printf("\n\taddress: 0x%016.16lx, offset 0x%016.16lx, size: %lu\n", header->sh_addr, header->sh_offset, header->sh_size);
-	printf("\tlink: %u, info: %u, align: %lu, entry size: %lu\n", header->sh_link, header->sh_info, header->sh_addralign, header->sh_entsize);
-}
-
-static void print_elf_sections(multiboot_tag *tag)
-{
-	struct multiboot_tag_elf_sections *elf = (struct multiboot_tag_elf_sections *)tag;
-	printf("elf sections, num %d, entsize %d, shndx: %d\n", elf->num, elf->entsize, elf->shndx);
-	// const char *strings = stringTable( (Elf64_Shdr *)(elf->sections), elf->num);
-	// for( auto i=0; i<elf->num; ++i )
-	// {
-	// 	Elf64_Shdr *header = ((Elf64_Shdr *)(elf->sections) + i);
-	// 	print_section_header(header, strings);
-	// }
+	printf("elf sections, num %d, entsize %d, shndx: %d\n", elf->num, elf->entsize, elf->shndx);	
 }
 
 
-static void print_apm(multiboot_tag *tag)
+static void print_apm(const multiboot_tag_apm *apm)
 {
-	struct multiboot_tag_apm *apm = (struct multiboot_tag_apm *)tag;
 	printf("apm\n");
 	printf("Version: %d, cseg 0x%04.4x, offset 0x%08.8x\n", apm->version, apm->cseg, apm->offset);
 	printf("cseg16: 0x%04.4x, dseg: 0x%04.4x, flags: 0x%04.4x\n", apm->cseg_16, apm->dseg, apm->flags );
 	printf("cseg_len: %d, cseg_16_len: %d, dseg_len: %d\n", apm->cseg_len, apm->cseg_16_len, apm->dseg_len);
 }
 
-static void print_load_base_addr(multiboot_tag *tag)
+static void print_load_base_addr(const multiboot_tag_load_base_addr *info)
 {
-	struct multiboot_tag_load_base_addr *info = (struct multiboot_tag_load_base_addr *)tag;
 	printf("load base addr: 0x%08.8x\n", info->load_base_addr);
 }
 
-static void print_acpi_old(multiboot_tag *tag)
+static void print_acpi_old(const multiboot_tag_old_acpi *acpi)
 {
-	struct multiboot_tag_old_acpi *acpi = (struct multiboot_tag_old_acpi *)(tag);
-	unsigned char *ptr = acpi->rsdp;
+	const unsigned char *ptr = acpi->rsdp;
 	printf("acpi old\n");
 	printf("Signature: %.8s, ", (char *)ptr );
 	ptr += 8;
@@ -226,10 +140,9 @@ static void print_acpi_old(multiboot_tag *tag)
 	printf("RstAddress: 0x%08.8x\n", *((multiboot_uint32_t *)ptr) );
 }
 
-static void print_acpi_new(multiboot_tag *tag)
+static void print_acpi_new(const multiboot_tag_new_acpi *acpi)
 {
-	struct multiboot_tag_new_acpi *acpi = (struct multiboot_tag_new_acpi *)(tag);
-	unsigned char *ptr = acpi->rsdp;
+	const unsigned char *ptr = acpi->rsdp;
 	printf("acpi new\n");
 	printf("Signature: %.8s, ", (char *)ptr );
 	ptr += 8;
@@ -248,54 +161,40 @@ static void print_acpi_new(multiboot_tag *tag)
 	printf("reserved: {%d, %d, %d}\n", (unsigned)ptr[0], (unsigned)ptr[1], (unsigned)ptr[2]);
 }
 
-static void print_cmdline(multiboot_tag *tag)
+static void print_cmdline(const multiboot_tag_string *cmd)
 {
-	printf ("Command line = %s\n",
-		  ((struct multiboot_tag_string *) tag)->string);
+	printf ("Command line = %s\n", cmd->string);
 }
 
-static void print_bootloader_name(multiboot_tag *tag)
+static void print_bootloader_name(const multiboot_tag_string *name)
 {
-	printf ("Boot loader name = %s\n",
-		  ((struct multiboot_tag_string *) tag)->string);
+	printf ("Boot loader name = %s\n", name->string);
 
 }
 
 
-static void print_module(multiboot_tag *tag)
+static void print_module(const multiboot_tag_module *module)
 {
 	printf ("Module at 0x%08.8x-0x%08.8x. Command line %s\n",
-		  ((struct multiboot_tag_module *) tag)->mod_start,
-		  ((struct multiboot_tag_module *) tag)->mod_end,
-		  ((struct multiboot_tag_module *) tag)->cmdline);
+		  module->mod_start, module->mod_end, module->cmdline);
 
 }
 
-static void print_basic_meminfo(multiboot_tag *tag)
+static void print_basic_meminfo(const multiboot_tag_basic_meminfo *info)
 {
 	printf ("mem_lower = %uKB, (0x%08.8xKB) mem_upper = %uKB (0x%08.8xKB)\n",
-		((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
-		((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
-		((struct multiboot_tag_basic_meminfo *) tag)->mem_upper,
-		((struct multiboot_tag_basic_meminfo *) tag)->mem_upper);
-
+		info->mem_lower, info->mem_lower, info->mem_upper, info->mem_upper);
 }
 
 
-static void print_boot_device(multiboot_tag *tag)
+static void print_boot_device(const multiboot_tag_bootdev *bootdev)
 {
 	printf ("Boot device 0x%08.8x, %u (0x%08.8x), %u (0x%08.8x)\n",
-		((struct multiboot_tag_bootdev *) tag)->biosdev,
-		((struct multiboot_tag_bootdev *) tag)->slice,
-		((struct multiboot_tag_bootdev *) tag)->slice,
-		((struct multiboot_tag_bootdev *) tag)->part,
-		((struct multiboot_tag_bootdev *) tag)->part);
+		bootdev->biosdev, bootdev->slice, bootdev->slice, bootdev->part, bootdev->part);
 }
 
-static void print_mmap(multiboot_tag *tag)
+static void print_mmap(const  multiboot_tag_mmap *mmapStart)
 {
-	multiboot_memory_map_t *mmap;
-
 	uint64_t	ram_size = 0;
 	uint64_t	acpi_size = 0;
 	uint64_t	reserved_size = 0;
@@ -303,18 +202,22 @@ static void print_mmap(multiboot_tag *tag)
 
 	printf ("mmap\n");
 
-	for (mmap = ((struct multiboot_tag_mmap *) tag)->entries;
-		 (multiboot_uint8_t *) mmap  < (multiboot_uint8_t *) tag + tag->size;
-		 mmap = (multiboot_memory_map_t *) ((unsigned long) mmap + ((struct multiboot_tag_mmap *) tag)->entry_size)) 
+	for (auto *mmap = mmapStart->entries;
+		 reinterpret_cast<const multiboot_uint8_t *>(mmap ) < reinterpret_cast<const multiboot_uint8_t *>(mmapStart) + mmapStart->size;
+		 mmap = reinterpret_cast<const multiboot_memory_map_t *> (reinterpret_cast<const uint8_t *>(mmap) + mmapStart->entry_size)) 
 	{
+		printf (" base_addr = 0x%08.8x%08.8x, length = 0x%08.8x%08.8x, type = %s\n",
+		HIDWORD(mmap->addr), LODWORD(mmap->addr) , 
+		HIDWORD(mmap->len), LODWORD(mmap->len),
+		mmap_type( mmap->type) );
 		
-		uint64_t endAddr = (mmap->addr + mmap->len);
-		printf (" base_addr: 0x%016.16llx, length=%llu, end: 0x%016.16lx,\n\ttype: %s\n", mmap->addr, mmap->len, endAddr, mmap_type( mmap->type) );
-		
-		//~ printf (" base_addr = 0x%08.8x%08.8x, length = 0x%08.8x%08.8x, type = %s\n",
-		//~ HIDWORD(mmap->addr), LODWORD(mmap->addr) , 
-		//~ HIDWORD(mmap->len), LODWORD(mmap->len),
-		//~ mmap_type( mmap->type) );
+	  /* printf (" base_addr = 0x%08.8x%08.8x,"
+		  " length = 0x%08.8x%08.8x, type = %s\n",
+		  HIDWORD(mmap->addr ),
+		  LODWORD(mmap->addr),
+		  HIDWORD (mmap->len),
+		  LODWORD (mmap->len),
+		  mmap_type( mmap->type) ) ; */
 		  
 		  if( MMAP_RAM == mmap->type)
 		  {
@@ -338,14 +241,15 @@ static void print_mmap(multiboot_tag *tag)
 	print_mem_size(acpi_size, "ACPI, ");
 	print_mem_size(defective_size, "Defective, ");
 	print_mem_size(reserved_size, "reserved\n");
+	// printf("Totals: %uK RAM, %uK ACPI, %uK Defective, %uK reserved\n", ram_size/1024, acpi_size/1024, defective_size/1024, reserved_size/1024 );
 
 }
 
-static uint32_t get_indexed_color(multiboot_tag_framebuffer *tagfb)
+static uint32_t get_indexed_color(const multiboot_tag_framebuffer *tagfb)
 {
 	uint32_t distance;
 
-	multiboot_color *palette = tagfb->framebuffer_palette;
+	const multiboot_color *palette = tagfb->framebuffer_palette;
 
 	uint32_t color = 0;
 	uint32_t best_distance = 4*256*256;
@@ -385,7 +289,15 @@ void set_pixel<multiboot_uint32_t, 24>(multiboot_tag_framebuffer *tagfb, multibo
 	*pixel = ((c & 0x00FFFFFF) | (*pixel & 0xFF000000));
 }
 
-static void set_pixel_color(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color)
+static void draw_line(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color, void (*set)(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t x, multiboot_uint32_t y, multiboot_uint32_t c))
+{
+	for (auto i = 0; i < tagfb->common.framebuffer_width && i < tagfb->common.framebuffer_height; i++)
+	{
+		set(tagfb, i, i, color);
+	}
+}
+
+static void set_pixel_color(const multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color)
 {
 	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
 	
@@ -414,12 +326,12 @@ static void set_pixel_color(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t
 	}
 }
 
-static void print_frame_buffer(multiboot_tag *tag)
+static void print_frame_buffer(const multiboot_tag_framebuffer *tagfb)
 {
 	multiboot_uint32_t color;
 	unsigned i;
-	struct multiboot_tag_framebuffer *tagfb
-	  = (struct multiboot_tag_framebuffer *) tag;
+	//~ struct multiboot_tag_framebuffer *tagfb
+	  //~ = (struct multiboot_tag_framebuffer *) tag;
 	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
 
 	printf("framebuffer: type: %d\n", tagfb->common.framebuffer_type);
@@ -490,30 +402,29 @@ tagType2String(multiboot_uint16_t type)
 /*  Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void
-cmain (unsigned long magic, unsigned long addr)
+cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr)
 {  
-	struct multiboot_tag *tag;
+	const multiboot_tag *tag;
 	unsigned size;
 
 	/*  Clear the screen. */
 //	cls (); 
 
-	/*  Am I booted by a Multiboot-compliant boot loader? */
-	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
+	if(!addr)
 	{
-	  printf ("Invalid magic number: 0x%x\n", (unsigned) magic);
+		printf("<NULL> MultiBootInfoHeader\n");
+		return;
+	}
+	
+	if ( reinterpret_cast<uintptr_t>(addr) & 7)
+	{
+	  printf ("Unaligned mbi: 0x%lx\n", reinterpret_cast<uintptr_t>(addr));
 	  return;
 	}
 
-	if (addr & 7)
-	{
-	  printf ("Unaligned mbi: 0x%lx\n", addr);
-	  return;
-	}
-
-	  size = *(unsigned *) addr;
-	  printf ("Announced mbi size %d (%08.8x) bytes\n", size, size);
-	  for (tag = (struct multiboot_tag *) (addr + 8);
+	  size = addr->size;
+	  printf ("Announced mbi size %d (%08.8x)\n", size, size);
+	  for (tag = addr->tags;
 		   tag->type != MULTIBOOT_TAG_TYPE_END ;
 		   tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 
 										   + ((tag->size + 7) & ~7)))
@@ -528,46 +439,58 @@ cmain (unsigned long magic, unsigned long addr)
 		switch (tag->type)
 		{
 			case MULTIBOOT_TAG_TYPE_ELF_SECTIONS:
-				print_elf_sections(tag);
+				bootInfo.elf_sections = reinterpret_cast<const multiboot_tag_elf_sections *>(tag);
+				print_elf_sections(bootInfo.elf_sections);
 				break;
 			case MULTIBOOT_TAG_TYPE_APM:
-				print_apm(tag);
+				bootInfo.apm = reinterpret_cast<const multiboot_tag_apm *>(tag);
+				print_apm(bootInfo.apm);
 				break;
 			case MULTIBOOT_TAG_TYPE_LOAD_BASE_ADDR:
-				print_load_base_addr(tag);
+				bootInfo.load_base_addr = reinterpret_cast<const multiboot_tag_load_base_addr *>(tag);
+				print_load_base_addr(bootInfo.load_base_addr );
 				break;
 			case MULTIBOOT_TAG_TYPE_ACPI_OLD:
-				print_acpi_old(tag);
+				bootInfo.acpi_old = reinterpret_cast<const multiboot_tag_old_acpi *>(tag);
+				print_acpi_old(bootInfo.acpi_old);
 				break;
 			case MULTIBOOT_TAG_TYPE_ACPI_NEW:
-				print_acpi_new(tag);
+				bootInfo.acpi_new = reinterpret_cast<const multiboot_tag_new_acpi *>(tag);
+				print_acpi_new(bootInfo.acpi_new);
 				break;
 			case MULTIBOOT_TAG_TYPE_CMDLINE:
-				print_cmdline(tag);
+				bootInfo.command_line = reinterpret_cast<const multiboot_tag_string *>(tag);
+				print_cmdline(bootInfo.command_line);
 				break;
 			case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-				print_bootloader_name(tag);
+				bootInfo.bootloader_name = reinterpret_cast<const multiboot_tag_string *>(tag);
+				print_bootloader_name(bootInfo.bootloader_name);
 				break;
 			case MULTIBOOT_TAG_TYPE_MODULE:
-				print_module(tag);
+				bootInfo.module_info = reinterpret_cast<const multiboot_tag_module *>(tag);
+				print_module(bootInfo.module_info);
 				break;
 			case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-				print_basic_meminfo(tag);
+				bootInfo.basic_meminfo = reinterpret_cast<const multiboot_tag_basic_meminfo *>(tag);
+				print_basic_meminfo(bootInfo.basic_meminfo);
 				break;
 			case MULTIBOOT_TAG_TYPE_BOOTDEV:
-				print_boot_device(tag);
+				bootInfo.boot_device = reinterpret_cast<const multiboot_tag_bootdev *>(tag);
+				print_boot_device(bootInfo.boot_device);
 				break;
 			case MULTIBOOT_TAG_TYPE_MMAP:
-				print_mmap(tag);
+				bootInfo.mmap = reinterpret_cast<const multiboot_tag_mmap *>(tag);
+				print_mmap(bootInfo.mmap);
 				break;
 			case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
-				print_frame_buffer(tag);
+				bootInfo.frame_buffer = reinterpret_cast<const multiboot_tag_framebuffer *>(tag);
+				print_frame_buffer(bootInfo.frame_buffer);
 				break;
 		}
 	}
 	tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag 
 								  + ((tag->size + 7) & ~7));
-	printf ("Total mbi size %u (0x%08.8x)\n", (unsigned) (unsigned long long)(tag - addr), (unsigned)(unsigned long long) (tag - addr));
+	printf ("Total mbi size %u (0x%08.8x)\n", (unsigned) (unsigned long long)((uint8_t *)tag - (uint8_t *)addr), (unsigned)(unsigned long long) ((uint8_t *)tag - (uint8_t *)addr));
 }    
 
 /*  Clear the screen and initialize VIDEO, XPOS and YPOS. */

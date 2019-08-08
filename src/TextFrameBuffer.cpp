@@ -147,7 +147,8 @@ void TextFrameBuffer::debug_out(char c)
 {
 	if( test(flags,TextFlags::ENABLE_DEBUG) )
 	{
-		outb(0xe9, c);
+		// outb(0xe9, c);
+		serial_putc(2, c);
 	}
 }
 

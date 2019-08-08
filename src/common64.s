@@ -11,7 +11,6 @@ section .text
 [GLOBAL halt]
 [GLOBAL invalidate_tlb]
 [GLOBAL invalidate_all_tlbs]
-[GLOBAL copy_page]
 
 invalidate_tlb:
 	invlpg [rdi]
@@ -63,12 +62,3 @@ halt:
 	cli
 	hlt
 	jmp halt
-
-; copy 1 page to another.
-copy_page:
-	shl rdx, 9	; rdx holds the number of pages to copy.  1 page == 4096 bytes == 512 quadwords (1<<9==512)
-	rep movsq 
-	ret
-
-	
-	
