@@ -376,16 +376,23 @@ heap_t *getKernelHeap()
     return kernelHeap;
 }
 
-void initHeap()
+extern "C"
+{
+    extern uint64_t placement_address;
+}
+
+Frames<uint64_t> *initHeap()
 {
     frames = New<Frames<uint64_t>>( (uint64_t)(2ull*1024ull*1024ull*1024ull) );
     // new (reinterpret_cast<void *>(frames_buffer)) Frames<uint64_t> {2ull*1024ull*1024ull*1024ull};
     frames->mapInitialPages(512);
     kernelHeap = initialKernelHeap();
+    debug_out("Heap Created. placement_address == 0x%016.16lx\n", placement_address);
+    return frames;
 }
 
 
-Page4K<uint64_t> *getPage(void *vaddr)
+Page4K *getPage(void *vaddr)
 {
     return pmle4->findPage(reinterpret_cast<uint64_t>(vaddr));
 }

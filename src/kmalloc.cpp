@@ -3,7 +3,7 @@
 #include "kheap.h"
 
 
-Page4K<uint64_t> *getPage(void *vaddr);
+Page4K *getPage(void *vaddr);
 extern heap_t *kernelHeap;
 
 extern "C"

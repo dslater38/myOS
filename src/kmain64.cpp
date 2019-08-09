@@ -21,14 +21,17 @@ void cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr);
 
 extern Foobar barfoo;
 
-extern void initHeap();
+extern Frames<uint64_t> *initHeap();
+void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
 
 extern "C"
 {
 	void initTextFrameBuffer();
 	extern uint64_t placement_address;
 	void __libc_init_array (void);
-
+	extern void startup_data_start();
+	extern void startup_data_end();
+	extern void report_idt_info();
 
 	void kmain64(uint32_t magic, const MultiBootInfoHeader *mboot_header)
 	{
@@ -69,8 +72,11 @@ extern "C"
 		{
 			printf("Initialized COM2\n");
 		}
-			
-		initHeap();
+		
+		debug_out("Startup Data Block: start 0x%016.16lx, end: 0x%016.16lx\n",(uint64_t)&startup_data_start, (uint64_t)&startup_data_end);
+		report_idt_info();
+		
+		auto *frames = initHeap();
 		printf("Heap Initialized...\n");
 		
 		success = init_serial(1, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
@@ -92,6 +98,7 @@ extern "C"
 		{
 			printf("process mboot_header\n");
 			cmain(bootInfo, mboot_header);
+			mapMemory(frames, bootInfo.mmap);
 		}
 		else
 		{
@@ -107,7 +114,35 @@ extern "C"
 
 }
 
-	
+extern Page4K *getPage(void *vaddr);
+
+void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap)
+{
+	const uint8_t *end = reinterpret_cast<const uint8_t *>(mmap) + mmap->size;
+	for (auto *entry = mmap->entries;
+		 reinterpret_cast<const uint8_t *>(entry) < end;
+		 entry = reinterpret_cast<const multiboot_memory_map_t *> (reinterpret_cast<const uint8_t *>(entry) + mmap->entry_size))
+	{
+		// mark anything that's not available as in use
+		// so we don't try to use these addresses.
+		if( entry->type != MULTIBOOT_MEMORY_AVAILABLE )
+		{
+			uint64_t nPages = (entry->len>>12);
+			frames->markFrames(entry->addr, nPages);
+			auto addr = entry->addr;
+			for( auto i=0ull; i<nPages; ++i, addr += 0x1000 )
+			{
+				auto *page = getPage(reinterpret_cast<void *>(addr));
+				if( page )
+				{
+					page->rw = 0; 	// mark the page as read-only
+					page->user = 0;	// only kernel access
+				}
+			}
+		}
+	}
+}
+
 static void test_page_fault()
 {
 	printf("Testing Page Fault\n");

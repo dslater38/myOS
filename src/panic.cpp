@@ -1,6 +1,7 @@
 #include "common.h"
 #include "vesavga.h"
 #include "TextFrameBuffer.h"
+#include <stdarg.h>
 
 extern "C"
 {

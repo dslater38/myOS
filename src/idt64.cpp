@@ -32,6 +32,12 @@ extern "C"
 		// install handlers for cpu generated exceptions.
 		install_processor_handlers();
 	}
+
+	void report_idt_info()
+	{
+		debug_out("Installed IDT at 0x%016.16lx, size %ld\n", reinterpret_cast<uint64_t>(&idt64_ptr), sizeof(idt64_ptr));
+		debug_out("IDT entries at 0x%016.16lx, size %ld\n", idt64_ptr.base(), sizeof(idt64_entries));
+	}
 }
 
 static void init_idt()

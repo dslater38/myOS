@@ -7,6 +7,8 @@ section .text
 [GLOBAL p4_table]
 [GLOBAL p3_table]
 [GLOBAL p2_table]
+[GLOBAL startup_data_start]
+[GLOBAL startup_data_end]
 [EXTERN init_gdt]
 [EXTERN kmain64]
 [EXTERN kernel_stack];
@@ -119,6 +121,7 @@ section .data
 ; Our GDT
 
 align 0x10
+startup_data_start:
 entries:
 .null:
 	dq 0
@@ -164,6 +167,6 @@ p1_table:						; PTE
 	%assign p p+ 0x00001000	; increment page entry virtual ( and physical ) address by page size (4K)
 	%endrep					; end of loop
 	dq (p4_table + 3)			; recursive last table entry points back to p4_table
-	
+startup_data_end:
 
 

@@ -29,15 +29,6 @@ public:
 
 	}
 
-	static void debug_out(const char *s)
-	{
-		while(*s)
-		{
-			outb(0xe9, *s);
-			++s;
-		}
-	}
-
 	void markFrames(Uint addr, size_t count)
 	{
 		for( auto i=0u; i<count; ++i, addr+=PAGE_SIZE)
@@ -60,7 +51,7 @@ public:
 		// }
 	}
 
-	void alloc(PageT<Uint> *page, int isKernel, int isWritable)
+	void alloc(PageT<> *page, int isKernel, int isWritable)
 	{
 		// static unsigned int nAllocated = 0;
 		if( page->frame == 0 )
@@ -86,7 +77,7 @@ public:
 		}
 	}
 
-	void free(PageT<Uint> *page)
+	void free(PageT<> *page)
 	{
 		auto frame = page->frame;
 		if( frame != 0 )
