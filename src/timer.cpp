@@ -7,7 +7,7 @@
 
 uint64_t tick = 0;
 
-static void timer_callback(registers_t regs)
+static void timer_callback(registers64_t regs)
 {
 	tick++;
 }
@@ -38,7 +38,7 @@ static void set_frequency(uint32_t frequency)
 void init_timer(uint32_t frequency)
 {
 	// Firstly, register our timer callback.
-	register_interrupt_handler(IRQ0, &timer_callback);
+	register_interrupt_handler64(IRQ0, &timer_callback);
 
 	set_repeat_mode();
 	set_frequency(frequency);

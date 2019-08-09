@@ -110,7 +110,7 @@ extern "C"
 	
 static void test_page_fault()
 {
-	monitor_write("Testing Page Fault\n");
+	printf("Testing Page Fault\n");
 	uint32_t *ptr = (uint32_t*)0xA0000000;
 	uint32_t do_page_fault = *ptr;
 	monitor_write_dec(do_page_fault);

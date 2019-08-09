@@ -9,8 +9,7 @@
 template<typename T, typename... TArgs>
 T *New(TArgs... args)noexcept
 {
-	void *memory = kmalloc(sizeof(T));
-	return new(memory) T{ std::forward<TArgs>(args)... };
+	return new(std::nothrow) T{ std::forward<TArgs>(args)... };
 }
 
 template<typename T, typename... TArgs>

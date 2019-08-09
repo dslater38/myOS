@@ -63,8 +63,10 @@ uint16_t LOWORD(uint32_t w)
 	return static_cast<uint16_t>(w & 0x0000FFFFu);
 }
 
-void panic(const char *message, const char *file, uint32_t line);
+void panic(const char *message, const char *file, uint32_t line, ...);
 void panic_assert(const char *file, uint32_t line, const char *desc);
+
+#define PANIC1(fmt,...) panic(fmt, __FILE__, __LINE__ , __VA_ARGS__)
 
 #define PANIC(msg) panic(msg, __FILE__, __LINE__);
 #define ASSERT(b) ((b) ? (void)0 : panic_assert(__FILE__, __LINE__, #b))

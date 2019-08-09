@@ -25,19 +25,12 @@ extern "C"
 {
 	void init_idt64_table()
 	{
+		// initialize and install the interrupt descriptor table
 		init_idt();
-		// for( auto i =0; i<256; ++i )
-		// {
-		// 	interrupt64_handlers[i] = nullptr;
-		// }
-		// register_interrupt_handler64(14, page_fault);
+		// zero out the handlers array
 		memset(&interrupt64_handlers, 0, sizeof(isr64_t)*256);
+		// install handlers for cpu generated exceptions.
 		install_processor_handlers();
-	}
-
-	void flush_idt64(void *p)
-	{
-		idt_flush(p);
 	}
 }
 
@@ -45,23 +38,21 @@ static void init_idt()
 {
 	idt64_ptr.limit() = sizeof(idt_entry64_t) * 256 -1;
 	idt64_ptr.base()  = reinterpret_cast<uint64_t>(&idt64_entries);
-
-
-	// memset(idt64_entries, 0, sizeof(idt_entry64_t)*256);
 	
 	for( auto i=0u; i<256; ++i )
 	{
 		idt_set_gate(i, 0, 0, 0);
-	}
-	
+	}	
 	
 	// Remap the irq table.
 	remap_pics();
 	
+	// setup the processor exception handler stubs
 	init_isrs();
+	// setup the IRQ handler stubs
 	init_irqs();
-
-	flush_idt64(&idt64_ptr);
+	// install the interrupt descriptor table
+	idt_flush(&idt64_ptr);
 }
 
 /* reinitialize the PIC controllers, giving them specified vector offsets
@@ -159,59 +150,4 @@ static void init_isrs()
 static void idt_set_gate(uint8_t num, uint64_t base, uint16_t sel, uint8_t flags)
 {
 	idt64_entries[num].set(base, sel, flags);
-#if 0
-	idt_entries[num].base_lo() = base & 0xFFFF;
-	idt_entries[num].base_hi() = (base >> 16) & 0xFFFF;
-
-	idt_entries[num].sel()     = sel;
-	idt_entries[num].always0() = 0;
-	// We must uncomment the OR below when we get to using user-mode.
-	// It sets the interrupt gate's privilege level to 3.
-	idt_entries[num].flags()   = flags /* | 0x60 */;
-#endif // 0
 }
-
-#if 0
-void page_fault(registers64_t regs)
-{
-	// Output an error message.
-	//monitor_write("Page fault! ( ");
-	char buf[64] = {0};
-	// A page fault has occurred.
-	// The faulting address is stored in the CR2 register.
-	uint64_t faulting_address = get_fault_addr64();
-	// uint32_t faulting_address;
-	// asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
-
-	// The error code gives us details of what happened.
-	int present   = !(regs.err_code & 0x1); // Page not present
-	int rw = regs.err_code & 0x2;           // Write operation?
-	int us = regs.err_code & 0x4;           // Processor was in user-mode?
-	int reserved = regs.err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
-	int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
-
-	// Output an error message.
-	monitor_write("Page fault! ( ");
-	if (present) {monitor_write("present ");} else {monitor_write("absent ");}
-	if (rw) {monitor_write("read-only ");} else {monitor_write("read/write ");}
-	if (us) {monitor_write("user-mode ");} else {monitor_write("kernel-mode ");}
-	if (reserved) {monitor_write("reserved ");} else {monitor_write("not-reserved ");}
-	if(id) { monitor_write("fetching instruction "); }
-	monitor_write(") at 0x");
-	monitor_write_hex(faulting_address);
-	monitor_write("\n");
-	
-	sprintf(buf, ") at 0x%08.8X%08.8X\n", HIDWORD(faulting_address), LODWORD(faulting_address) );
-	monitor_write(buf);
-	
-	//~ sprintf(buf, ") at 0x%08Lx\n", faulting_address);
-	//~ monitor_write(buf);
-	// monitor_write(") at 0x");
-	// monitor_write_hex(faulting_address);
-
-	// monitor_write64("Page fault!!!!!!!!!!!!!!!!!!!!\n");
- 	PANIC("Page fault");
-}
-
-#endif // 0
-
