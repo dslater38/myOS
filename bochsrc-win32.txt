@@ -1,0 +1,36 @@
+megs: 2048
+
+romimage: file=$BXSHARE/BIOS-bochs-latest
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+floppya: 1_44=floppy.img, status=inserted
+
+ata0-master: type=disk, path="hda.img", mode=flat, cylinders=20, heads=16, spt=63, translation=lba
+ata0-slave: type=cdrom, path=os.iso, status=inserted
+
+boot: cdrom
+
+log: bochsout.txt
+
+display_library: win32
+# display_library: x, options="gui_debug"
+
+mouse: enabled=0
+clock: sync=realtime
+cpu: ips=1000000
+# cpuid: level=6, mmx=1, sep=1, simd=avx512, apic=xapic, aes=1, sha=1, adx=1, movbe=1, xsave=1, xsaveopt=1, avx_fma=1, bmi=1, x86_64=1, 1g_pages=1, pcid=1, smep=1, smap=1, mwait=1
+# vmx=1
+
+com1: enabled=1, mode=file, dev=serial.out
+port_e9_hack: enabled=1
+debug_symbols: file=kernel.sym
+debug: action=ignore, pci=report
+info: action=report
+error: action=report
+panic: action=ask
+
+# speaker: enabled=1, mode=sound
+# debug: action=ignore, CPU0=report
+# info: action=ignore, BXVGA=report
+# pcipnic: enabled=1, mac=b0:c4:20:4F:18:00, ethmod=linux, ethdev=ens33
+

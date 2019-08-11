@@ -1,5 +1,10 @@
 #include "kmalloc.h"
 #include "vesavga.h"
+#include "kheap.h"
+
+
+Page4K *getPage(void *vaddr);
+extern heap_t *kernelHeap;
 
 extern "C"
 {
@@ -40,18 +45,39 @@ extern "C"
 
 	static void *kmalloc_generic(size_t sz, bool align, void **phys)
 	{
-		if( align )
+		if(kernelHeap)
 		{
-			page_align_placement();
+			void *vaddr = kernelHeap->alloc(sz, align);
+			if (phys != 0)
+			{
+				auto *page = getPage(vaddr);
+				*phys = reinterpret_cast<void *>(page->frame*0x1000 + reinterpret_cast<uint64_t>(vaddr)&0xFFFull);
+			}
+			return vaddr;
 		}
+		else
+		{
+			if( align )
+			{
+				page_align_placement();
+			}
 
-		auto *tmp = reinterpret_cast<void *>(placement_address);
-		if (phys)
-		{
-			*phys = tmp;
-		}
+			auto *tmp = reinterpret_cast<void *>(placement_address);
+			if (phys)
+			{
+				*phys = tmp;
+			}
 		
-		placement_address += sz;
-		return tmp;
+			placement_address += sz;
+			return tmp;
+
+		}
+	}
+	void kfree(void *vaddr)
+	{
+		if(kernelHeap)
+		{
+			kernelHeap->free(vaddr);
+		}
 	}
 }

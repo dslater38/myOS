@@ -21,21 +21,37 @@ public:
 		auto allocSize = numUints*sizeof(Uint);			// number of bytes to allocate == allocSize*8 bits
 		frames = (Uint*)kmalloc_aligned(allocSize);		// frames buffer.
 
-		//~ printf32("maxzSize: %u\n",(uint32_t)maxSize);
+		printf("maxzSize: %u\n",(uint32_t)maxSize);
 		
-		//~ printf32("frames: %08.8x to %08.8x for %d bits, maxSize: %u\n", (uint32_t)frames, (uint32_t)(((unsigned char *)frames) + allocSize), allocSize*8, (uint32_t)maxSize);
-		// memset32(frames, 0, allocSize);
-		unsigned char *p = reinterpret_cast<unsigned char *>(frames);
-		for( auto i=0; i<allocSize; ++i )
-		{
-			p[i] = '\0';
-		}
-		
-		//~ printf32("maxzSize: %u\n",(uint32_t)maxSize);
+		printf("frames: %016.16lx to %016.16lx for %ld bits, maxSize: %lu\n", (uint64_t)frames, (uint64_t)(((unsigned char *)frames) + allocSize), allocSize*8, (uint64_t)maxSize);
+		memset(frames, 0, allocSize);
+		printf("maxzSize: %u\n",(uint32_t)maxSize);
+
 	}
 
+	void markFrames(Uint addr, size_t count)
+	{
+		for( auto i=0u; i<count; ++i, addr+=PAGE_SIZE)
+		{
+			set(addr);
+		}
+	}
 
-	void alloc(PageT<Uint> *page, int isKernel, int isWritable)
+	void mapInitialPages(Uint initialMappedPages)
+	{
+		markFrames(0, initialMappedPages);
+		// // mark the pages that are already mapped as in use.
+		// uint64_t addr = 0;
+		// char buffer[32];
+		// for( auto i=0; i<initialMappedPages; ++i, addr+=PAGE_SIZE)
+		// {
+		// 	// sprintf(buffer,"%d\n",i);
+		// 	// debug_out(buffer);
+		// 	set(addr);
+		// }
+	}
+
+	void alloc(PageT<> *page, int isKernel, int isWritable)
 	{
 		// static unsigned int nAllocated = 0;
 		if( page->frame == 0 )
@@ -61,9 +77,9 @@ public:
 		}
 	}
 
-	void free(PageT<Uint> *page)
+	void free(PageT<> *page)
 	{
-		auto frame = page->frame();
+		auto frame = page->frame;
 		if( frame != 0 )
 		{
 			clear(frame);

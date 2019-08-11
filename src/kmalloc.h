@@ -12,6 +12,8 @@ void *kmalloc_aligned(size_t sz);
 void *kmalloc_phys(size_t sz, void **phys);
 void *kmalloc_aligned_phys(size_t sz, void **phys);
 
+void kfree(void *vaddr);
+
 
 #ifdef __cplusplus
 }

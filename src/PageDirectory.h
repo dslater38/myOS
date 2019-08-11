@@ -4,16 +4,16 @@
 #include "kmalloc.h"
 #include "PageT.h"
 #include "memcpy.h"
+#include "NewObj.h"
 
 template<typename T, const int SHIFT, const int BITS>
 struct PageDirectory
 {
 	using PageType=typename T::PageType;
-	using  Pointer=typename PageType::Pointer;
 
 	static constexpr int bits=BITS;
-	static constexpr Pointer MASK = ((1<<BITS)-1);
-	static constexpr decltype(sizeof(int)) NUM_ENTRIES = 4096 / sizeof(Pointer);
+	static constexpr uintptr_t MASK = ((1<<BITS)-1);
+	static constexpr decltype(sizeof(int)) NUM_ENTRIES = 4096 / sizeof(uintptr_t);
 	
 	static constexpr  size_t OFFSET_BITS=T::OFFSET_BITS;
 	
@@ -21,72 +21,84 @@ struct PageDirectory
 	
 	static constexpr size_t shift=T::shift+BITS;
 	
-	static constexpr Pointer ATTRS = ((OFFSET_BITS >12 ) ? 0x43 : 0x03);
+	static constexpr uintptr_t ATTRS = ((OFFSET_BITS >12 ) ? 0x43 : 0x03);
 
-	Pointer physical[NUM_ENTRIES];
+	uintptr_t physical[NUM_ENTRIES];
 
 	PageDirectory()
 	{
 		memset(physical, '\0', sizeof(physical));
 	}
 
-	void setPhys(Pointer p)
+	void setPhys(uintptr_t p)
 	{
 	}
 
-	Pointer index(Pointer vaddr)const
+	uintptr_t index(uintptr_t vaddr)const
 	{
 		return ((vaddr>>(SHIFT)) & MASK);
 	}
 
 	T *operator[](int n)const
 	{
-		const Pointer MASK = (~((Pointer)(0xFFF)));
+		const uintptr_t MASK = (~((uintptr_t)(0xFFF)));
 		return reinterpret_cast<T *>(  MASK & physical[n] );
 	}
 
-	PageType *getPage(Pointer vaddr)
-	{
-		auto *page = findPage(vaddr);
-		if( page == nullptr)
-		{
-			void *phys = 0;
-			auto i = index(vaddr);
-			auto *table = AlignedNew<T>(&phys );
-			physical[i] = static_cast<Pointer>(phys|ATTRS); // PRESENT, RW, US.
-			page = table->getPage(vaddr);
-		}
-		return page;
-	}
-
-	PageType *findPage(Pointer vaddr)
+	PageType *getPage(uintptr_t vaddr)
 	{
 		auto i = index(vaddr);
-		auto n = physical[i] ;
-
-		if( (n & 0xFFFFFFFCull) != 0 )
+		T *table = (*this)[i];
+		if( table == nullptr )
 		{
-			PageDirectoryEntryT<Pointer> &entry  = PageDirectoryEntryT<Pointer>::toEntry(n);
-		
-			ASSERT( entry.present == 1 );
-		
-			auto *table = (T *)(n & 0xFFFFFFFCull);
-		
-			return table ? table->getPage(vaddr) : nullptr;
+			if( sizeof(T) == sizeof(Page4K))
+			{
+				physical[i] = 0;
+				table = reinterpret_cast<T *>(&(physical[i]));
+			}
+			else
+			{			
+				void *phys = 0;
+				table = AlignedNewPhys<T>(&phys );
+				physical[i] = static_cast<uintptr_t>(reinterpret_cast<uintptr_t>(phys)|ATTRS); // PRESENT, RW, US.
+			}
 		}
-		return nullptr;
+		return table->getPage(vaddr);
+	}
+
+	PageType *findPage(uintptr_t vaddr)
+	{
+		auto i = index(vaddr);
+		T *table = (*this)[i];
+		if( table == nullptr )
+		{
+			if( sizeof(T) == sizeof(Page4K))
+			{
+				physical[i] = 0;
+				return reinterpret_cast<PageType *>(&(physical[i]));
+			}
+			else
+			{
+				return nullptr;		
+			}
+		}
+		return table->findPage(vaddr);
 	}
 
 	void dump()const
 	{
-#if 0		
-		printf("PageDirectory: this 0x%08.8x, phys 0x%08.8x\n", (uint32_t)this ,(uint32_t)physicalAddr);
+#if 0	
+		printf("PageDirectory<T,%d,%d>: this 0x%016.16lx\n", SHIFT, BITS, (uint64_t)this);
 		for (auto i = 0u; i < NUM_ENTRIES; ++i)
 		{
-			printf("entry: %d == 0x%08.8x (0x%08.8x)\n", i, (uint32_t)tables[i], (uint32_t)physical[i]);
-			if (tables[i])
+			uint64_t entry = (uint64_t)physical[i];
+			if( entry != 0)
 			{
-				reinterpret_cast<T *>(tables[i])->dump();
+				printf("entry: %d == 0x%016.16lx \n", i, entry);
+				if (physical[i])
+				{
+					reinterpret_cast<T *>( entry & 0xFFFFFFFFFFFFF000)->dump();
+				}
 			}
 		}
 		printf("===========================================\n");
@@ -94,35 +106,36 @@ struct PageDirectory
 	}
 };
 
-template<class UINT, const int BITS>
+template<const int BITS, const int PAGE_BITS=12>
 class PageTableT
 {
 public:
 
-	static constexpr decltype(sizeof(int)) NUM_PAGES = 4096 / sizeof(UINT);
+	static constexpr decltype(sizeof(int)) NUM_PAGES = 4096 / sizeof(uintptr_t);
+	static constexpr uintptr_t MASK = (~(static_cast<uintptr_t>(-1)<<BITS));
 
 	PageTableT()
 	{
-		UINT *p = reinterpret_cast<UINT *>(pages);
+		uintptr_t *p = reinterpret_cast<uintptr_t *>(pages);
 		for( auto i=0; i<NUM_PAGES; ++i )
 		{
 			p[i] = 0u;
 		}
 	}
 
-	using PageType=PageT<UINT>;
+	using PageType=PageT<PAGE_BITS>;
 	static constexpr  size_t OFFSET_BITS=PageType::OFFBITS;
 
-	PageType *getPage(UINT vaddr)
+	PageType *getPage(uintptr_t vaddr)
 	{
-		return &(pages[( (vaddr >> 12) & 0x1FF)]);
+		return &(pages[( (vaddr >> (PAGE_BITS)) & MASK)]);
 	}
 
 	void setPhys(uint32_t){}
 
-	UINT operator[](int n)
+	uintptr_t operator[](int n)
 	{
-		return *(UINT *)(&pages[n]);
+		return *(uintptr_t *)(&pages[n]);
 	}
 
 	void dump()
@@ -140,19 +153,20 @@ private:
 
 };
 
-template<class T, const int BITS=9>
-using PageTable64 = PageTableT<uint64_t,BITS>;
+template<const int BITS=9>
+using PageTable64 = PageTableT<BITS>;
 
 template<typename T, const int SHIFT>
 using PageDirectory64 = PageDirectory<T, SHIFT, 9>;
 
-using PTE_=PageTable64<uint64_t>;
+template<const int BITS=9>
+using PTE_=PageTable64<BITS>;
 
 template<typename T>
 using PDE_ = PageDirectory64<T, 21>;
 
 template<const int BITS=10>
-using PageTable32 = PageTableT<uint32_t,BITS>;
+using PageTable32 = PageTableT<BITS>;
 
 template<typename T, const int SHIFT>
 using PageDirectory32 = PageDirectory<T, SHIFT, 10>;
@@ -181,22 +195,22 @@ using PDE32_2M = PageTable32<22>;
 
 // 32-bit PAE paging ( 4K or 2MB pages )
 using PDPTE_PAE = PageDirectory32<PDE32<PTE32>, 30>;
-using PDPTE_PAE_ = PageDirectory<PageDirectory<Page4K<uint32_t>, 12,10>,30,10>;
+using PDPTE_PAE_ = PageDirectory<PageDirectory<Page4K, 12,10>,30,10>;
 
 
 // 32-bit 4K page:
-using Page32_4K=Page4K<uint32_t>;
+using Page32_4K=Page4K;
 // 32-bit 2M page
-using Page32_2M=Page2M<uint32_t>;
+using Page32_2M=Page2M;
 // 32-bit 4M page: - defined in PageT.h
 // Page4M=PageT<uint32_t, 22>;
 
 // 64 bit 4K page
-using Page64_4K=Page4K<uint64_t>;
+using Page64_4K=Page4K;
 // 64-bit 2M page
-using Page64_2M=Page2M<uint64_t>;
+using Page64_2M=Page2M;
 // 64-bit 1G page
-using Page64_1G=Page1G<uint64_t>;
+using Page64_1G=Page1G;
 
 // 32-bit 4k page table
 using PTE_32_4K=PageDirectory<Page32_4K,Page32_4K::shift,10>;
@@ -228,6 +242,7 @@ using PML4E_2M=PageDirectory<PDPTE_64_2M,PDPTE_64_2M::shift,9>;
 // 64-bit 1G page table
 using PDPTE_64_1G=PageDirectory<Page64_1G,Page64_1G::shift,9>;
 using PML4E_1G=PageDirectory<PDPTE_64_1G,PDPTE_64_1G::shift,9>;
+
 
 
 #endif // PAGEDIRECTORY_H_INCLUDED

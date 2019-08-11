@@ -25,22 +25,22 @@ uint8_t set_foreground_color(uint8_t clr);
 uint8_t set_background_color(uint8_t clr);
 
 
-#define BLACK 0
-#define BLUE 1
-#define GREEN 2
-#define CYAN 3
-#define RED 4
-#define MAGENTA 5
-#define BROWN 6
-#define LTGRAY 7
-#define DKGRAY 8
-#define LTBLUE 9
-#define LTGREEN 10
-#define LTCYAN 11
-#define LTRED 12
-#define LTMAGENTA 13
-#define LTBROWN 14
-#define WHITE 15
+// #define BLACK 0
+// #define BLUE 1
+// #define GREEN 2
+// #define CYAN 3
+// #define RED 4
+// #define MAGENTA 5
+// #define BROWN 6
+// #define LTGRAY 7
+// #define DKGRAY 8
+// #define LTBLUE 9
+// #define LTGREEN 10
+// #define LTCYAN 11
+// #define LTRED 12
+// #define LTMAGENTA 13
+// #define LTBROWN 14
+// #define WHITE 15
 
 #ifdef __cplusplus
 }

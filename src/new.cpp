@@ -4,24 +4,28 @@ extern "C" {
 #include "kmalloc.h"
 	
 }
+	void *operator new(std::size_t size, const std::nothrow_t &)noexcept
+	{
+		return kmalloc(size);
+	}
+
+	void operator delete(void *p, const std::nothrow_t &)noexcept
+	{
+		kfree(0);
+	}
+
+	void *operator new[](std::size_t size, const std::nothrow_t &)noexcept
+	{
+		return kmalloc(size);
+	}
+
+	void operator delete[](void *p, const std::nothrow_t &)noexcept
+	{
+		kfree(0);
+	}
 
 
-void *operator new(std::size_t size)
+namespace std
 {
-	return reinterpret_cast<void *>(kmalloc(size));
-}
-
-void operator delete(void *)noexcept
-{
-	// kfree(reinterpret_cast<>);
-}
-
-void *operator new[](std::size_t size)
-{
-	return reinterpret_cast<void *>(kmalloc(size));
-}
-
-void operator delete[](void *)noexcept
-{
-	// kfree(reinterpret_cast<>);
+	const nothrow_t nothrow{};
 }
