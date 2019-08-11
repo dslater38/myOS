@@ -7,6 +7,7 @@
 #include <string.h>
 #include "common.h"
 #include "vesavga.h"
+#include "serial.h"
 
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')
@@ -415,9 +416,6 @@ extern "C"
 		(void)vsprintf_imp(buffer, fmt, args);
 		va_end(args);
 		char *s = buffer;
-		for(auto i=0; i<1024 && *s; ++i, ++s)
-		{
-			outb(0xe9, *s);
-		}
+		serial_write(2, s);
 	}
 }

@@ -7,9 +7,13 @@ section .text
 [GLOBAL p4_table]
 [GLOBAL p3_table]
 [GLOBAL p2_table]
+[GLOBAL startup_data_start]
+[GLOBAL startup_data_end]
 [EXTERN init_gdt]
 [EXTERN kmain64]
 [EXTERN kernel_stack];
+[EXTERN init_idt64_table]
+[EXTERN __libc_init_array]
 
 %include "macros.mac"
 
@@ -71,7 +75,13 @@ start:
 [BITS 64]
 start64:
 	and edi, edi	; 32-bit magic value is in edi. Make sure high order DWORD of rdi is cleared
-	and esi,esi	; multiboot header pointer was put in esi. It's < 32 bits, make sure upper DWORD of rsi is cleared.
+	and esi, esi	; multiboot header pointer was put in esi. It's < 32 bits, make sure upper DWORD of rsi is cleared.
+	mov r14, rdi	; save rdi & rsi while we call init_idt64_table & __libc_init_array
+	mov r15, rsi
+	call init_idt64_table
+	call __libc_init_array
+	mov rdi, r14
+	mov rsi, r15
 	jmp kmain64	; Jump to kmain64
 	xchg bx,bx	
 .loop:
@@ -111,6 +121,7 @@ section .data
 ; Our GDT
 
 align 0x10
+startup_data_start:
 entries:
 .null:
 	dq 0
@@ -126,6 +137,10 @@ entries:
 	GDT 0, 0xFFFFFFFF, (GDT_CODE_SEGMENT|GDT_READ_WRITE|GDT_CONFORMING|GDT_DESCRIPTOR_CODE_DATA|GDT_RING3|GDT_PRESENT|GDT_32_BIT_OPERAND|GDT_GRAN_4K)
 .user_data_32:
 	GDT 0, 0xFFFFFFFF, (GDT_DATA_SEGMENT|GDT_READ_WRITE|GDT_DIRECTION_UP|GDT_DESCRIPTOR_CODE_DATA|GDT_RING3|GDT_PRESENT|GDT_32_BIT_OPERAND|GDT_GRAN_4K)
+.user_code_16:
+	GDT 0, 0xFFFFFFFF, (GDT_CODE_SEGMENT|GDT_READ_WRITE|GDT_CONFORMING|GDT_DESCRIPTOR_CODE_DATA|GDT_RING3|GDT_PRESENT|GDT_16_BIT_OPERAND|GDT_GRAN_4K)
+.user_data_16:
+	GDT 0, 0xFFFFFFFF, (GDT_DATA_SEGMENT|GDT_READ_WRITE|GDT_DIRECTION_UP|GDT_DESCRIPTOR_CODE_DATA|GDT_RING3|GDT_PRESENT|GDT_16_BIT_OPERAND|GDT_GRAN_4K)	
 .end_entries:
 
 gdt:
@@ -152,6 +167,6 @@ p1_table:						; PTE
 	%assign p p+ 0x00001000	; increment page entry virtual ( and physical ) address by page size (4K)
 	%endrep					; end of loop
 	dq (p4_table + 3)			; recursive last table entry points back to p4_table
-	
+startup_data_end:
 
 

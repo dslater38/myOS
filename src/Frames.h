@@ -29,29 +29,29 @@ public:
 
 	}
 
-	static void debug_out(const char *s)
+	void markFrames(Uint addr, size_t count)
 	{
-		while(*s)
+		for( auto i=0u; i<count; ++i, addr+=PAGE_SIZE)
 		{
-			outb(0xe9, *s);
-			++s;
+			set(addr);
 		}
 	}
 
 	void mapInitialPages(Uint initialMappedPages)
 	{
-		// mark the pages that are already mapped as in use.
-		uint64_t addr = 0;
-		char buffer[32];
-		for( auto i=0; i<initialMappedPages; ++i, addr+=0x1000)
-		{
-			// sprintf(buffer,"%d\n",i);
-			// debug_out(buffer);
-			set(addr);
-		}
+		markFrames(0, initialMappedPages);
+		// // mark the pages that are already mapped as in use.
+		// uint64_t addr = 0;
+		// char buffer[32];
+		// for( auto i=0; i<initialMappedPages; ++i, addr+=PAGE_SIZE)
+		// {
+		// 	// sprintf(buffer,"%d\n",i);
+		// 	// debug_out(buffer);
+		// 	set(addr);
+		// }
 	}
 
-	void alloc(PageT<Uint> *page, int isKernel, int isWritable)
+	void alloc(PageT<> *page, int isKernel, int isWritable)
 	{
 		// static unsigned int nAllocated = 0;
 		if( page->frame == 0 )
@@ -77,7 +77,7 @@ public:
 		}
 	}
 
-	void free(PageT<Uint> *page)
+	void free(PageT<> *page)
 	{
 		auto frame = page->frame;
 		if( frame != 0 )

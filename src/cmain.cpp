@@ -361,6 +361,44 @@ static void print_frame_buffer(const multiboot_tag_framebuffer *tagfb)
 	  set_pixel_color(tagfb, color);
 }
 
+#define STR(a) #a
+#define CONCAT(a,b) a##b
+
+#define CASE(a) case a: return #a;
+
+const char *
+tagType2String(multiboot_uint16_t type)
+{
+	switch(type)
+	{
+		CASE(MULTIBOOT_TAG_TYPE_END);
+		CASE(MULTIBOOT_TAG_TYPE_CMDLINE);
+		CASE(MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME);
+		CASE(MULTIBOOT_TAG_TYPE_MODULE);
+		CASE(MULTIBOOT_TAG_TYPE_BASIC_MEMINFO);
+		CASE(MULTIBOOT_TAG_TYPE_BOOTDEV);
+		CASE(MULTIBOOT_TAG_TYPE_MMAP);
+		CASE(MULTIBOOT_TAG_TYPE_VBE);
+		CASE(MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
+		CASE(MULTIBOOT_TAG_TYPE_ELF_SECTIONS);
+		CASE(MULTIBOOT_TAG_TYPE_APM);
+		CASE(MULTIBOOT_TAG_TYPE_EFI32);
+		CASE(MULTIBOOT_TAG_TYPE_EFI64);
+		CASE(MULTIBOOT_TAG_TYPE_SMBIOS);
+		CASE(MULTIBOOT_TAG_TYPE_ACPI_OLD);
+		CASE(MULTIBOOT_TAG_TYPE_ACPI_NEW);
+		CASE(MULTIBOOT_TAG_TYPE_NETWORK);
+		CASE(MULTIBOOT_TAG_TYPE_EFI_MMAP);
+		CASE(MULTIBOOT_TAG_TYPE_EFI_BS);
+		CASE(MULTIBOOT_TAG_TYPE_EFI32_IH);
+		CASE(MULTIBOOT_TAG_TYPE_EFI64_IH);
+		CASE(MULTIBOOT_TAG_TYPE_LOAD_BASE_ADDR);
+		default:
+			break;
+	}
+	return "<unknown>";
+}
+
 /*  Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void
@@ -392,7 +430,8 @@ cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr)
 										   + ((tag->size + 7) & ~7)))
 	{
 		uint8_t oldColor = set_foreground_color((uint8_t)TextColors::RED);
-		printf ("Tag 0x%08.8x, Size 0x%08.8x\n", tag->type, tag->size);
+		// printf ("Tag 0x%08.8x, Size %d\n", tag->type, tag->size);
+		printf("Tag: %s, Size %d\n",tagType2String(tag->type), tag->size);
 		if( oldColor != 0xFF )
 		{
 			set_foreground_color(oldColor);

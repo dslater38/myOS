@@ -7,12 +7,9 @@
 
 uint64_t tick = 0;
 
-static void timer_callback(registers_t regs)
+static void timer_callback(registers64_t regs)
 {
 	tick++;
-	//~ monitor_write("Tick: ");
-	//~ monitor_write_dec(tick);
-	//~ monitor_write("\n");
 }
 
 static void set_repeat_mode()
@@ -30,8 +27,8 @@ static void set_frequency(uint32_t frequency)
 	uint32_t divisor = PIT_CLOCK_FREQ / frequency;
 	
 	// Divisor has to be sent byte-wise, so split here into upper/lower bytes.
-	uint8_t l = (uint8_t)(divisor & 0xFF);
-	uint8_t h = (uint8_t)( (divisor>>8) & 0xFF );
+	uint8_t l = LOBYTE(divisor);
+	uint8_t h =HIBYTE(divisor);
 
 	// Send the frequency divisor.
 	outb(PIT_CHANNEL_0, l);
@@ -41,7 +38,7 @@ static void set_frequency(uint32_t frequency)
 void init_timer(uint32_t frequency)
 {
 	// Firstly, register our timer callback.
-	register_interrupt_handler(IRQ0, &timer_callback);
+	register_interrupt_handler64(IRQ0, &timer_callback);
 
 	set_repeat_mode();
 	set_frequency(frequency);
