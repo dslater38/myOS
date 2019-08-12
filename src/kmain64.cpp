@@ -9,6 +9,7 @@
 #include "MultiBootInfoHeader.h"
 #include "BootInformation.h"
 #include "Foobar.h"
+#include "vfs.h"
 
 void init_idt64_table();
 
