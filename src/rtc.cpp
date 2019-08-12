@@ -59,6 +59,12 @@ fromBDC(uint8_t bcd)
     return (((bcd & 0xF0)>>4)*10 + (bcd & 0x0F));
 }
 
+uint64_t
+JulianDay(int64_t M, int64_t D, int64_t Y)
+{
+    return (1461 * (Y+4800+(M-14)/12)/4 + (367*(M-2-12*((M-14)/12)))/12 - (3*((Y+4900+(M-14)/12)/100))/4 + D - 32075);
+}
+
 uint64_t RTC_currentTime()
 {
     for(;;)
