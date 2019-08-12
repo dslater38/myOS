@@ -153,7 +153,8 @@ gdt:
 align 0x1000
 p4_table:						; PML4E
 	dq (p3_table + 3)			; pointer to PDPTE table with rw & present bits set
-	TIMES 511 dq 0			; write 511 null entries to fill the table.
+	TIMES 510 dq 0			; write 511 null entries to fill the table.
+	dq (p4_table + 3)			; recursive last table entry points back to p4_table (with present & rw bits set)
 p3_table:						; PDPTE
 	dq (p2_table + 3)			; pointer to PDE table with rw & present bits set.
 	TIMES 511 dq 0			; write 511 null entries to fill the table.
@@ -162,11 +163,10 @@ p2_table:						; PDE
 	TIMES 511 dq 0			; write 511 null entries for a total of 512 entries
 p1_table:						; PTE 
 	%assign p 0x03			; set the rw & present bits (0x03) 
-	%rep 511					; write 511 of 512 entries to the PTE table
+	%rep 512					; write 511 of 512 entries to the PTE table
 	dq p						; write page entry
 	%assign p p+ 0x00001000	; increment page entry virtual ( and physical ) address by page size (4K)
 	%endrep					; end of loop
-	dq (p4_table + 3)			; recursive last table entry points back to p4_table
 startup_data_end:
 
 
