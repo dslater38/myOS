@@ -24,6 +24,7 @@ extern Foobar barfoo;
 
 extern Frames<uint64_t> *initHeap();
 void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
+uint64_t RTC_currentTime();
 
 extern "C"
 {
@@ -106,7 +107,8 @@ extern "C"
 			PANIC("mboot_header is NULL\n");
 		}
 		
-		printf("barfoo: %s\n", barfoo.get());
+		printf("RTC Current Time:\n");
+		RTC_currentTime();
 
 		test_page_fault();
 		

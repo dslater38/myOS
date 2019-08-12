@@ -13,11 +13,8 @@ struct IVfsNode
     virtual uint32_t write(uint64_t offset, uint64_t size, const uint8_t *buffer)noexcept =0;
     virtual void open(bool forWrite)noexcept =0;
     virtual void close()noexcept =0;
-    virtual const IVfsDirectoryNode *toDir()const noexcept = 0;
-    virtual IVfsDirectoryNode *toDir()noexcept = 0;
-    virtual const IVfsFileNode *toFile()const noexcept = 0;
-    virtual IVfsFileNode *toFile()noexcept = 0;
     uint64_t    inode{0};
+    uint64_t    flags{0};
 };
 
 #endif // VFS_H_INCLUDED__
