@@ -1,7 +1,7 @@
 #ifndef DESCRIPTOR_TABLES_H_INCLUDED
 #define DESCRIPTOR_TABLES_H_INCLUDED
 
-#include "types.h"
+#include <stdint.h>
 
 // This structure contains the value of one GDT entry.
 // We use the attribute 'packed' to tell GCC not to change

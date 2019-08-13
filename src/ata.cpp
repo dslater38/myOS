@@ -3,7 +3,7 @@
 
 #include "vesavga.h"
 #include "common.h"
-#include "types.h"
+#include <stdint.h>
 #include "ata.h"
 
 void write(void *buffer, uint32_t address, uint32_t size);
