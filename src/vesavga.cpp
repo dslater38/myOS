@@ -5,6 +5,11 @@
 
 TextFrameBuffer *video=nullptr;
 
+TextFrameBuffer *getVideo()
+{
+	return video;
+}
+
 extern "C"
 {
 	void initTextFrameBuffer()

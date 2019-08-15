@@ -10,7 +10,7 @@ uint64_t tick = 0;
 static void timer_callback(registers64_t regs)
 {
 	tick++;
-	printf("tick: %ld\n", tick);
+//	printf("tick: %ld\n", tick);
 }
 
 static void set_repeat_mode()

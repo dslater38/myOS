@@ -61,6 +61,7 @@ public:
 	void put(char c);
 	void clear();
 	void write(const char *str);
+	void write_at(uint16_t row, uint16_t col, TextColors fg, TextColors bg, const char *str);
 
 private:
 	void inc_cur_line();
@@ -85,5 +86,7 @@ private:
 	uint16_t cursor_y {0};
 	uint8_t	flags{TextFlags::ENABLE_SERIAL|TextFlags::ENABLE_DEBUG};
 };
+
+TextFrameBuffer *getVideo();
 
 #endif // TEXTFRAMEBUFFER_H_INCLUDED

@@ -119,8 +119,8 @@ extern "C"
 
 		while(true)
 		{
-			//asm("sti");
-			//asm("hlt");
+			// asm("sti");
+			asm("hlt");
 		}
 
 		// test_page_fault();

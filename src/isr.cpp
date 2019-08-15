@@ -17,10 +17,10 @@ extern "C"
 	{
 		if (interrupt64_handlers[regs.int_no] != 0)
 		{
-			printf("Call ISR handler %ld\n", regs.int_no);
+		//	printf("Call ISR handler %ld\n", regs.int_no);
 			isr64_t handler = interrupt64_handlers[regs.int_no];
 			handler(regs);
-			printf("ISR handler %ld returned\n", regs.int_no);
+		//	printf("ISR handler %ld returned\n", regs.int_no);
 		}
 		else
 		{
@@ -49,10 +49,10 @@ extern "C"
 
 		if (interrupt64_handlers[regs.int_no] != 0)
 		{
-			printf("Call IRQ handler %ld\n", regs.int_no);
+		//	printf("Call IRQ handler %ld\n", regs.int_no);
 			isr64_t handler = interrupt64_handlers[regs.int_no];
 			handler(regs);
-			printf("IRQ handler %ld returned\n", regs.int_no);
+		//	printf("IRQ handler %ld returned\n", regs.int_no);
 		}
 		else
 		{

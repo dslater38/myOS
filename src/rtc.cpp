@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "isr.h"
 #include <ctime>
+#include "TextFrameBuffer.h"
 
 constexpr uint16_t	RTC_SECONDS = 0x00;
 constexpr uint16_t	RTC_MINUTES = 0x02;
@@ -123,8 +124,15 @@ uint64_t RTC_currentTime_nowait()
     outb(RTC_REGISTER_SELECT_PORT, CURRENT_CENTURY);
     auto cen = fromBDC(inb(RTC_REGISTER_DATA_PORT));
 
+    char buffer[24];
+    sprintf(buffer,"%02.2u/%02.2u/%04.4u %02.2u:%02.2u:%02.2u",month, day, (cen*100u + year), hr, min, sec);
 
-    printf("%02.2u/%02.2u/%04.4u %02.2u:%02.2u:%02.2u\n",month, day, (cen*100u + year), hr, min, sec);
+    auto *v = getVideo();
+
+    if(v)
+    {
+        v->write_at(1, 60, TextColors::RED, TextColors::BLUE, buffer);
+    }
 
     return 0;
 }
@@ -168,18 +176,19 @@ void rtc_interrupt_handler(registers64_t regs)
         {
             initial_update = true;
             printf("RTC Current Time:\n");
-            RTC_currentTime();
+           
             rtc_set_interrupt_rate(0x06u);
             outb(RTC_REGISTER_SELECT_PORT, (DISABLE_NMI_BIT|STATUS_REGISTER_B));    // select register B disable NMI
-            uint8_t prev = inb(RTC_REGISTER_DATA_PORT);                                     // fetch the current contents
+            uint8_t prev = inb(RTC_REGISTER_DATA_PORT);                             // fetch the current contents
             outb(RTC_REGISTER_SELECT_PORT, (DISABLE_NMI_BIT|STATUS_REGISTER_B));    // select register B again (a read will reset the index to register D)
-            outb(RTC_REGISTER_DATA_PORT, ( prev & (~RTC_UIE_BIT)) | RTC_PIE_BIT );
+            // outb(RTC_REGISTER_DATA_PORT, ( prev & (~RTC_UIE_BIT)) | RTC_PIE_BIT );
         }
+        RTC_currentTime_nowait();
     }
     else if(stat & RTC_PF_BIT )
     {
         ++counter;
-        printf("rtc: %ld\n",counter);
+      //  printf("rtc: %ld\n",counter);
     }
 }
 
@@ -188,17 +197,10 @@ void init_rct_interrupts()
     register_interrupt_handler64(IRQ8, rtc_interrupt_handler);
     constexpr uint8_t rate = 0x06u;                                         // rate is 64 == interrupt every 15.625 milliseconds
     asm("cli");      
-//    rtc_set_interrupt_rate(0x06u);                                                       // disable interrupts
-//    outb(RTC_REGISTER_SELECT_PORT, (DISABLE_NMI_BIT|STATUS_REGISTER_A));    // select status register A & disable NMI
-//    uint8_t prev = inb(RTC_REGISTER_DATA_PORT);                             // get initial value in a register
-//    outb(RTC_REGISTER_SELECT_PORT, (DISABLE_NMI_BIT|STATUS_REGISTER_A));    // select A again
-//    outb(RTC_REGISTER_DATA_PORT, (prev & 0xF0) | rate);                     // set the periodic interrupt rate
-
     outb(RTC_REGISTER_SELECT_PORT, (DISABLE_NMI_BIT|STATUS_REGISTER_B));    // select register B disable NMI
-    uint8_t prev = inb(RTC_REGISTER_DATA_PORT);                                     // fetch the current contents
+    uint8_t prev = inb(RTC_REGISTER_DATA_PORT);                             // fetch the current contents
     outb(RTC_REGISTER_SELECT_PORT, (DISABLE_NMI_BIT|STATUS_REGISTER_B));    // select register B again (a read will reset the index to register D)
-//     outb(RTC_REGISTER_DATA_PORT, prev | RTC_PIE_BIT| RTC_UIE_BIT);          // enable the periodic and update ended interrupts
-    outb(RTC_REGISTER_DATA_PORT, prev | RTC_UIE_BIT );          // enable the periodic and update ended interrupts
+    outb(RTC_REGISTER_DATA_PORT, prev | RTC_UIE_BIT );                      // enable the periodic and update ended interrupts
     enable_nmi();                                                           // make sure NMI's are turned back on
     asm("sti");                                                             // re-enable interrupts
 }
