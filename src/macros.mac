@@ -17,8 +17,8 @@
   [GLOBAL isr%1]        ; %1 accesses the first parameter.
   isr%1:
     cli
-    push byte 0
-    push byte %1
+    push qword 0
+    push qword %1
     jmp isr_common_stub
 %endmacro
 
@@ -36,18 +36,12 @@
   [GLOBAL irq%1]
   irq%1:
 	cli
-	push byte 0
-	push byte %2
+	push qword 0
+	push qword %2
 	jmp irq_common_stub
 %endmacro
 
-%macro COMMON_STUB 2
-[EXTERN %2]
-
-%1:
-;	pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
-
-
+%macro PUSHAQ 0
 	push qword r15
 	push qword r14
 	push qword r13
@@ -56,7 +50,6 @@
 	push qword r10
 	push qword r9
 	push qword r8
-
 	push qword rax
 	push qword rcx
 	push qword rdx
@@ -65,83 +58,56 @@
 	push qword rbp
 	push qword rsi
 	push qword rdi
-	
-	mov ax, ds
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	
-	push qword rax
-	mov rdi, rsp
+%endmacro
 
-	; mov ax, ds               ; Lower 16-bits of eax = ds.
-	; push rax                 ; save the data segment descriptor
-
-	; mov ax, 0x10  ; load the kernel data segment descriptor
-	; mov ds, ax
-	; mov es, ax
-	; mov fs, ax
-	; mov gs, ax
-
-	call %2
-
-	pop rax
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	
-	pop rdi
-	pop rsi
-	pop rbp
-	add rsp,8
-	pop rbx
-	pop rdx
-	pop rcx
-	pop rax
-	
-	pop r8
-	pop r9
-	pop r10
-	pop r11
-	pop r12
-	pop r13
-	pop r14
-	pop r15
-
-	; pop rbx        ; reload the original data segment descriptor
-	; mov ds, bx
-	; mov es, bx
-	; mov fs, bx
-	; mov gs, bx
-
-	pop qword r15
-	pop qword r14
-	pop qword r13
-	pop qword r12
-	pop qword r11
-	pop qword r10
-	pop qword r9
-	pop qword r8
-	pop qword rax
-	pop qword rcx
-	pop qword rdx
-	pop qword rbx
-	pop qword rbp
-	add rsp, 8	; don't actually pop rsp
-	pop qword rsi
+%macro POPAQ 0
 	pop qword rdi
-	
-	add rsp, 8	; pop the error code pushed by the stub
-
-	mov ds, rax
+	pop qword rsi
+	pop qword rbp
+	add rsp,8
+	pop qword rbx
+	pop qword rdx
+	pop qword rcx
 	pop qword rax
-	mov es, rax
-	pop qword rax
+	pop qword r8
+	pop qword r9
+	pop qword r10
+	pop qword r11
+	pop qword r12
+	pop qword r13
+	pop qword r14
+	pop qword r15
+%endmacro
 
-;	popa                     ; Pops edi,esi,ebp...
-	add rsp,16	     ; Cleans up the pushed error code and pushed ISR number
-	sti
-	iretq           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP
+%macro COMMON_STUB 2
+[EXTERN %2]
+
+%1:
+						; on entry, the stack looks like SS, RSP, RFLAGS, CS, RIP, ERROR_CODE, ISR_#
+	PUSHAQ				; save general registers
+
+	mov ax, ds			; Lower 16-bits of eax = ds.
+	push qword rax		; save the data segment descriptor	
+						; stack now looks like SS, RSP, RFLAGS, CS, RIP, ERROR_CODE, ISR_#, r15, r14,...,r8,rax,rcx,rdx,rbx,rsp,rbp,rsi,rdi,DS
+	mov ax, 0x10		; load the kernel data segment descriptor
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+
+	mov rdi, rsp		; x86_64 passes first arg in rdi. 
+
+	call %2				; call the handler
+
+	pop rax				; reload the original data segment descriptor
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+
+	POPAQ				; restore registers
+						; stack now looks like: SS, RSP, RFLAGS, CS, RIP, ERROR_CODE, ISR_#
+	add rsp,16	     	; Clean up the pushed error code and ISR number
+	sti					; stack now looks like: SS, RSP, RFLAGS, CS, RIP
+	iretq           	; pops 5 things at once: SS, RSP, RFLAGS, CS, RIP
 %endmacro

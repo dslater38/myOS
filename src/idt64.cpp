@@ -82,14 +82,14 @@ static void remap_pics()
 	// Remap the irq table.
 	outb(MASTER_PIC_COMMAND, ICW1_INIT | ICW1_ICW4);
 	outb(SLAVE_PIC_COMMAND, ICW1_INIT | ICW1_ICW4);
-	outb(0x21, 0x20);
-	outb(0xA1, 0x28);
-	outb(0x21, 0x04);
-	outb(0xA1, 0x02);
-	outb(0x21, 0x01);
-	outb(0xA1, 0x01);
-	outb(0x21, 0x0);
-	outb(0xA1, 0x0);
+	outb(MASTER_PIC_DATA, 0x20);
+	outb(SLAVE_PIC_DATA, 0x28);
+	outb(MASTER_PIC_DATA, 0x04);
+	outb(SLAVE_PIC_DATA, 0x02);
+	outb(MASTER_PIC_DATA, 0x01);
+	outb(SLAVE_PIC_DATA, 0x01);
+	outb(MASTER_PIC_DATA, 0x0);
+	outb(SLAVE_PIC_DATA, 0x0);
 }
 
 static void init_irqs()

@@ -10,6 +10,7 @@
 #include "BootInformation.h"
 #include "Foobar.h"
 #include "vfs.h"
+#include "timer.h"
 
 void init_idt64_table();
 
@@ -24,7 +25,9 @@ extern Foobar barfoo;
 
 extern Frames<uint64_t> *initHeap();
 void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
-uint64_t RTC_currentTime();
+// uint64_t RTC_currentTime();
+void init_rct_interrupts();
+// void init_timer(uint32_t frequency);
 
 extern "C"
 {
@@ -107,10 +110,20 @@ extern "C"
 			PANIC("mboot_header is NULL\n");
 		}
 		
-		printf("RTC Current Time:\n");
-		RTC_currentTime();
+		// printf("RTC Current Time:\n");
+		// RTC_currentTime();
+		init_timer(1);
+		init_rct_interrupts();
+		asm("sti");
+		
 
-		test_page_fault();
+		while(true)
+		{
+			//asm("sti");
+			//asm("hlt");
+		}
+
+		// test_page_fault();
 		
 
 	}

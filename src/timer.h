@@ -21,6 +21,7 @@ constexpr uint16_t PIT_CHANNEL_2 = 0x0042;
 
 /* I/O commands */
 constexpr uint8_t PIT_SET_MODE_REPEAT = 0x36;
+constexpr uint8_t PIT_SET_MODE_TERMINAL_COUNT = 0x30;
 
 
 #ifdef __cplusplus
