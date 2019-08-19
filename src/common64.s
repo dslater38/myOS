@@ -11,6 +11,23 @@ section .text
 [GLOBAL halt]
 [GLOBAL invalidate_tlb]
 [GLOBAL invalidate_all_tlbs]
+[GLOBAL cpuid]
+
+; void cpuid(CpuidInfo *info, uint32_t eax);
+cpuid:
+	test rdi, rdi
+	jz .error
+	mov eax, esi	; load eax with the passed in parameter
+	cpuid
+	mov dword [rdi], eax
+	mov dword [rdi+4], ebx
+	mov dword [rdi+8], ecx
+	mov dword [rdi+12], edx
+.exit:
+	ret
+.error:
+	xor eax,eax
+	jmp .exit
 
 invalidate_tlb:
 	invlpg [rdi]

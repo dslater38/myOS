@@ -4,12 +4,22 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    {
+        "type": "gdb",
+        "request": "attach",
+        "name": "Attach to gdbserver",
+        "executable": "/home/slaterd/repos/myOS/kernel",
+        "target": "192.168.42.128:11234",
+        "remote": true,
+        "cwd": "${workspaceRoot}",
+        "valuesFormatting": "parseText"
+    },
         {
             "name": "myOS - gdbserver",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/isofiles/boot/kernel",
-            "miDebuggerServerAddress": "localhost:11234",
+            "miDebuggerServerAddress": "192.168.42.128:11234",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
@@ -22,7 +32,8 @@
                 "MIMode": "gdb"
               },
               "windows": {
-                "MIMode": "gdb"
+                "MIMode": "gdb",
+                "miDebuggerPath": "c:\\mingw-w64\\x86_64-7.3.0-posix-seh-rt_v5-rev0\\mingw64\\bin\\gdb.exe"
               }
         },
         {

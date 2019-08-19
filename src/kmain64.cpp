@@ -11,6 +11,7 @@
 #include "Foobar.h"
 #include "vfs.h"
 #include "timer.h"
+#include "cpuinfo.h"
 
 void init_idt64_table();
 
@@ -116,6 +117,20 @@ extern "C"
 		init_rct_interrupts();
 		asm("sti");
 		
+		CpuInfo info{};
+		getCpuInfo(info);
+
+		printf("Vendor Id String: %s\n", info.vendorId);
+		printf("Stepping: %d, Model: %d, Family: %d, Type: %d, ExtendedModel: %d, ExtendedFamily: %d\n",
+		info.stepping, info.model, info.family, info.processor_type, info.extendedModelId, info.extendedFamilyId);
+
+		const char *str = getBrandString(info.brand_index);
+		if( str )
+		{
+			printf("Brand String: %s\n", str);
+		}
+
+
 
 		while(true)
 		{

@@ -30,7 +30,7 @@ com2: enabled=1, mode=file, dev=kdebug.log
 # debugger_log: debugger.out
 port_e9_hack: enabled=0
 debug_symbols: file=kernel.sym
-debug: action=ignore, CPU0=report
+debug: action=ignore, CPU0=report, PIC=report
 info: action=report
 error: action=report
 panic: action=ask
