@@ -11,6 +11,7 @@
 #include "Foobar.h"
 #include "vfs.h"
 #include "timer.h"
+#include "fat.h"
 
 void init_idt64_table();
 
@@ -28,7 +29,8 @@ void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
 // uint64_t RTC_currentTime();
 void init_rct_interrupts();
 // void init_timer(uint32_t frequency);
-
+void dump_fat_table(const BootBlock &boot);
+void dump_root_dir(const BootBlock &boot);
 extern "C"
 {
 	void initTextFrameBuffer();
@@ -116,6 +118,19 @@ extern "C"
 		init_rct_interrupts();
 		asm("sti");
 		
+
+		BootBlock boot{};
+		read(&boot, 0, sizeof(BootBlock));
+		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
+		boot.BytesPerBlock(), boot.ReservedBlocks(), boot.NumRootDirEntries(), boot.TotalNumBlocks());
+		printf("NumBlocksFat1: %d, NumBlocksPerTrack %d, NumHeads: %d, NumHiddenBlocks: %d\n",
+		boot.NumBlocksFat1(), boot.NumBlocksPerTrack(), boot.NumHeads(), boot.NumHiddenBlocks());
+		printf("TotalBlocks: %d, PhysDriveNo: %d, VolumeSerialNumber: %04.4x-%04.4x, FsId: %8.8s, BlockSig: %x\n",
+		boot.TotalBlocks(), boot.PhysDriveNo(), (boot.VolumeSerialNumber() & 0xFFFF0000)>>16, boot.VolumeSerialNumber() & 0x0000FFFF, boot.FsId(), boot.BlockSig());
+		printf("Volume Label: %11.11s\n", boot.volume_label);
+
+		// dump_fat_table(boot);
+		dump_root_dir(boot);
 
 		while(true)
 		{
