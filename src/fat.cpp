@@ -4,6 +4,16 @@
 #include <new>
 #include <stdio.h>
 
+uint16_t fat16_entry(const uint8_t *fatTable, uint16_t cluster)
+{
+    return reinterpret_cast<const uint16_t *>(fatTable)[cluster];
+}
+
+void fat16_entry(uint8_t *fatTable, uint16_t cluster, uint16_t value)
+{
+    reinterpret_cast<uint16_t *>(fatTable)[cluster] = value;
+}
+
 uint16_t fat12_entry(const uint8_t *fatTable, uint16_t cluster)
 {
     auto *offset = fatTable + 3*(cluster/2);

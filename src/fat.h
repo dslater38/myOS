@@ -10,15 +10,20 @@ struct BootBlock
     uint8_t bytes_per_block[2];
     uint8_t blocks_per_alloc;
     uint8_t reserved_blocks[2];
+                                    // 16 bytes
     uint8_t num_FAT_tables;
     uint8_t num_root_dir_entries[2];
     uint8_t total_num_blocks[2];
     uint8_t media_descriptor;
     uint8_t num_blocks_fat1[2];
+                                    // 8 bytes
     uint8_t num_blocks_per_track[2];
     uint8_t num_heads[2];
+                                    // 4 bytes
     uint8_t num_hidden_blocks[4];
+                                    // 8 bytes
     uint8_t total_blocks[4];
+                                    // 4 bytes
     uint8_t phys_drive_num[2];
     uint8_t extended_boot_record;
     uint8_t volume_serial[4];

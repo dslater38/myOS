@@ -15,6 +15,26 @@ extern "C"
     void cpuid(CpuidInfo *info, uint32_t req);
 }
 
+struct CacheInfo
+{
+    uint32_t    lineSize;       // in bytes
+    uint32_t    linesPerTag;
+    uint32_t    associativity;
+    uint32_t    size;           // in KB
+};
+
+struct TLBInfo
+{
+    uint32_t    entries;
+    uint32_t    associativity;
+};
+
+struct Descriptor
+{
+    uint8_t descriptor;
+    const char *string;
+};
+
 struct CpuInfo
 {
     // EAX == 0 info returned in eax,ebx,ecx,edx
