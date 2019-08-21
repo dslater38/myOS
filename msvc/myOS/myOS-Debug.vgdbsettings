@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<VisualGDBProjectSettings2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ConfigurationName>Debug</ConfigurationName>
+  <Project xsi:type="com.visualgdb.project.linux">
+    <CustomSourceDirectories>
+      <Directories />
+      <PathStyle>Unknown</PathStyle>
+    </CustomSourceDirectories>
+    <BuildHost>
+      <HostName>debian</HostName>
+      <Transport>SSH</Transport>
+      <UserName>slaterd</UserName>
+    </BuildHost>
+    <MountInfo>
+      <Mode>UserProvidedMount</Mode>
+      <RemoteHost>
+        <HostName>debian</HostName>
+        <Transport>SSH</Transport>
+        <UserName>slaterd</UserName>
+      </RemoteHost>
+      <LocalDirectory>R:\repos\myOS</LocalDirectory>
+      <RemoteDirectory>/home/slaterd/repos/myOS</RemoteDirectory>
+    </MountInfo>
+    <AllowChangingHostForMainCommands>true</AllowChangingHostForMainCommands>
+    <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
+    <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
+    <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
+    <SkipDeploymentTests>false</SkipDeploymentTests>
+    <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
+  </Project>
+  <Build xsi:type="com.visualgdb.build.custom">
+    <ToolchainID>
+      <Version>
+        <Revision>0</Revision>
+      </Version>
+    </ToolchainID>
+    <BuildCommand>
+      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>debian</HostName>
+        <Transport>SSH</Transport>
+        <UserName>slaterd</UserName>
+      </RemoteHost>
+      <Command>make</Command>
+      <Arguments>--jobs=4</Arguments>
+      <WorkingDirectory>/home/slaterd/repos/myOS</WorkingDirectory>
+      <Environment>
+        <Records />
+        <EnvironmentSetupFiles />
+      </Environment>
+      <BackgroundMode xsi:nil="true" />
+    </BuildCommand>
+    <CleanCommand>
+      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>debian</HostName>
+        <Transport>SSH</Transport>
+        <UserName>slaterd</UserName>
+      </RemoteHost>
+      <Command>make</Command>
+      <Arguments>--jobs=4 clean</Arguments>
+      <WorkingDirectory>/home/slaterd/repos/myOS</WorkingDirectory>
+      <Environment>
+        <Records />
+        <EnvironmentSetupFiles />
+      </Environment>
+      <BackgroundMode xsi:nil="true" />
+    </CleanCommand>
+    <MainBuildDirectory>$(SourceDir)</MainBuildDirectory>
+    <AbsoluteTargetPath>/home/slaterd/repos/myOS/isofiles/boot/kernel</AbsoluteTargetPath>
+    <AutoUpdateMakefiles>true</AutoUpdateMakefiles>
+  </Build>
+  <CustomBuild>
+    <PreSyncActions />
+    <PreBuildActions />
+    <PostBuildActions />
+    <PreCleanActions />
+    <PostCleanActions />
+  </CustomBuild>
+  <CustomDebug>
+    <PreDebugActions>
+      <CustomActionBase xsi:type="CommandLineAction">
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>BuildMachine</HostName>
+          <Transport>BuiltinShortcut</Transport>
+        </RemoteHost>
+        <Command>/usr/bin/rm</Command>
+        <Arguments>-f /home/slaterd/repos/myOS/*.lock</Arguments>
+        <WorkingDirectory>$(BuildDir)</WorkingDirectory>
+        <BackgroundMode>false</BackgroundMode>
+      </CustomActionBase>
+    </PreDebugActions>
+    <PostDebugActions />
+    <DebugStopActions />
+    <BreakMode>Interrupt</BreakMode>
+    <CustomBreakCommand>
+      <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+      <RemoteHost>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
+      </RemoteHost>
+      <BackgroundMode xsi:nil="true" />
+    </CustomBreakCommand>
+  </CustomDebug>
+  <CustomShortcuts>
+    <Shortcuts />
+    <ShowMessageAfterExecuting>true</ShowMessageAfterExecuting>
+  </CustomShortcuts>
+  <UserDefinedVariables />
+  <ImportedPropertySheets />
+  <CodeSense>
+    <Enabled>Unknown</Enabled>
+    <ExtraSettings>
+      <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
+      <SupportLightweightReferenceAnalysis>true</SupportLightweightReferenceAnalysis>
+      <DiscoverySettings>
+        <Mode>Enabled</Mode>
+        <SearchInProjectDir>true</SearchInProjectDir>
+        <SearchInSourceDirs>true</SearchInSourceDirs>
+        <SearchInIncludeSubdirs>true</SearchInIncludeSubdirs>
+        <ExtraSearchDirs>
+          <string>$(ProjectDir)../../src/</string>
+        </ExtraSearchDirs>
+      </DiscoverySettings>
+      <CheckForClangFormatFiles>true</CheckForClangFormatFiles>
+      <FormattingEngine xsi:nil="true" />
+    </ExtraSettings>
+    <CodeAnalyzerSettings>
+      <Enabled>false</Enabled>
+    </CodeAnalyzerSettings>
+  </CodeSense>
+  <Configurations />
+  <ProgramArgumentsSuggestions />
+  <Debug xsi:type="com.visualgdb.debug.remote">
+    <AdditionalStartupCommands />
+    <AdditionalGDBSettings>
+      <Features>
+        <DisableAutoDetection>false</DisableAutoDetection>
+        <UseFrameParameter>false</UseFrameParameter>
+        <SimpleValuesFlagSupported>false</SimpleValuesFlagSupported>
+        <ListLocalsSupported>false</ListLocalsSupported>
+        <ByteLevelMemoryCommandsAvailable>false</ByteLevelMemoryCommandsAvailable>
+        <ThreadInfoSupported>false</ThreadInfoSupported>
+        <PendingBreakpointsSupported>false</PendingBreakpointsSupported>
+        <SupportTargetCommand>false</SupportTargetCommand>
+        <ReliableBreakpointNotifications>false</ReliableBreakpointNotifications>
+      </Features>
+      <EnableSmartStepping>false</EnableSmartStepping>
+      <FilterSpuriousStoppedNotifications>false</FilterSpuriousStoppedNotifications>
+      <ForceSingleThreadedMode>false</ForceSingleThreadedMode>
+      <UseAppleExtensions>false</UseAppleExtensions>
+      <CanAcceptCommandsWhileRunning>false</CanAcceptCommandsWhileRunning>
+      <MakeLogFile>true</MakeLogFile>
+      <IgnoreModuleEventsWhileStepping>true</IgnoreModuleEventsWhileStepping>
+      <UseRelativePathsOnly>false</UseRelativePathsOnly>
+      <ExitAction>None</ExitAction>
+      <DisableDisassembly>false</DisableDisassembly>
+      <ExamineMemoryWithXCommand>false</ExamineMemoryWithXCommand>
+      <StepIntoNewInstanceEntry>start</StepIntoNewInstanceEntry>
+      <ExamineRegistersInRawFormat>true</ExamineRegistersInRawFormat>
+      <DisableSignals>false</DisableSignals>
+      <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
+      <EnableNonStopMode>false</EnableNonStopMode>
+      <MaxBreakpointLimit>0</MaxBreakpointLimit>
+    </AdditionalGDBSettings>
+    <LaunchGDBSettings xsi:type="GDBLaunchParametersGDBStub">
+      <GDBExe>/usr/local/bin/gdb</GDBExe>
+      <RemoteHostOverride>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
+      </RemoteHostOverride>
+      <DebuggedProgram>/home/slaterd/repos/myOS/isofiles/boot/kernel</DebuggedProgram>
+      <GDBStubCommand>
+        <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
+        <RemoteHost>
+          <HostName>debian</HostName>
+          <Transport>SSH</Transport>
+          <UserName>slaterd</UserName>
+        </RemoteHost>
+        <Command>/home/slaterd/repos/myOS/run_bochs.sh</Command>
+        <Arguments>-g</Arguments>
+        <WorkingDirectory>/home/slaterd/repos/myOS</WorkingDirectory>
+        <Environment>
+          <Records>
+            <Record>
+              <VariableName>DISPLAY</VariableName>
+              <Value>192.168.42.1:0</Value>
+            </Record>
+          </Records>
+          <EnvironmentSetupFiles />
+        </Environment>
+        <BackgroundMode xsi:nil="true" />
+      </GDBStubCommand>
+      <GDBServerPort>11234</GDBServerPort>
+      <GDBServerSettings>
+        <SendCtrlCToGDBServer>false</SendCtrlCToGDBServer>
+        <SuccessfullyStartedRegex />
+        <PortGroupIndexInStartedRegex>0</PortGroupIndexInStartedRegex>
+        <StartTimeout>0</StartTimeout>
+        <ExitTimeout>0</ExitTimeout>
+        <TerminateGDBServerOnExit>false</TerminateGDBServerOnExit>
+      </GDBServerSettings>
+    </LaunchGDBSettings>
+    <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <X11WindowMode>Local</X11WindowMode>
+    <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
+    <RunGDBUnderSudo>false</RunGDBUnderSudo>
+    <DeploymentMode>Auto</DeploymentMode>
+    <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <SuppressTTYCreation>false</SuppressTTYCreation>
+  </Debug>
+</VisualGDBProjectSettings2>

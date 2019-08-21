@@ -1,0 +1,61 @@
+﻿  VisualGDB: Run "make --jobs=4 clean" in directory "/home/slaterd/repos/myOS" on slaterd@debian (SSH)
+  make[1]: Entering directory '/home/slaterd/repos/myOS/src'
+  make[1]: Leaving directory '/home/slaterd/repos/myOS/src'
+  rm -f isofiles/boot/kernel
+  rm -f os.iso
+  VisualGDB: Run "make --jobs=4" in directory "/home/slaterd/repos/myOS" on slaterd@debian (SSH)
+  make[1]: Entering directory '/home/slaterd/repos/myOS/src'
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o elf64.o elf64.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o rtc.o rtc.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o kheap.o kheap.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o Foobar.o Foobar.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o memset.o memset.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o timer.o timer.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o idt64.o idt64.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o TextFrameBuffer.o TextFrameBuffer.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o pcSpeaker.o pcSpeaker.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o panic.o panic.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o strlen.o strlen.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o isr.o isr.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o cpu_exceptions.o cpu_exceptions.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o fat.o fat.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o vsprintf.o vsprintf.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o placement_address.o placement_address.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o elf.o elf.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o ata.o ata.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o elf32.o elf32.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o memcpy.o memcpy.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o serial.o serial.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o multibootheader.o multibootheader.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o cpuinfo.o cpuinfo.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o vesavga.o vesavga.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o cmain.o cmain.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o new.o new.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o kmain64.o kmain64.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o kmalloc.o kmalloc.cpp
+  clang++ -std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -I../include -I.  -c -o runtime_init.o runtime_init.cpp
+  nasm -felf64 -g  -o crti.o crti.s
+  nasm -felf64 -g  -o interrupts.o interrupts.s
+  nasm -felf64 -g  -o common64.o common64.s
+  nasm -felf64 -g  -o crtn.o crtn.s
+  nasm -felf64 -g  -o boot.o boot.s
+  make[1]: Leaving directory '/home/slaterd/repos/myOS/src'
+  gcc -no-pie -ffreestanding -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone  -Xlinker -Tlink.ld -lgcc -o kernel src/kmalloc.o src/runtime_init.o src/memcpy.o src/elf64.o src/vesavga.o src/memset.o src/ata.o src/fat.o src/elf.o src/cpuinfo.o src/idt64.o src/vsprintf.o src/kmain64.o src/timer.o src/Foobar.o src/placement_address.o src/panic.o src/elf32.o src/strlen.o src/pcSpeaker.o src/isr.o src/new.o src/cmain.o src/rtc.o src/multibootheader.o src/TextFrameBuffer.o src/serial.o src/kheap.o src/cpu_exceptions.o src/interrupts.o src/crti.o src/common64.o src/crtn.o src/boot.o
+  nm kernel | awk '{ print $1" "$3 }' > kernel.sym
+  cp kernel isofiles/boot/kernel
+  grub-mkrescue -o os.iso isofiles
+  xorriso 1.5.0 : RockRidge filesystem manipulator, libburnia project.
+  
+  Drive current: -outdev 'stdio:os.iso'
+  Media current: stdio file, overwriteable
+  Media status : is blank
+  Media summary: 0 sessions, 0 data blocks, 0 data, 13.9g free
+  Added to ISO image: directory '/'='/tmp/grub.zTYHAb'
+  xorriso : UPDATE :     320 files added in 1 seconds
+  Added to ISO image: directory '/'='/home/slaterd/repos/myOS/isofiles'
+  xorriso : UPDATE :     324 files added in 1 seconds
+  xorriso : NOTE : Copying to System Area: 512 bytes from file '/usr/local/lib/grub/i386-pc/boot_hybrid.img'
+  ISO image produced: 4058 sectors
+  Written to medium : 4058 sectors at LBA 0
+  Writing to 'stdio:os.iso' completed successfully.
+  

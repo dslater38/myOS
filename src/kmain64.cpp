@@ -47,7 +47,7 @@ extern "C"
 		// page table that identity maps the first 2 MB or RAM
 		// install our interrupt handlers
 //		init_idt64_table();
-		
+
 //		__libc_init_array();
 
 		/*  Am I booted by a Multiboot-compliant boot loader? */
@@ -57,8 +57,8 @@ extern "C"
 			sprintf(buffer,"Invalid magic number: 0x%x\n", (unsigned) magic);
 			PANIC (buffer);
 		}
-		
-		
+
+
 		if(mboot_header && placement_address < reinterpret_cast<uint64_t>(mboot_header))
 		{
 			// if the mboot header is higher up in memory that placement_address
@@ -71,22 +71,22 @@ extern "C"
 		}
 		initTextFrameBuffer();
 		set_foreground_color((uint8_t)TextColors::GREEN);
-		set_background_color((uint8_t)TextColors::BLACK);	
-		
+		set_background_color((uint8_t)TextColors::BLACK);
+
 		printf("Hello World from 64-bit long mode!!!!!\n");
-		
+
 		auto success = init_serial(2, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
-		if(success)
+		if(success == SUCCESS)
 		{
 			printf("Initialized COM2\n");
 		}
-		
+
 		debug_out("Startup Data Block: start 0x%016.16lx, end: 0x%016.16lx\n",(uint64_t)&startup_data_start, (uint64_t)&startup_data_end);
 		report_idt_info();
-		
+
 		auto *frames = initHeap();
 		printf("Heap Initialized...\n");
-		
+
 		success = init_serial(1, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
 		if( success == SUCCESS)
 		{
@@ -95,12 +95,12 @@ extern "C"
 
 		printf("COM1: %s,\tCOM2: %s\n",identify_uart(1), identify_uart(2));
 		printf("COM3: %s,\tCOM4: %s\n",identify_uart(3), identify_uart(4));
-		
+
 		// detect ata disks & controllers.
 		detectControllers();
 
 		BootInformation bootInfo{};
-		
+
 		// process the mboot header.
 		if( mboot_header != 0)
 		{
@@ -112,13 +112,13 @@ extern "C"
 		{
 			PANIC("mboot_header is NULL\n");
 		}
-		
+
 		// printf("RTC Current Time:\n");
 		// RTC_currentTime();
 		init_timer(1);
 		init_rct_interrupts();
 		asm("sti");
-		
+
 		CpuInfo info{};
 		getCpuInfo(info);
 
@@ -154,7 +154,7 @@ extern "C"
 		}
 
 		// test_page_fault();
-		
+
 
 	}
 
