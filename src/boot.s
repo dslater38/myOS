@@ -60,6 +60,10 @@ start:
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
+	mov ebp, start
+	push ebp				; set up a fake initial stack frame 
+	push 0					; make it look like a 64-bit frame
+	mov ebp, esp			; that looks like a call to start
 	push esi
 	push 0
 	push edi
@@ -71,9 +75,13 @@ start:
 .error:
 	xchg bx,bx
 	jmp .loop
+	pop ebp			; undo the 2 pushes at the start
+	pop ebp			; first pop is high-order DWORD == 0 - discard
 
 [BITS 64]
 start64:
+	push start.loop	; setup fake return address - allows debugger to walk up the stack
+	mov rbp, rsp
 	and edi, edi	; 32-bit magic value is in edi. Make sure high order DWORD of rdi is cleared
 	and esi, esi	; multiboot header pointer was put in esi. It's < 32 bits, make sure upper DWORD of rsi is cleared.
 	mov r14, rdi	; save rdi & rsi while we call init_idt64_table & __libc_init_array
@@ -82,11 +90,12 @@ start64:
 	call __libc_init_array
 	mov rdi, r14
 	mov rsi, r15
-	jmp kmain64	; Jump to kmain64
+	call kmain64	; Jump to kmain64
 	xchg bx,bx	
 .loop:
 	hlt				; should never get here
-	jmp .loop	
+	jmp .loop
+	pop rbp			; will never get here
 
 ;
 ;	The multiboot header
