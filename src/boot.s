@@ -160,22 +160,25 @@ gdt:
 ; Create initial identity mapped page table mapping the first 1GB of physical RAM
 ; the the first 1GB of virtual address space (i.e. virtual address == physical address )
 align 0x1000
-p4_table:						; PML4E
-	dq (p3_table + 3)			; pointer to PDPTE table with rw & present bits set
-	TIMES 511 dq 0			; write 511 null entries to fill the table.
-p3_table:						; PDPTE
-	dq (p2_table + 3)			; pointer to PDE table with rw & present bits set.
-	TIMES 511 dq 0			; write 511 null entries to fill the table.
-p2_table:						; PDE 
-	dq (p1_table + 3)			; pointer to the PTE table with rw & present bits set
-	TIMES 511 dq 0			; write 511 null entries for a total of 512 entries
-p1_table:						; PTE 
-	%assign p 0x03			; set the rw & present bits (0x03) 
-	%rep 511					; write 511 of 512 entries to the PTE table
-	dq p						; write page entry
-	%assign p p+ 0x00001000	; increment page entry virtual ( and physical ) address by page size (4K)
-	%endrep					; end of loop
-	dq (p4_table + 3)			; recursive last table entry points back to p4_table
+p4_table:							; PML4E
+	dq (p3_table + 3)				; pointer to PDPTE table with rw & present bits set
+	TIMES 510 dq 0					; write 511 null entries to fill the table.
+	dq (p4_table + 3)				; write recursive entry
+p3_table:							; PDPTE
+	dq (p2_table + 3)				; pointer to PDE table with rw & present bits set.
+	TIMES 511 dq 0					; write 511 null entries to fill the table.
+p2_table:							; PDE 
+	dq (p1_table + 0x0003)			; pointer to the first PTE table with rw & present bits set
+	dq (p1_table + 0x1003)			; pointer to the second PTE table with rw & present bits set
+	dq (p1_table + 0x2003)			; pointer to the third PTE table with rw & present bits set
+	dq (p1_table + 0x3003)			; pointer to the forth PTE table with rw & present bits set
+	TIMES 508 dq 0					; write 511 null entries for a total of 512 entries
+p1_table:							; PTE 
+	%assign p 0x0000000000000003	; set the rw & present bits (0x03) 
+	%rep 2048						; write 2048 entries to 4 PTE tables to cover 8 MB physical RAM
+	dq p							; write page entry
+	%assign p p + 0x0000000000001000; increment page entry virtual ( and physical ) address by page size (4K)
+	%endrep							; end of loop
 startup_data_end:
 
 

@@ -41,8 +41,15 @@ struct PageDirectory
 
 	T *operator[](int n)const
 	{
-		const uintptr_t MASK = (~((uintptr_t)(0xFFF)));
-		return reinterpret_cast<T *>(  MASK & physical[n] );
+		if( sizeof(T) == sizeof(Page4K) )
+		{
+			return const_cast<T *>(reinterpret_cast<const T *>(&(physical[n])));
+		}
+		else
+		{	
+			const uintptr_t MASK = (~((uintptr_t)(0xFFF)));
+			return reinterpret_cast<T *>(  MASK & physical[n] );
+		}
 	}
 
 	PageType *getPage(uintptr_t vaddr)
@@ -74,7 +81,7 @@ struct PageDirectory
 		{
 			if( sizeof(T) == sizeof(Page4K))
 			{
-				physical[i] = 0;
+				// physical[i] = 0;
 				return reinterpret_cast<PageType *>(&(physical[i]));
 			}
 			else
@@ -87,21 +94,21 @@ struct PageDirectory
 
 	void dump()const
 	{
-#if 0	
-		printf("PageDirectory<T,%d,%d>: this 0x%016.16lx\n", SHIFT, BITS, (uint64_t)this);
+#if 1
+		debug_out("PageDirectory<T,%d,%d>: this 0x%016.16lx\n", SHIFT, BITS, (uint64_t)this);
 		for (auto i = 0u; i < NUM_ENTRIES; ++i)
 		{
 			uint64_t entry = (uint64_t)physical[i];
 			if( entry != 0)
 			{
-				printf("entry: %d == 0x%016.16lx \n", i, entry);
+				debug_out("entry: %d == 0x%016.16lx \n", i, entry);
 				if (physical[i])
 				{
 					reinterpret_cast<T *>( entry & 0xFFFFFFFFFFFFF000)->dump();
 				}
 			}
 		}
-		printf("===========================================\n");
+		debug_out("===========================================\n");
 #endif // 0		
 	}
 };

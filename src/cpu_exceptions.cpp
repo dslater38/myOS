@@ -188,14 +188,16 @@ void page_fault(registers64_t regs)
 	int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
 
 	// Output an error message.
-	printf("Page fault! at 0x%016.16lX\n\t( %s %s %s %s )\n", 
+	printf("Page fault! at 0x%016.16lX\n\t( %s %s %s %s %s )\n", 
         faulting_address,
         present ? "present" : "absent",
         rw ? "read-only" : "read/write",
         us ? "user-mode" : "kernel-mode",
-        reserved ? "reserved" : "not-reserved"
+        reserved ? "reserved" : "not-reserved",
+        id  ? "fetch" : "data"
        );
 
+    printf("rip: 0x%016.16x\n", regs.rip);
  	PANIC("Page fault");
 
 }

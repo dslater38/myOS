@@ -8,7 +8,6 @@
 #include "TextFrameBuffer.h"
 #include "MultiBootInfoHeader.h"
 #include "BootInformation.h"
-#include "Foobar.h"
 #include "vfs.h"
 #include "timer.h"
 #include "cpuinfo.h"
@@ -23,8 +22,6 @@ static void test_page_fault();
 
 void cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr);
 
-extern Foobar barfoo;
-
 extern Frames<uint64_t> *initHeap();
 void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
 // uint64_t RTC_currentTime();
@@ -32,7 +29,7 @@ void init_rct_interrupts();
 // void init_timer(uint32_t frequency);
 void dump_fat_table(const BootBlock &boot);
 void dump_root_dir(const BootBlock &boot);
-void print_clusters(const BootBlock &boot, uint16_t startCluster);
+void print_clusters(const BootBlock &boot, uint16_t startCluster, uint32_t fileSize);
 void print_file(const BootBlock &boot, const char *fileName, const char *ext);
 extern "C"
 {
@@ -135,7 +132,7 @@ extern "C"
 		}
 
 
-
+		asm("cli");
 		BootBlock boot{};
 		read(&boot, 0, sizeof(BootBlock));
 		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
@@ -148,10 +145,11 @@ extern "C"
 
 		dump_fat_table(boot);
 		dump_root_dir(boot);
-		printf("Dumping DRVSPACE.BIN\n");
-		print_clusters(boot, 578);
+		printf("Printing README.TXT\n");
+		// print_clusters(boot, 578);
 		print_file(boot, "README  ","TXT");
-
+		printf("================== DONE =====================\n");
+		asm("sti");
 
 		while(true)
 		{
@@ -202,13 +200,4 @@ static void test_page_fault()
 	uint32_t do_page_fault = *ptr;
 	monitor_write_dec(do_page_fault);
 	monitor_write("After page fault! SHOULDN'T GET HERE \n");
-}
-
-
-const char *getTheString()
-{
-
-	static const char *SSS="This is the initial string";
-	return SSS;
-
 }

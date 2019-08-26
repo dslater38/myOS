@@ -3,39 +3,14 @@
 #include "ata.h"
 #include <new>
 #include <cstdio>
-#include <list>
+// #include <list>
 #include <algorithm>
 #include "kmalloc.h"
+#include <vector>
 
+using vector=std::vector<uint16_t ,KAllocator<uint16_t>>;
 
-template<class T>
-struct KAllocator
-{
-    using value_type=T;
-    KAllocator() = default;
-    template <class U> constexpr KAllocator(const KAllocator<U>&) noexcept {}
-  [[nodiscard]] T* allocate(std::size_t n)noexcept {
-    if(n > std::size_t(-1) / sizeof(T)) return nullptr;
-    return static_cast<T*>(kmalloc(n*sizeof(T)));
-  }
-  void deallocate(T* p, std::size_t) noexcept { kfree(p); }
-
-};
-
-std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const BootBlock &boot, uint16_t startCluster);
-
-namespace std {
-    namespace __detail {
-        void
-        _List_node_base::_M_hook(_List_node_base* const __position) _GLIBCXX_USE_NOEXCEPT
-        {
-        this->_M_next = __position;
-        this->_M_prev = __position->_M_prev;
-        __position->_M_prev->_M_next = this;
-        __position->_M_prev = this;
-        }
-    }
-}
+vector get_clusters(const BootBlock &boot, uint16_t startCluster, uint32_t fileSize);
 
 uint16_t fat16_entry(const uint8_t *fatTable, uint16_t cluster)
 {
@@ -180,8 +155,8 @@ const DirectoryEntry *getDirectoryEntry(const BootBlock &boot, const DirectoryEn
         }
         if( e.filename[0] != '\0')
         {
-            if(strcmp(reinterpret_cast<const char *>(e.filename), fileName) == 0 &&
-                strcmp(reinterpret_cast<const char *>(e.ext), ext) == 0)
+            if(strncmp(reinterpret_cast<const char *>(e.filename), fileName, 8) == 0 &&
+                strncmp(reinterpret_cast<const char *>(e.ext), ext, 3) == 0)
                 {
                     return &e;
                 }
@@ -209,22 +184,24 @@ void print_file(const BootBlock &boot, const char *fileName, const char *ext)
     auto start_cluster = open_file(boot, fileName, ext);
     if( start_cluster > 0 )
     {
-        auto list = get_clusters(boot, start_cluster);
+        
         const DirectoryEntry *dir = getDirectoryEntry(boot, read_root_directory(boot), fileName, ext);
         if(dir)
         {
             auto size = dir->FileSize();
             if( size>0 )
             {
-              char buffer[513];
-              for( auto it = std::begin(list), e = std::end(list);
+                auto list = get_clusters(boot, start_cluster, size);
+                char buffer[514];
+                for( auto it = std::begin(list), e = std::end(list);
                     it != e;
                     ++it )
                     {
                         auto cluster = *it;
                         auto read_size = std::min(size, 512u);
-                        read(buffer, cluster, read_size);
+                        read(buffer, 33 + cluster - 2, read_size);
                         buffer[read_size] = '\0';
+                        buffer[read_size+1] = '\0';
                         printf("%s",buffer);
                         size -= read_size;
                     }  
@@ -233,24 +210,26 @@ void print_file(const BootBlock &boot, const char *fileName, const char *ext)
     }
 }
 
-std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const BootBlock &boot, uint16_t startCluster)
+vector get_clusters(const BootBlock &boot, uint16_t startCluster, uint32_t fileSize)
 {
     auto *table = read_fat_table(boot);
     auto end_of_chain = fat12_entry(table, 1);
-    auto cluster = startCluster;
-    
-    auto l = std::list<uint16_t ,KAllocator<uint16_t>>{};
 
-    for(++cluster; cluster!=end_of_chain; cluster = fat12_entry(table, cluster))
+    auto l = vector{};
+
+    auto clusterCount = fileSize/512+1;
+    l.reserve(clusterCount);
+
+    for(auto cluster = startCluster; cluster!=end_of_chain; cluster = fat12_entry(table, cluster))
     {
         l.emplace_back(cluster);
     }
     return l;
 }
 
-void print_clusters(const BootBlock &boot, uint16_t startCluster)
+void print_clusters(const BootBlock &boot, uint16_t startCluster, uint32_t fileSize)
 {
-    auto l = get_clusters(boot, startCluster);
+    auto l = get_clusters(boot, startCluster,  fileSize);
 
     auto it = std::begin(l);
     printf("{ %d", *it);

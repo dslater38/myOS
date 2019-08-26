@@ -73,7 +73,8 @@ public:
 			page->present = 1;
 			page->rw = (isWritable ? 1 : 0);
 			page->user = (isKernel ? 0 : 1);
-			page->frame = index*sizeof(Uint)*8+offset;
+			uintptr_t fr = index*sizeof(Uint)*8+offset;
+			page->frame = fr;
 		}
 	}
 
@@ -112,6 +113,7 @@ private:
 
 	void clear(Uint addr)
 	{
+		debug_out("addr:0x%016.16x\n",addr);
 		auto frame = addr / PAGE_SIZE;
 		auto idx = INDEX_FROM_BIT(frame);
 		auto off = OFFSET_FROM_BIT(frame);

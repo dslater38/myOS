@@ -204,5 +204,10 @@ void getCpuInfo(CpuInfo &info)
     info.tm1    = test(cpuInfo.edx, CPUID_FEAT_EDX_TM1);
     info.pbe    = test(cpuInfo.edx, CPUID_FEAT_EDX_PBE);
 
+    cpuInfo.eax = cpuInfo.ebx = cpuInfo.ecx = cpuInfo.edx = 0;
+
+    cpuid(&cpuInfo, 2);
+    
+
 
 }
