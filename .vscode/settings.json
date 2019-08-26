@@ -34,6 +34,8 @@
         "system_error": "cpp",
         "cinttypes": "cpp",
         "type_traits": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "list": "cpp",
+        "algorithm": "cpp"
     }
 }

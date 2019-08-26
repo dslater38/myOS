@@ -5,6 +5,7 @@
 #include "common.h"
 #include <stdint.h>
 #include "ata.h"
+#include <algorithm>
 
 void write(void *buffer, uint32_t address, uint32_t size);
 void read(void *buffer, uint32_t address, uint32_t size);
@@ -104,20 +105,23 @@ void write(void *buffer, uint32_t address, size_t size)
 
 void read(void *buffer, uint32_t address, size_t size)
 {
-	uint16_t sect[256] ={0};
-	setup_for_io(address, size, 0);
+	// uint16_t sect[256] ={0};
 	
 	unsigned char *buf = (unsigned char *)buffer;
-		
-	for( int idx = 0; idx<size/2; ++idx )
+
+	for( auto read_size = std::min(size, 512ul); size>0; size -= read_size, address += read_size/512, buf += read_size )
 	{
-		*((uint16_t *)(buf + 2*idx)) = inw(ATA_PRIMARY_IO + ATA_REG_DATA);
-		//unsigned short temp = inw(ATA_PRIMARY_IO + ATA_REG_DATA);
-		//buf[2*idx] = (unsigned char)(temp & 0x00FF);
-		//buf[2*idx+1] = (unsigned char)( (temp & 0xFF00) >> 8);
-		// sect[idx] = inw(ATA_PRIMARY_IO + ATA_REG_DATA);
+		setup_for_io(address, read_size, 0);
+			
+		for( int idx = 0; idx<read_size/2; ++idx )
+		{
+			*((uint16_t *)(buf + 2*idx)) = inw(ATA_PRIMARY_IO + ATA_REG_DATA);
+			//unsigned short temp = inw(ATA_PRIMARY_IO + ATA_REG_DATA);
+			//buf[2*idx] = (unsigned char)(temp & 0x00FF);
+			//buf[2*idx+1] = (unsigned char)( (temp & 0xFF00) >> 8);
+			// sect[idx] = inw(ATA_PRIMARY_IO + ATA_REG_DATA);
+		}
 	}
-	
 	//~ for( int idx=0;idx< size/2; ++idx )
 	//~ {
 		//~ // unsigned short temp = inw(ATA_PRIMARY_IO + ATA_REG_DATA);

@@ -32,6 +32,8 @@ void init_rct_interrupts();
 // void init_timer(uint32_t frequency);
 void dump_fat_table(const BootBlock &boot);
 void dump_root_dir(const BootBlock &boot);
+void print_clusters(const BootBlock &boot, uint16_t startCluster);
+void print_file(const BootBlock &boot, const char *fileName, const char *ext);
 extern "C"
 {
 	void initTextFrameBuffer();
@@ -144,8 +146,12 @@ extern "C"
 		boot.TotalBlocks(), boot.PhysDriveNo(), (boot.VolumeSerialNumber() & 0xFFFF0000)>>16, boot.VolumeSerialNumber() & 0x0000FFFF, boot.FsId(), boot.BlockSig());
 		printf("Volume Label: %11.11s\n", boot.volume_label);
 
-		// dump_fat_table(boot);
+		dump_fat_table(boot);
 		dump_root_dir(boot);
+		printf("Dumping DRVSPACE.BIN\n");
+		print_clusters(boot, 578);
+		print_file(boot, "README  ","TXT");
+
 
 		while(true)
 		{
