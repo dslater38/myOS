@@ -20,6 +20,8 @@ void init_idt64_table();
 volatile int foo___ = 0;
 static void test_page_fault();
 
+uint32_t indent=0;
+
 void cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr);
 
 extern Frames<uint64_t> *initHeap();

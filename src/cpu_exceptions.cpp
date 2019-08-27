@@ -197,7 +197,7 @@ void page_fault(registers64_t regs)
         id  ? "fetch" : "data"
        );
 
-    printf("rip: 0x%016.16x\n", regs.rip);
+    printf("rip: 0x%016.16lx\n", regs.rip);
  	PANIC("Page fault");
 
 }

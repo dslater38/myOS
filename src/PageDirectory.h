@@ -21,7 +21,7 @@ struct PageDirectory
 	
 	static constexpr size_t shift=T::shift+BITS;
 	
-	static constexpr uintptr_t ATTRS = ((OFFSET_BITS >12 ) ? 0x43 : 0x03);
+	static constexpr uintptr_t ATTRS = ((OFFSET_BITS >12 ) ? 0x03 : 0x03);
 
 	uintptr_t physical[NUM_ENTRIES];
 
@@ -41,12 +41,12 @@ struct PageDirectory
 
 	T *operator[](int n)const
 	{
-		if( sizeof(T) == sizeof(Page4K) )
+		if constexpr( sizeof(T) == sizeof(Page4K) )
 		{
 			return const_cast<T *>(reinterpret_cast<const T *>(&(physical[n])));
 		}
 		else
-		{	
+		{
 			const uintptr_t MASK = (~((uintptr_t)(0xFFF)));
 			return reinterpret_cast<T *>(  MASK & physical[n] );
 		}
@@ -58,17 +58,10 @@ struct PageDirectory
 		T *table = (*this)[i];
 		if( table == nullptr )
 		{
-			if( sizeof(T) == sizeof(Page4K))
-			{
-				physical[i] = 0;
-				table = reinterpret_cast<T *>(&(physical[i]));
-			}
-			else
-			{			
-				void *phys = 0;
-				table = AlignedNewPhys<T>(&phys );
-				physical[i] = static_cast<uintptr_t>(reinterpret_cast<uintptr_t>(phys)|ATTRS); // PRESENT, RW, US.
-			}
+			ASSERT(sizeof(T) != sizeof(Page4K));
+			void *phys = 0;
+			table = AlignedNewPhys<T>(&phys );
+			physical[i] = static_cast<uintptr_t>(reinterpret_cast<uintptr_t>(phys)|ATTRS); // PRESENT, RW, US.
 		}
 		return table->getPage(vaddr);
 	}
@@ -77,38 +70,37 @@ struct PageDirectory
 	{
 		auto i = index(vaddr);
 		T *table = (*this)[i];
-		if( table == nullptr )
+		if constexpr(sizeof(T) == sizeof(Page4K))
 		{
-			if( sizeof(T) == sizeof(Page4K))
-			{
-				// physical[i] = 0;
-				return reinterpret_cast<PageType *>(&(physical[i]));
-			}
-			else
-			{
-				return nullptr;		
-			}
+			return table;
 		}
-		return table->findPage(vaddr);
+		return table ? table->findPage(vaddr) : nullptr;
 	}
 
-	void dump()const
+	void dump(uint64_t vaddr)const
 	{
 #if 1
-		debug_out("PageDirectory<T,%d,%d>: this 0x%016.16lx\n", SHIFT, BITS, (uint64_t)this);
-		for (auto i = 0u; i < NUM_ENTRIES; ++i)
+		INDENT();debug_out("PageDirectory<T,%d,%d>: this 0x%016.16lx\n", SHIFT, BITS, (uint64_t)this);
+		++indent;
+		for (auto i = 0ul; i < NUM_ENTRIES; ++i)
 		{
+			auto vaddr2 = (vaddr | (i<<SHIFT));
 			uint64_t entry = (uint64_t)physical[i];
 			if( entry != 0)
 			{
-				debug_out("entry: %d == 0x%016.16lx \n", i, entry);
-				if (physical[i])
+				INDENT();debug_out("0x%016.16lx, %d == 0x%016.16lx \n", vaddr2, i, entry);
+				if constexpr(sizeof(T) != sizeof(Page4K))
 				{
-					reinterpret_cast<T *>( entry & 0xFFFFFFFFFFFFF000)->dump();
+					auto *ptr = (*this)[i];
+					if (ptr)
+					{
+						ptr->dump(vaddr2);
+					}
 				}
 			}
 		}
-		debug_out("===========================================\n");
+		--indent;
+		INDENT();debug_out("===========================================\n");
 #endif // 0		
 	}
 };

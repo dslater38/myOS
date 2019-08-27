@@ -162,7 +162,7 @@ gdt:
 align 0x1000
 p4_table:							; PML4E
 	dq (p3_table + 3)				; pointer to PDPTE table with rw & present bits set
-	TIMES 510 dq 0					; write 511 null entries to fill the table.
+	TIMES 510 dq 0					; write 510 null entries to fill the table.
 	dq (p4_table + 3)				; write recursive entry
 p3_table:							; PDPTE
 	dq (p2_table + 3)				; pointer to PDE table with rw & present bits set.
