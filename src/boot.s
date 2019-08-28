@@ -179,6 +179,11 @@ p1_table:							; PTE
 	dq p							; write page entry
 	%assign p p + 0x0000000000001000; increment page entry virtual ( and physical ) address by page size (4K)
 	%endrep							; end of loop
+p3_gb_mapped_table:
+	%assign p 0xFFFF800000000183	; set the rw, present, and global bits (0x03) 
+	%rep 512						; write 512 entries 1GB page entries to the table. set the global,rw,present & huge bits
+	%assign p p + 0x0000000040000000; increment page entry virtual ( and physical ) address by page size (1GB) for first 512 GB of RAM
+	%endrep							; end of loop
 startup_data_end:
 
 
