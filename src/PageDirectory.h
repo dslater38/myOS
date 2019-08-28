@@ -6,7 +6,7 @@
 #include "memcpy.h"
 #include "NewObj.h"
 
-template<typename T, const int SHIFT, const int BITS>
+template<const int SHIFT>
 const char *DirectoryName();
 
 
@@ -83,8 +83,8 @@ struct PageDirectory
 
 	void dump(uint64_t vaddr)const
 	{
-#if 1
-		INDENT();debug_out("PageDirectory<T,%d,%d>: this 0x%016.16lx\n", SHIFT, BITS, (uint64_t)this);
+#if 1 // PageDirectory<T,%d,%d>
+		INDENT();debug_out("%s: this 0x%016.16lx\n", DirectoryName<SHIFT>(), (uint64_t)this);
 		++indent;
 		for (auto i = 0ul; i < NUM_ENTRIES; ++i)
 		{
@@ -245,6 +245,34 @@ using PML4E_2M=PageDirectory<PDPTE_64_2M,PDPTE_64_2M::shift,9>;
 // 64-bit 1G page table
 using PDPTE_64_1G=PageDirectory<Page64_1G,Page64_1G::shift,9>;
 using PML4E_1G=PageDirectory<PDPTE_64_1G,PDPTE_64_1G::shift,9>;
+
+template<>
+inline
+const char *DirectoryName<39>()
+{
+	return "PML4E";
+}
+
+template<>
+inline
+const char *DirectoryName<30>()
+{
+	return "PDPTE";
+}
+
+template<>
+inline
+const char *DirectoryName<21>()
+{
+	return "PDE";
+}
+
+template<>
+inline
+const char *DirectoryName<12>()
+{
+	return "PTE";
+}
 
 
 

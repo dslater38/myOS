@@ -134,16 +134,15 @@ void stack_segment_fault(registers64_t)
 
 void general_protection_fault(registers64_t regs)
 {
-
     if( regs.err_code != 0)
     {
-        monitor_write("General Protection Fault");
+        printf("General Protection Fault");
         const auto code = regs.err_code;
         printf("\tSegment Error: code: 0x%lx\n", code);
 
         if( code & 0x01)
         {
-            monitor_write("\tExternally Generated Exception.\n");
+            printf("\tExternally Generated Exception.\n");
         }
         const auto table = ((code>>1) & 0x03);
         const char *strTable = nullptr;
@@ -165,8 +164,8 @@ void general_protection_fault(registers64_t regs)
         uint16_t selector_index = ((code >> 3) & 0x1FFF);
         printf("Accessing: %s, Selector Index: 0x%04.4x\n", strTable, selector_index);
     }
- 
-    PANIC("General Protection Fault")
+
+    PANIC1("General Protection Fault, RIP 0x%016.16lx", regs.rip);
 }
 
 void page_fault(registers64_t regs)

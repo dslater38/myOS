@@ -33,6 +33,14 @@ void dump_fat_table(const BootBlock &boot);
 void dump_root_dir(const BootBlock &boot);
 void print_clusters(const BootBlock &boot, uint16_t startCluster, uint32_t fileSize);
 void print_file(const BootBlock &boot, const char *fileName, const char *ext);
+
+static void SetGlobalPageBits();
+
+static const char *yn(uint32_t n)
+{
+	return n ? "YES" : "no";
+}
+
 extern "C"
 {
 	void initTextFrameBuffer();
@@ -85,6 +93,17 @@ extern "C"
 		debug_out("Startup Data Block: start 0x%016.16lx, end: 0x%016.16lx\n",(uint64_t)&startup_data_start, (uint64_t)&startup_data_end);
 		report_idt_info();
 
+
+		CpuInfo info{};
+		getCpuInfo(info);
+
+		if(info.pge)
+		{
+			SetGlobalPageBits();
+		}
+
+
+
 		auto *frames = initHeap();
 		printf("Heap Initialized...\n");
 
@@ -120,12 +139,11 @@ extern "C"
 		init_rct_interrupts();
 		asm("sti");
 
-		CpuInfo info{};
-		getCpuInfo(info);
-
 		printf("Vendor Id String: %s\n", info.vendorId);
 		printf("Stepping: %d, Model: %d, Family: %d, Type: %d, ExtendedModel: %d, ExtendedFamily: %d\n",
 		info.stepping, info.model, info.family, info.processor_type, info.extendedModelId, info.extendedFamilyId);
+		printf("Global Page Support: %s, SYSCALL support: %s, 1GB Page Support %s\n", yn(info.pge), yn(info.syscall), yn(info.page1gb));
+		printf("4MB Page Support: %s, PAE support: %s, IA-32e Support: %s\n", yn(info.pse), yn(info.pae), yn(info.intel64));
 
 		const char *str = getBrandString(info.brand_index);
 		if( str )
@@ -145,13 +163,14 @@ extern "C"
 		boot.TotalBlocks(), boot.PhysDriveNo(), (boot.VolumeSerialNumber() & 0xFFFF0000)>>16, boot.VolumeSerialNumber() & 0x0000FFFF, boot.FsId(), boot.BlockSig());
 		printf("Volume Label: %11.11s\n", boot.volume_label);
 
-		dump_fat_table(boot);
+		// dump_fat_table(boot);
 		dump_root_dir(boot);
-		printf("Printing README.TXT\n");
+		// printf("Printing README.TXT\n");
 		// print_clusters(boot, 578);
-		print_file(boot, "README  ","TXT");
-		printf("================== DONE =====================\n");
+		// print_file(boot, "README  ","TXT");
+		// printf("================== DONE =====================\n");
 		asm("sti");
+
 
 		while(true)
 		{
@@ -202,4 +221,12 @@ static void test_page_fault()
 	uint32_t do_page_fault = *ptr;
 	monitor_write_dec(do_page_fault);
 	monitor_write("After page fault! SHOULDN'T GET HERE \n");
+}
+
+static void SetGlobalPageBits()
+{
+	PTE_64_4K *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
+	printf("pte->physical[511] == 0x%016.16lx\n", pte->physical[511]);
+	pte->physical[511] |= (1<<8);
+	// make the recursive entry in plme4 global
 }

@@ -451,7 +451,7 @@ heap_t *initialKernelHeap()
 {
     debug_out("initialKernelHeap\n");
     // allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, 0, 1);
-    allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, PageFlags::PRESENT|PageFlags::READWRITE|PageFlags::USER);
+    allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, PageFlags::PRESENT|PageFlags::READWRITE|PageFlags::USER|PageFlags::GLOBAL);
     pmle4->dump(0);
 	return heap_t::create(allocPages, freePages, KHEAP_START, KHEAP_START+KHEAP_INITIAL_SIZE, HEAK_MAX_SIZE, 0, 0 );
 }
