@@ -7,6 +7,10 @@
 #include "NewObj.h"
 
 template<typename T, const int SHIFT, const int BITS>
+const char *DirectoryName();
+
+
+template<typename T, const int SHIFT, const int BITS>
 struct PageDirectory
 {
 	using PageType=typename T::PageType;
