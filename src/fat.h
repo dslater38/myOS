@@ -2,6 +2,7 @@
 #define FAT_H_INCLUDED
 
 #include <cstdint>
+#include "vfs.h"
 
 struct BootBlock
 {
@@ -122,6 +123,17 @@ struct DirectoryEntry
     uint32_t FileSize()const {
         return *reinterpret_cast<const uint32_t *>(file_size);
     }
+};
+
+class FatVfsNode : public IVfsNode
+{
+    uint32_t read(uint64_t offset, uint64_t size, uint8_t *buffer)noexcept override;
+    virtual uint32_t write(uint64_t offset, uint64_t size, const uint8_t *buffer)noexcept override;
+    virtual void open(bool forWrite)noexcept override;
+    virtual void close()noexcept override;
+    virtual size_t  size()noexcept override;
+    virtual IVfsNode *link()noexcept override;
+
 };
 
 #endif // FAT_H_INCLUDED
