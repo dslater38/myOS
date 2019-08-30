@@ -95,10 +95,18 @@ struct PageDirectory
 				INDENT();debug_out("0x%016.16lx, %d == 0x%016.16lx \n", vaddr2, i, entry);
 				if constexpr(sizeof(T) != sizeof(Page4K))
 				{
-					auto *ptr = (*this)[i];
-					if (ptr)
+					if ( (SHIFT == 30 || SHIFT == 21) && (entry & (1<<7)))	// check for a 1GB page entry in the level 3 table
+					{														// or a 2MB page entry in the level 2 table
+						;
+					}
+					else
 					{
-						ptr->dump(vaddr2);
+					
+						auto *ptr = (*this)[i];
+						if (ptr)
+						{
+							ptr->dump(vaddr2);
+						}
 					}
 				}
 			}

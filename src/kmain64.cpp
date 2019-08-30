@@ -50,6 +50,11 @@ extern "C"
 	extern void startup_data_end();
 	extern void report_idt_info();
 
+	extern uint64_t p3_gb_mapped_table[512];
+	extern uint64_t p4_table[512];
+
+	extern void invalidate_all_tlbs();
+
 	void kmain64(uint32_t magic, const MultiBootInfoHeader *mboot_header)
 	{
 		// Entry - at this point, we're in 64-bit long mode with a basic
@@ -102,6 +107,14 @@ extern "C"
 			SetGlobalPageBits();
 		}
 
+		if( info.page1gb )
+		{
+			auto *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
+			auto * pdpte= reinterpret_cast<PDPTE_64_1G *>(p3_gb_mapped_table);
+			auto phys = (reinterpret_cast<uint64_t>(pdpte) | 0x03);
+			pte->physical[256] = phys;
+			invalidate_all_tlbs();
+		}
 
 
 		auto *frames = initHeap();
