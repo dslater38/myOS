@@ -84,6 +84,11 @@ struct PageDirectory
 	void dump(uint64_t vaddr)const
 	{
 #if 1 // PageDirectory<T,%d,%d>
+		if( 0 != (vaddr & 0x0000800000000000) )
+		{
+			vaddr |= 0xFFFF000000000000;
+		}
+
 		INDENT();debug_out("%s: this 0x%016.16lx\n", DirectoryName<SHIFT>(), (uint64_t)this);
 		++indent;
 		for (auto i = 0ul; i < NUM_ENTRIES; ++i)
