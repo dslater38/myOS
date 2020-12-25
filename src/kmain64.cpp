@@ -1,36 +1,51 @@
 #include "common.h"
 #include "vesavga.h"
 #include "serial.h"
-#include "ata.h"
+#include "AtaController.h"
 #include "multiboot2.h"
 #include "PageDirectory.h"
 #include "Frames.h"
+#include "VmmPageStack.h"
 #include "TextFrameBuffer.h"
 #include "MultiBootInfoHeader.h"
 #include "BootInformation.h"
 #include "Foobar.h"
 #include "vfs.h"
 #include "timer.h"
+#include "cpu.h"
+#include "VMManager.h"
 
 void init_idt64_table();
+
+static std::array<uint8_t, 512> partData{};
 
 // uint32_t mboot_header=0;
 
 volatile int foo___ = 0;
 static void test_page_fault();
+static void reportPartition(int which);
 
 void cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr);
 
 extern Foobar barfoo;
 
-extern Frames<uint64_t> *initHeap();
+extern Frames<uint64_t> *initHeap(VM::Manager &mgr);
 void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
 // uint64_t RTC_currentTime();
 void init_rct_interrupts();
 // void init_timer(uint32_t frequency);
+extern void init_keyboard_handler();
+void testVmmPageStack(const MultiBootInfoHeader *mboot_header);
+
+static void detectControllers();
+extern void detectControllersOld();
+static void dumpPageTables();
+static void accessP4Table();
+extern const multiboot_tag *findMultiBootInfoHeaderTag(const MultiBootInfoHeader *addr, multiboot_uint32_t type);
 
 extern "C"
 {
+	extern PML4E_4K *p4_table;
 	void initTextFrameBuffer();
 	extern uint64_t placement_address;
 	void __libc_init_array (void);
@@ -73,7 +88,7 @@ extern "C"
 		printf("Hello World from 64-bit long mode!!!!!\n");
 		
 		auto success = init_serial(2, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
-		if(success)
+		if (success == SUCCESS)
 		{
 			printf("Initialized COM2\n");
 		}
@@ -81,11 +96,31 @@ extern "C"
 		debug_out("Startup Data Block: start 0x%016.16lx, end: 0x%016.16lx\n",(uint64_t)&startup_data_start, (uint64_t)&startup_data_end);
 		report_idt_info();
 		
-		auto *frames = initHeap();
+
+		// process the mboot header.
+		BootInformation bootInfo{};
+		if( mboot_header != 0)
+		{
+			printf("process mboot_header\n");
+			cmain(bootInfo, mboot_header);
+//			mapMemory(frames, bootInfo.mmap);
+		}
+		else
+		{
+			PANIC("mboot_header is NULL\n");
+		}
+		
+		
+    	// const auto *tag = findMultiBootInfoHeaderTag(mboot_header, MULTIBOOT_TAG_TYPE_MMAP);
+		// VM::Manager mgr {reinterpret_cast <const multiboot_tag_mmap *>(tag)};
+		VM::Manager mgr {bootInfo.mmap};
+		
+		
+		auto *frames = initHeap(mgr);
 		printf("Heap Initialized...\n");
 		
 		success = init_serial(1, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
-		if( success == SUCCESS)
+		if( success == SUCCESS )
 		{
 			printf("Initialized COM1 port\n");
 		}
@@ -93,27 +128,26 @@ extern "C"
 		printf("COM1: %s,\tCOM2: %s\n",identify_uart(1), identify_uart(2));
 		printf("COM3: %s,\tCOM4: %s\n",identify_uart(3), identify_uart(4));
 		
+	
+//		dumpPageTables();
 		// detect ata disks & controllers.
 		detectControllers();
+		
+		// reportPartition(0);
+		//reportPartition(1);
 
-		BootInformation bootInfo{};
-		
-		// process the mboot header.
-		if( mboot_header != 0)
-		{
-			printf("process mboot_header\n");
-			cmain(bootInfo, mboot_header);
-			mapMemory(frames, bootInfo.mmap);
-		}
-		else
-		{
-			PANIC("mboot_header is NULL\n");
-		}
-		
 		// printf("RTC Current Time:\n");
 		// RTC_currentTime();
+		
+		Cpu cpu{};
+		printf("Cpuid: MaxRequest: %u, Vendor ID: %s\n", cpu .MaxRequestLevel(), cpu.VendorId());
+	
+		
+//		testVmmPageStack(mboot_header);
+
 		init_timer(1);
 		init_rct_interrupts();
+		init_keyboard_handler();
 		asm("sti");
 		
 
@@ -175,4 +209,395 @@ const char *getTheString()
 	static const char *SSS="This is the initial string";
 	return SSS;
 
+}
+
+static void checkMem(uint8_t *alloc, bool init)
+{
+	for( auto i=0; i<512; ++i )
+	{
+		if(alloc[i] != 0xCB)
+		{
+			printf("Overwrote memry at offset %u\n", i);
+		}
+		if(!init)
+		{
+			if(alloc[i+512] == 0xAE)
+			{
+				printf("disk read didn't overwrite memory at %u\n", i);
+			}
+		}
+		if(alloc[i+1024] != 0xFD)
+		{
+			printf("Overwrote memry at offset %u\n", i+1024);
+		}
+	}
+}
+
+static void reportPartition(int which)
+{
+	// uint8_t *buffer = partData.data();
+	printf("Allocating 3 pages for reportPArtition\n");
+	
+	uint8_t *alloc = static_cast<uint8_t *>(kmalloc(512*3));
+	if(!alloc)
+	{
+		PANIC("Memory allocation error.");
+	}
+	memset(alloc,0xCB,512);
+	memset(alloc+512,0xAE,512);
+	memset(alloc+1024,0xFD,512);
+	checkMem(alloc, true);
+	printf("Check before reading disk\n");
+	auto *buffer = alloc + 512;
+	auto &ctl = which == 0 ? AtaController::primary() : AtaController::secondary();
+
+	auto read = ctl.read(AtaController::Drive::Primary, buffer, 0, 512);
+	if(read!=512)
+	{
+		printf("ctl.read() failed. only got %lu bytes", read);
+	}
+	else
+	{
+		auto *part1 = buffer + 446;
+		uint8_t status = part1[0];
+		printf("Status: %d\n", status);
+		uint8_t head = part1[1];
+		uint8_t b2 = part1[2];
+		uint8_t b3 = part1[3];
+
+		uint16_t cyl = (static_cast<uint16_t>(0xC0 & b2)<<8)|static_cast<uint16_t>(b3);
+		uint8_t sector = (b2 & 0x3F);
+		printf("Start-C/H/S %d/%d/%d\n", cyl, head, sector);
+		printf("Type: %x\n", part1[4]);
+		head = part1[5];
+		b2 = part1[6];
+		b3 = part1[7];
+		cyl = (static_cast<uint16_t>(0xC0 & b2)<<8)|static_cast<uint16_t>(b3);
+		sector = (b2 & 0x3F);
+		printf("End-C/H/S %d/%d/%d\n", cyl, head, sector);
+		uint32_t lba = *reinterpret_cast<uint32_t *>(part1 + 8);
+		printf("LBA of first sector: %u (%x)\n", lba, lba);
+		uint32_t sectorCount = *reinterpret_cast<uint32_t *>(part1 + 0x0C);
+		printf("sector count: %u (%x)\n", sectorCount, sectorCount);
+	}
+	checkMem(alloc, false);
+	printf("Check AFTER reading disk\n");
+	printf("Freeing memory\n");
+	kfree(alloc);
+}
+
+static void reportController(const char *format, AtaController::AtaDeviceType type)
+{
+	bool detected = (type!=AtaController::AtaDeviceType::UNKNOWN);
+	printf(format, detected ? "present" : "absent");
+	if(detected)
+	{
+		const char *sType=nullptr;
+		switch(type)
+		{
+        	case AtaController::AtaDeviceType::PATAPI:
+				sType="Parallel ATAPI (PATAPI)";
+				break;
+        	case AtaController::AtaDeviceType::SATAPI:
+				sType="Serial ATAPI (SATAPI)";
+				break;
+        	case AtaController::AtaDeviceType::PATA:
+				sType="Parallel ATA (PATA)";
+				break;
+        	case AtaController::AtaDeviceType::SATA:
+				sType="Serial ATA (SATA)";
+				break;
+			default:
+				sType="<NULL>";
+				break;
+		}
+		printf("\tType: %s\n", sType);
+	}
+}
+
+static void detectControllers()
+{
+	const auto &p=AtaController::primary();
+	const auto &s=AtaController::secondary();
+
+	auto driveType = p.detect(AtaController::Drive::Primary);
+	reportController("Primary IDE controller Master drive: %s\n", driveType);
+	if(driveType!=AtaController::AtaDeviceType::UNKNOWN)
+	{		
+		p.identify(AtaController::Drive::Primary);
+	}
+	driveType = p.detect(AtaController::Drive::Secondary);
+	reportController("Primary IDE controller Slave drive: %s\n", driveType);
+	if(driveType!=AtaController::AtaDeviceType::UNKNOWN)
+	{		
+		p.identify(AtaController::Drive::Secondary);
+	}
+
+
+	driveType = s.detect(AtaController::Drive::Primary);
+	reportController("Secondary IDE controller Master drive: %s\n", driveType);
+	if(driveType!=AtaController::AtaDeviceType::UNKNOWN)
+	{		
+		s.identify(AtaController::Drive::Primary);
+	}
+	driveType = p.detect(AtaController::Drive::Secondary);
+	reportController("Secondary IDE controller Slave drive: %s\n", driveType);
+	if(driveType!=AtaController::AtaDeviceType::UNKNOWN)
+	{		
+		s.identify(AtaController::Drive::Secondary);
+	}
+}
+
+static void accessP4Table()
+{
+	const uint64_t canonicalExtendMask = 0xFFFF000000000000;
+	auto vAddrP4Table = reinterpret_cast<const uint64_t *>(canonicalExtendMask | 0x0000FFFFFFFFF000);
+	printf("Access Page: p4_table last entry: 0x%0.16lx\n", vAddrP4Table[511]);
+}
+
+static void dumpPageTables()
+{
+	const uint64_t canonicalExtendMask = 0xFFFF000000000000;
+
+	auto vAddrP4Table = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFFFFFF000);
+	auto vAddrP3Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFFFE00000);
+	auto vAddrP2Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFC0000000);
+	auto vAddrP1Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FF8000000000);
+	
+	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+	{
+		if( (*vAddrP4Table)[i] != 0 )
+		{
+			printf("P4Table: Found non-zero entry: 0x%lx\n", (*vAddrP4Table)[i]);
+		}
+	}
+
+	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+	{
+		if( (*vAddrP3Table0)[i] != 0 )
+		{
+			printf("P3Table: Found non-zero entry: 0x%lx\n", (*vAddrP3Table0)[i]);
+		}
+	}
+
+	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+	{
+		if( (*vAddrP2Table0)[i] != 0 )
+		{
+			printf("P2Table: Found non-zero entry: 0x%lx\n", (*vAddrP2Table0)[i]);
+		}
+	}
+
+	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+	{
+		if( (*vAddrP1Table0)[i] != 0 )
+		{
+			printf("P1Table: Found non-zero entry: %lx\n", (*vAddrP1Table0)[i]);
+		}
+	}
+
+}
+
+uint64_t *PML4EEntryVAddr(size_t index)
+{
+	constexpr uint64_t recursiveAddr = 0xFFFFFFFFFFFFF000;
+	if( index < 512 )
+	{
+		return reinterpret_cast<uint64_t *>(recursiveAddr + index);
+	}
+	return nullptr;
+}
+
+uint64_t *PDPTEEntryVAddr(size_t plme4Index, size_t pdpteIndex)
+{
+	const auto *plme4Entry = PML4EEntryVAddr(plme4Index);
+	if( plme4Entry && pdpteIndex < 512)
+	{
+		constexpr uint64_t recursiveAddr = 0xFFFFFFFFFFE00000;
+		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 12)) + pdpteIndex);
+	}
+	return nullptr;
+}
+
+uint64_t *PDEEEntryVAddr(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex)
+{
+	const auto *pdpteEntry = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+	if( pdpteEntry && pdeIndex < 512 )
+	{
+		constexpr uint64_t recursiveAddr = 0xFFFFFFFFC0000000;
+		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 21) | (pdpteIndex<<12) ) + pdeIndex);
+	}
+	return nullptr;
+}
+
+uint64_t *PTEEntryVAddr(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex)
+{
+	const auto *pdeEntry = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
+	if( pdeEntry && pteIndex < 512 )
+	{
+		constexpr uint64_t recursiveAddr = 0xFFFFFFFFC0000000;
+		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 30) | (pdpteIndex<<21) | (pdeIndex<<12)) + pteIndex);
+	}
+	return nullptr;
+}
+
+uint64_t getPML4EEntry(size_t index)
+{
+	const auto *vAddr = PML4EEntryVAddr(index);
+	return vAddr ? *vAddr : 0u;
+}
+
+uint64_t getPDPTEEntry(size_t plme4Index, size_t pdpteIndex)
+{
+	const auto *vAddr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+	return vAddr ? *vAddr : 0u;
+}
+
+uint64_t getPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex)
+{
+	const auto *vAddr = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
+	return vAddr ? *vAddr : 0u;
+}
+
+uint64_t getPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex)
+{
+	const auto *vAddr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+	return vAddr ? *vAddr : 0u;
+}
+
+bool setPML4EEntry(size_t index, uint64_t val)
+{
+	auto *vAddr = PML4EEntryVAddr(index);
+	if( vAddr )
+	{
+		*vAddr = val;
+	}
+	return (vAddr != nullptr);
+}
+
+bool setPDPTEEntry(size_t plme4Index, size_t pdpteIndex, uint64_t val)
+{
+	auto *vAddr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+	if( vAddr )
+	{
+		*vAddr = val;
+	}
+	return (vAddr != nullptr);
+}
+
+bool setPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, uint64_t val)
+{
+	auto *vAddr = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
+	if( vAddr )
+	{
+		*vAddr = val;
+	}
+	return (vAddr != nullptr);
+}
+
+bool setPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t val)
+{
+	auto *vAddr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+	if( vAddr )
+	{
+		*vAddr = val;
+	}
+	return (vAddr != nullptr);
+}
+
+uint64_t *lookupPTEEntry(uint64_t vAddr)
+{
+	size_t plme4Index = ((vAddr >> 39) & 0x00000000000001FFu);
+	size_t pdpteIndex = ((vAddr >> 30) & 0x00000000000001FFu);
+	size_t pdeIndex = ((vAddr >> 21) & 0x00000000000001FFu);
+	size_t pteIndex = ((vAddr >> 12) & 0x00000000000001FFu);
+	return PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+}
+
+bool createPTEEntry(uint64_t vAddr)
+{
+	/*
+	size_t plme4Index = ((vAddr >> 39) & 0x00000000000001FFu);
+	size_t pdpteIndex = ((vAddr >> 30) & 0x00000000000001FFu);
+	size_t pdeIndex = ((vAddr >> 21) & 0x00000000000001FFu);
+	size_t pteIndex = ((vAddr >> 12) & 0x00000000000001FFu);
+	
+	auto entry = getPML4EEntry(plme4Index);
+	if( entry == 0 )
+	{
+		entry = allocFrame();
+		setPML4EEntry(plme4Index, entry);
+	}
+	entry = getPDPTEEntry(plme4Index, pdpteIndex);
+	if( entry == 0 )
+	{
+		entry = allocFrame();
+		setPDPTEEntry(plme4Index, pdpteIndex, entry);
+	}
+	entry = getPDEEntry(plme4Index, pdpteIndex, pdeIndex);
+	if( entry == 0 )
+	{
+		entry = allocFrame();
+		setPDEEntry(plme4Index, pdpteIndex, pdeIndex, entry);
+	}
+	entry = getPTEEntry(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+	if( entry == 0 )
+	{
+		entry = allocFrame();
+		setPTEEntry(plme4Index, pdpteIndex, pdeIndex, pteIndex, entry);
+	}
+	return true;
+	*/
+	return false;
+}
+
+void testVmmPageStack(const MultiBootInfoHeader *mboot_header)
+{
+	const auto *tag = findMultiBootInfoHeaderTag(mboot_header, MULTIBOOT_TAG_TYPE_MMAP);
+	PhysicalMemoryBlock *pHead = nullptr;
+	if( tag )
+	{
+		const auto *mmapStart = reinterpret_cast<const multiboot_tag_mmap *>(tag);
+		for( auto *mmap = mmapStart->entries;
+			 reinterpret_cast<const multiboot_uint8_t *>(mmap) < reinterpret_cast<const multiboot_uint8_t *>(mmapStart) + mmapStart->size;
+			 mmap = reinterpret_cast<const multiboot_memory_map_t *> (reinterpret_cast<const uint8_t *>(mmap) + mmapStart->entry_size) )
+		{
+			if( mmap->type == MULTIBOOT_MEMORY_AVAILABLE && mmap->addr > 0x0000000000100000)
+			{
+				auto *newBlock = New<PhysicalMemoryBlock>();
+				newBlock->start = ((mmap->addr) >> 12);
+				newBlock->len = ((mmap->len) >> 12);
+				if( !pHead )
+				{
+					pHead = newBlock;
+				}
+				else
+				{
+					auto *ptr = pHead;
+					while( ptr->next != nullptr )
+					{
+						ptr = ptr->next;
+					}
+					ptr->next = newBlock;
+				}
+			}
+		}
+	}
+	if( pHead )
+	{
+		VmmPageStack stack{pHead};
+		auto p1 = stack.allocPage();
+		auto p2 = stack.allocPage();
+		auto p3 = stack.allocPage();
+		auto p4 = stack.allocPage();
+		auto p5 = stack.allocPage();
+
+		stack.freePage(p5);
+		stack.freePage(p1);
+		stack.freePage(p3);
+		p5 = stack.allocPage();
+		stack.freePage(p2);
+		stack.freePage(p4);
+		stack.freePage(p5);
+	}
 }

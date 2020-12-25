@@ -5,75 +5,79 @@
 
 OUTPUT_FORMAT(elf64-x86-64)
 ENTRY(start)
+
+
+
+/* VM_BASE = 0xFFFF800000000000; */
+/* VM_BASE = 0x0000000000000000; */
+VM_BASE = 0x00000000C0000000;
+
 SECTIONS
 {	
-	.text 0x100000 :
-	{
-		code = .; _code = .; __code = .;
-		src/boot.o(.text)
-		*(.text)
-		. = ALIGN(4096);
+	.multiboot.data 0x00100000 : {
+		*(.multiboot.data)
 	}
 
-	.data :
-	{
-		data = .; _data = .; __data = .;
-		*(.data)
-		. = ALIGN(4096);
+	.multiboot.text : {
+		*(.multiboot.text)
 	}
-	.rodata :
+
+	. += VM_BASE;
+
+	kernel_begin = .; _kernel_begin = .; __kernel_begin = .;
+
+	.text ALIGN (4K) : AT (ADDR (.text) - VM_BASE)
+	{
+		code = .; _code = .; __code = .;
+/*		src/boot.o(.text) */
+		*(.text*)
+	}
+	.rodata ALIGN (4K) : AT (ADDR (.rodata) - VM_BASE)
 	{
 		rodata = .; _rodata = .; __rodata = .;
-		*(.rodata)
-		. = ALIGN(4096);
+		*(.rodata*)
 	}
-	.bss :
+	.data ALIGN (4K) : AT (ADDR (.data) - VM_BASE)
+	{
+		data = .; _data = .; __data = .;
+		*(.data*)
+	}
+	.bss ALIGN (4K) : AT (ADDR (.bss) - VM_BASE)
 	{
 		bss = .; _bss = .; __bss = .;
-		*(.bss)
-		. = ALIGN(4096);
-	}
- 
-	.stack :
-	{
-		kernel_stack_base = .; _kernel_stack_base = .; __kernel_stack_base = .; 
-		. += 16384; 
-		. = ALIGN(4096);
-		kernel_stack = .; _kernel_stack = .; __kernel_stack = .;
-		. = ALIGN(4096);
+		*(.bss*)
 	}
 	. = ALIGN(CONSTANT (MAXPAGESIZE));
-    .init           :
+    .init           : AT (ADDR (.init) - VM_BASE)
 	{
 		KEEP (*(SORT_NONE(.init)))
 	}
 		
-	.fini           :
+	.fini           : AT (ADDR (.fini) - VM_BASE)
 	{
 		KEEP (*(SORT_NONE(.fini)))
 	}
-	.preinit_array    :
+	.preinit_array    : AT (ADDR (.preinit_array) - VM_BASE)
 	{
 		PROVIDE_HIDDEN (__preinit_array_start = .);
 		KEEP (*(.preinit_array))
 		PROVIDE_HIDDEN (__preinit_array_end = .);
 	}
-	.init_array    :
+	.init_array    : AT (ADDR (.init_array) - VM_BASE)
 	{
 		PROVIDE_HIDDEN (__init_array_start = .);
 		KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
 		KEEP (*(.init_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .ctors))
 		PROVIDE_HIDDEN (__init_array_end = .);
 	}
-	.fini_array    :
+	.fini_array    : AT (ADDR (.fini_array) - VM_BASE)
 	{
 		PROVIDE_HIDDEN (__fini_array_start = .);
 		KEEP (*(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*)))
 		KEEP (*(.fini_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .dtors))
 		PROVIDE_HIDDEN (__fini_array_end = .);
-	}
- 
-	.ctors :
+	} 
+	.ctors ALIGN (4K) : AT (ADDR (.ctors) - VM_BASE)
 	{
 		/* gcc uses crtbegin.o to find the start of
 		the constructors, so we make sure it is
@@ -93,19 +97,27 @@ SECTIONS
 		KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .ctors))
 		KEEP (*(SORT(.ctors.*)))
 		KEEP (*(.ctors))
-		. = ALIGN(4096);
 	}
-	.dtors :
+	.dtors ALIGN (4K) : AT (ADDR (.dtors) - VM_BASE)
 	{
-    KEEP (*crtbegin.o(.dtors))
-    KEEP (*crtbegin?.o(.dtors))
-    KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
-    KEEP (*(SORT(.dtors.*)))
-    KEEP (*(.dtors))
-	  . = ALIGN(4096);
+		KEEP (*crtbegin.o(.dtors))
+		KEEP (*crtbegin?.o(.dtors))
+		KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
+		KEEP (*(SORT(.dtors.*)))
+		KEEP (*(.dtors))
+	}
+	.stack ALIGN (4K) : AT (ADDR (.stack) - VM_BASE)
+	{
+		kernel_stack_base = .; _kernel_stack_base = .; __kernel_stack_base = .; 
+		. += 16384; 
+		. = ALIGN(4096);
+		__kernel_stack = .;
+		_kernel_stack = .; 
+		kernel_stack = (. - VM_BASE);
 	}
 
-	end = .; _end = .; __end = .;
+/*	end = .; _end = .; __end = .; */
+	kernel_end = .; _kernel_end = .; __kernel_end = .;
   
 }
 

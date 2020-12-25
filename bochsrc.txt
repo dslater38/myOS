@@ -5,8 +5,13 @@ vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 
 floppya: 1_44=floppy.img, status=inserted
 
+ata0: enabled=true, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 ata0-master: type=disk, path="hda.img", mode=flat, cylinders=20, heads=16, spt=63, translation=lba
-ata0-slave: type=cdrom, path=os.iso, status=inserted
+ata0-slave: type=cdrom, path="os.iso", status=inserted, model="Generic 1234", biosdetect=auto
+ata1: enabled=true, ioaddr1=0x170, ioaddr2=0x370, irq=15
+ata1-master: type=disk, path="hdb.img", mode=flat, cylinders=512, heads=4, spt=32, sect_size=512, model="Generic 128/16/63", biosdetect=auto, translation=auto
+ata1-slave: type=none
+
 
 boot: cdrom
 
@@ -15,22 +20,23 @@ log: bochsout.txt
 # display_library: win32
 # display_library: x, options="gui_debug"
 display_library: x
+# display_library: term
 
 mouse: enabled=0
 # clock: sync=slowdown
 clock: sync=realtime, time0=local, rtc_sync=1
 cpu: ips=1000000
-# cpuid: level=6, mmx=1, sep=1, simd=avx512, apic=xapic, aes=1, sha=1, adx=1, movbe=1, xsave=1, xsaveopt=1, avx_fma=1, bmi=1, x86_64=1, 1g_pages=1, pcid=1, smep=1, smap=1, mwait=1
+cpuid: level=6, mmx=1, sep=1, simd=avx512, apic=xapic, aes=1, sha=1, adx=1, movbe=1, xsave=1, xsaveopt=1, avx_fma=1, bmi=1, x86_64=1, 1g_pages=1, pcid=1, smep=1, smap=1, mwait=1
 # vmx=1
 
 # com1: enabled=1, mode=socket-server, dev=192.168.3.130:20201
 com1: enabled=1, mode=file, dev=serial.out
 com2: enabled=1, mode=file, dev=kdebug.log
 
-# debugger_log: debugger.out
+debugger_log: debugger.out
 port_e9_hack: enabled=0
 debug_symbols: file=kernel.sym
-debug: action=ignore, CPU0=report
+debug: action=report, pit=ignore
 info: action=report
 error: action=report
 panic: action=ask

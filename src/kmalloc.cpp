@@ -18,6 +18,22 @@ extern "C"
 		return kmalloc_generic(sz,false,nullptr);
 	}
 
+	void *krealloc(void *p, size_t sz)
+	{
+		void *newMem = kmalloc(sz);
+		if(newMem && p)
+		{
+			auto oldSize = kernelHeap->blockSize(p);
+			auto copyLen = std::min(sz, oldSize);
+			if(copyLen>0)
+			{
+				memcpy(newMem, p, copyLen);
+			}
+			kfree(p);
+		}
+		return newMem;
+	}
+
 	void *kmalloc_aligned(size_t sz)
 	{
 		return kmalloc_generic(sz,true,nullptr);

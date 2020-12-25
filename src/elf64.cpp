@@ -32,6 +32,11 @@
 #include <errors/errno.h>
 #include <elf/elf.h>
 
+extern "C"
+{
+	void dbgInterrupt();
+}
+
 /**
  * \brief Calculates the base of the loadable portion of the elf image in
  * virtual memory.
@@ -349,6 +354,8 @@ errval_t elf64_load(uint16_t em_machine, elf_allocator_fn allocate_func,
             }
             assert(dest != NULL);
 
+	        dbgInterrupt();
+	        
             // Copy file segment into memory
             memcpy(dest, (void *)(base + (uintptr_t)p->p_offset), p->p_filesz);
 

@@ -23,6 +23,8 @@ struct PageDirectory
 	
 	static constexpr uintptr_t ATTRS = ((OFFSET_BITS >12 ) ? 0x43 : 0x03);
 
+	static constexpr bool IsDirectory = true;
+	
 	uintptr_t physical[NUM_ENTRIES];
 
 	PageDirectory()
@@ -34,15 +36,16 @@ struct PageDirectory
 	{
 	}
 
-	uintptr_t index(uintptr_t vaddr)const
+	static uintptr_t index(uintptr_t vaddr)
 	{
 		return ((vaddr>>(SHIFT)) & MASK);
 	}
 
 	T *operator[](int n)const
 	{
-		const uintptr_t MASK = (~((uintptr_t)(0xFFF)));
-		return reinterpret_cast<T *>(  MASK & physical[n] );
+		constexpr uintptr_t MASK = (~((uintptr_t)(0xFFF)));
+		const auto *ptr  = T::IsDirectory ? reinterpret_cast<const T *>(MASK & physical[n]) : reinterpret_cast<const T *>(&physical[n]);
+		return const_cast <T *>(ptr);
 	}
 
 	PageType *getPage(uintptr_t vaddr)
@@ -51,17 +54,10 @@ struct PageDirectory
 		T *table = (*this)[i];
 		if( table == nullptr )
 		{
-			if( sizeof(T) == sizeof(Page4K))
-			{
-				physical[i] = 0;
-				table = reinterpret_cast<T *>(&(physical[i]));
-			}
-			else
-			{			
-				void *phys = 0;
-				table = AlignedNewPhys<T>(&phys );
-				physical[i] = static_cast<uintptr_t>(reinterpret_cast<uintptr_t>(phys)|ATTRS); // PRESENT, RW, US.
-			}
+			ASSERT(T::IsDirectory==true);
+			void *phys = 0;
+			table = AlignedNewPhys<T>(&phys );
+			physical[i] = static_cast<uintptr_t>(reinterpret_cast<uintptr_t>(phys)|ATTRS); // PRESENT, RW, US.
 		}
 		return table->getPage(vaddr);
 	}
@@ -70,19 +66,7 @@ struct PageDirectory
 	{
 		auto i = index(vaddr);
 		T *table = (*this)[i];
-		if( table == nullptr )
-		{
-			if( sizeof(T) == sizeof(Page4K))
-			{
-				physical[i] = 0;
-				return reinterpret_cast<PageType *>(&(physical[i]));
-			}
-			else
-			{
-				return nullptr;		
-			}
-		}
-		return table->findPage(vaddr);
+		return table ? table->findPage(vaddr) : nullptr;
 	}
 
 	void dump()const
@@ -133,7 +117,7 @@ public:
 
 	void setPhys(uint32_t){}
 
-	uintptr_t operator[](int n)
+	uintptr_t operator[](int n)const
 	{
 		return *(uintptr_t *)(&pages[n]);
 	}

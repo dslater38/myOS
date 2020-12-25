@@ -1,4 +1,58 @@
 Next at t=0
 (0) [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
-c
-(0).[3675426000] [0x00000010bf5a] 0008:000000000010bf5a (halt+2): jmp .-4 (0x000000000010bf58) ; ebfc
+<bochs:1> lb 'start.enable_paging'
+<bochs:2> c
+(0) Breakpoint 1, 0x0000000000100060 in ?? ()
+Next at t=681284994
+(0) [0x000000100060] 0010:0000000000100060 (start.enable_paging+0): mov eax, cr0              ; 0f20c0
+<bochs:3> x 'p4_table'
+[bochs]:
+0x00000000c012d000 <p4_table+0>:bx_dbg_read_linear: physical memory read error (phy=0x0000c012d000, lin=0x00000000c012d000)
+<bochs:4> x 0x00000012d000
+[bochs]:
+0x000000000012d000 <start.error+2cf6c>:	0x0012e003
+<bochs:5> u /10
+0000000000100060: (start.enable_paging+0): mov eax, cr0              ; 0f20c0
+0000000000100063: (start.enable_paging+3): or eax, 0x80000000        ; 0d00000080
+0000000000100068: (start.enable_paging+8): or eax, 0x00010000        ; 0d00000100
+000000000010006d: (start.enable_paging+d): mov cr0, eax              ; 0f22c0
+0000000000100070: (   start.gdt_flush+0): mov eax, 0x0012c048       ; b848c01200
+0000000000100075: (   start.gdt_flush+5): lgdt ds:[eax]             ; 0f0110
+0000000000100078: (   start.gdt_flush+8): mov ax, 0x0010            ; 66b81000
+000000000010007c: (   start.gdt_flush+c): mov ds, ax                ; 8ed8
+000000000010007e: (   start.gdt_flush+e): mov es, ax                ; 8ec0
+0000000000100080: (  start.gdt_flush+10): mov fs, ax                ; 8ee0
+<bochs:6> s
+Next at t=681284995
+(0) [0x000000100063] 0010:0000000000100063 (start.enable_paging+3): or eax, 0x80000000        ; 0d00000080
+<bochs:7> s
+Next at t=681284996
+(0) [0x000000100068] 0010:0000000000100068 (start.enable_paging+8): or eax, 0x00010000        ; 0d00000100
+<bochs:8> s
+Next at t=681284997
+(0) [0x00000010006d] 0010:000000000010006d (start.enable_paging+d): mov cr0, eax              ; 0f22c0
+<bochs:9> s
+Next at t=681284998
+(0) [0x000000100070] 0010:0000000000100070 (start.gdt_flush+0): mov eax, 0x0012c048       ; b848c01200
+<bochs:10> u /10
+0000000000100070: (   start.gdt_flush+0): mov eax, 0x0012c048       ; b848c01200
+0000000000100075: (   start.gdt_flush+5): lgdt ds:[eax]             ; 0f0110
+0000000000100078: (   start.gdt_flush+8): mov ax, 0x0010            ; 66b81000
+000000000010007c: (   start.gdt_flush+c): mov ds, ax                ; 8ed8
+000000000010007e: (   start.gdt_flush+e): mov es, ax                ; 8ec0
+0000000000100080: (  start.gdt_flush+10): mov fs, ax                ; 8ee0
+0000000000100082: (  start.gdt_flush+12): mov gs, ax                ; 8ee8
+0000000000100084: (  start.gdt_flush+14): mov ss, ax                ; 8ed0
+0000000000100086: (  start.gdt_flush+16): push esi                  ; 56
+0000000000100087: (  start.gdt_flush+17): push 0x00000000           ; 6a00
+<bochs:11> s
+Next at t=681284999
+(0) [0x000000100075] 0010:0000000000100075 (start.gdt_flush+5): lgdt ds:[eax]             ; 0f0110
+<bochs:12> s
+Next at t=681285000
+(0) [0x000000100078] 0010:0000000000100078 (start.gdt_flush+8): mov ax, 0x0010            ; 66b81000
+<bochs:13> c
+Next at t=4040428952
+(0) [0x000000000df2] 0008:00000000c0123df2 (get_fault_addr64.__endp+2): add byte ptr ds:[rax] (get_fault_addr64.__endp+4), al ; 0000
+<bochs:14> q
+(0).[4040428952] [0x000000000df2] 0008:00000000c0123df2 (get_fault_addr64.__endp+2): add byte ptr ds:[rax] (get_fault_addr64.__endp+4), al ; 0000

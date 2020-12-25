@@ -3,7 +3,7 @@
 #include "ordered_array.h"
 #include "PageDirectory.h"
 #include "NewObj.h"
-
+#include "VMManager.h"
 
 extern "C"
 {
@@ -11,8 +11,36 @@ extern "C"
 	extern uint64_t p3_table[512];
 	extern uint64_t p2_table[512];
     extern void invalidate_tlb(uint64_t);
+	extern void invalidate_all_tlbs();
 }
 
+heap_t::heap_t(VM::Manager *pMgr, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t super, uint8_t ro)
+	: index{reinterpret_cast<header_t **>(start), (uint64_t)HEAP_INDEX_SIZE}
+	, start_address{start}
+	, end_address{end_addr}
+	, max_address{max_size}
+	, supervisor{super}
+	, readonly{ro}
+    , pManager {pMgr}
+{
+    printf("create_heap: start: %016.16lx, end: %016.16lx, max: %016.16lx\n", start, end_addr, max_size);
+	// All our assumptions are made on startAddress and endAddress being page-aligned.
+	ASSERT(start%0x1000 == 0);
+	ASSERT(end_addr%0x1000 == 0);
+
+	// Shift the start address forward to resemble where we can start putting data.
+	start_address += sizeof(void *)*HEAP_INDEX_SIZE;
+	PAGE_ALIGN(start_address);
+		
+    printf("hole: %016.16lx\n", start_address);
+
+	// We start off with one large hole in the index.
+	header_t *hole = (header_t *)start_address;
+	hole->size = end_addr-start_address;
+	hole->magic = HEAP_MAGIC;
+	hole->is_hole = 1;
+	insert_ordered_array(hole, &index);
+}
 
 heap_t::heap_t(PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t super, uint8_t ro)
 	: index{reinterpret_cast<header_t **>(start), (uint64_t)HEAP_INDEX_SIZE}
@@ -44,12 +72,37 @@ heap_t::heap_t(PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr
 }
 
 // static 
-heap_t *heap_t::create(PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t supervisor, uint8_t readonly)
+heap_t *heap_t::create(void *memory, PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t supervisor, uint8_t readonly)
 {
-    void *memory = kmalloc(sizeof(heap_t));
     heap_t *heap = new(memory) heap_t{alloc, free, start, end_addr, max_size, supervisor, readonly};
     return heap;
 	// return New<heap_t>(alloc, free, start, end_addr, max_size, supervisor, readonly);
+}
+
+bool heap_t::allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable)
+{
+	if( pManager )
+	{
+		return pManager->allocPages(startAddress, numPages, isKernel, isWritable);
+	}
+	else if(pageAlloc)
+	{
+		return pageAlloc(startAddress, numPages, isKernel, isWritable);
+	}
+	return false;
+}
+
+bool heap_t::freePages(uint64_t startAddress, size_t numPages)
+{
+	if( pManager )
+	{
+		return pManager->freePages(startAddress, numPages);
+	}
+	else if(pageFree)
+	{
+		return pageFree(startAddress, numPages);
+	}
+	return false;
 }
 
 int64_t heap_t::find_smallest_hole(uint64_t size, bool page_align)
@@ -109,7 +162,7 @@ void heap_t::expand(uint64_t new_size)
 	// This should always be on a page boundary.
 	auto old_size = end_address-start_address;
 	auto i = old_size;
-	if ( pageAlloc(start_address + i, new_size - old_size, supervisor, !readonly) )
+	if ( allocPages(start_address + i, new_size - old_size, supervisor, !readonly) )
 	{
 		end_address = start_address+new_size;
 	}
@@ -137,7 +190,7 @@ uint64_t heap_t::contract(uint64_t new_size)
 
     auto old_size = end_address-start_address;
     auto i = old_size - 0x1000;
-    if( pageFree(start_address, i))
+    if( freePages(start_address, i))
     {
         end_address = start_address + new_size;
         return new_size;
@@ -275,6 +328,17 @@ void *heap_t::alloc(uint64_t size, bool page_align)
     return (void *) ( (uint64_t)block_header+sizeof(header_t) );
 }
 
+uint64_t heap_t::blockSize(void *p)
+{
+    // Exit gracefully for null pointers.
+    if (p == 0)
+        return 0ull;
+
+    // Get the header and footer associated with this pointer.
+    header_t *header = (header_t*) ( (uint64_t)p - sizeof(header_t) );
+    return header->size;
+}
+
 void heap_t::free(void *p)
 {
     // Exit gracefully for null pointers.
@@ -381,16 +445,28 @@ extern "C"
     extern uint64_t placement_address;
 }
 
-Frames<uint64_t> *initHeap()
+Frames<uint64_t> *initHeap(VM::Manager &mgr)
 {
-    frames = New<Frames<uint64_t>>( (uint64_t)(2ull*1024ull*1024ull*1024ull) );
+//    frames = New<Frames<uint64_t>>( (uint64_t)(2ull*1024ull*1024ull*1024ull) );
     // new (reinterpret_cast<void *>(frames_buffer)) Frames<uint64_t> {2ull*1024ull*1024ull*1024ull};
-    frames->mapInitialPages(512);
-    kernelHeap = initialKernelHeap();
+//    frames->mapInitialPages(512);
+    kernelHeap = initialKernelHeap(mgr);
     debug_out("Heap Created. placement_address == 0x%016.16lx\n", placement_address);
     return frames;
 }
 
+template<const int BITS>
+inline constexpr uint64_t Canonical(uint64_t addr)
+{
+	constexpr uint64_t TESTBIT = (1ul << (BITS - 1));
+	constexpr uint64_t MASK = ~((1ul << BITS) - 1ul);
+	return (addr & TESTBIT) ? (addr | MASK) : addr;
+}
+
+constexpr uint64_t PLME4BASE =   Canonical<48>(0x0000FFFFFFFFF000);
+constexpr uint64_t PDEBASE =     Canonical<48>(0x0000FFFFFFE00000);
+constexpr uint64_t PDPTEBASE =   Canonical<48>(0x0000FFFFC0000000);
+constexpr uint64_t PTEBASE =     Canonical<48>(0x0000FF8000000000);
 
 Page4K *getPage(void *vaddr)
 {
@@ -405,7 +481,8 @@ bool allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWr
 //        debug_out("mapped: 0x%016.16lx\n",startAddress);
         auto * page = pmle4->getPage(startAddress);
         frames->alloc(page, isKernel, isWritable);
-        invalidate_tlb((uint64_t)&startAddress);
+        // invalidate_tlb((uint64_t)&startAddress);
+	    invalidate_all_tlbs();
     }
     return true;
 }
@@ -421,10 +498,32 @@ bool freePages(uint64_t startAddress, size_t numPages)
     return true;
 }
 
-heap_t *initialKernelHeap()
+heap_t *initialKernelHeap(VM::Manager &mgr)
 {
     debug_out("initialKernelHeap\n");
-    allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, 0, 1);
+	return mgr.getKernelHeap();
+//	return heap_t::create(allocPages, freePages, KHEAP_START, KHEAP_START+KHEAP_INITIAL_SIZE, HEAK_MAX_SIZE, 0, 0 );
+//    allocPages(KHEAP_START, KHEAP_INITIAL_SIZE>>12, 0, 1);
 //    pmle4->dump();
-	return heap_t::create(allocPages, freePages, KHEAP_START, KHEAP_START+KHEAP_INITIAL_SIZE, HEAK_MAX_SIZE, 0, 0 );
+// 	return heap_t::create(allocPages, freePages, KHEAP_START, KHEAP_START+KHEAP_INITIAL_SIZE, HEAK_MAX_SIZE, 0, 0 );
+}
+
+extern "C"
+{
+	//extern void munmap(void *__addr, size_t __len);
+    void *mmap(void *__addr, size_t __len, int __prot, int __flags, int __fd, __off_t __offset)noexcept
+	{
+		return nullptr;		
+	}
+	void munmap(void *__addr, size_t __len)
+	{
+	}
+	
+	long int time(long int *p)
+	{
+		long int foo = 0xABCDEF1234;
+		if (p)
+			*p = foo;
+		return foo;
+	}
 }

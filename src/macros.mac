@@ -1,6 +1,18 @@
 %include "mbootconst.mac"
 %include "gdtconst.mac"
 
+
+%macro PROC 1
+[global %1:function %1.__endp-%1]
+%1:
+%endmacro
+
+%macro ENDP 0
+align 16
+.__endp:
+%endmacro
+
+
 %MACRO  get_GOT 0 
         call    %%getgot 
   %%getgot: 
@@ -13,32 +25,42 @@
 	dq (%2 & 0xFFFF)|( (%1 & 0xFFFFFF)<<16) |( (%2 & 0x0F0000) << 32) | ((%1 & 0xFF000000) << 32) | (%3)
 %ENDMACRO
 
+;  [GLOBAL isr%1]        ; %1 accesses the first parameter.
+;  isr%1:
+
 %macro ISR_NOERRCODE 1  ; define a macro, taking one parameter
-  [GLOBAL isr%1]        ; %1 accesses the first parameter.
-  isr%1:
+	PROC isr%1
     cli
     push qword 0
     push qword %1
     jmp isr_common_stub
+	ENDP
 %endmacro
 
+;  [GLOBAL isr%1]
+;  isr%1:
+
 %macro ISR_ERRCODE 1
-  [GLOBAL isr%1]
-  isr%1:
+	PROC isr%1
     cli
     push qword %1
     jmp isr_common_stub
+	ENDP
 %endmacro
 
 ; This macro creates a stub for an IRQ - the first parameter is
 ; the IRQ number, the second is the ISR number it is remapped to.
+
+;  [GLOBAL irq%1]
+;  irq%1:
+
 %macro IRQ 2
-  [GLOBAL irq%1]
-  irq%1:
+	PROC irq%1
 	cli
 	push qword 0
 	push qword %2
 	jmp irq_common_stub
+	ENDP
 %endmacro
 
 %macro PUSHAQ 0

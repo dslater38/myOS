@@ -16,6 +16,12 @@ void outb(uint16_t port, uint8_t value);
 void outw(uint16_t port, uint16_t value);
 void outd(uint16_t port, uint32_t value);
 
+void outsb(uint16_t port, const uint8_t *buf, size_t size);
+void outsw(uint16_t port, const uint16_t *buf, size_t size);
+
+void batch_outb(uint16_t *port, uint8_t *data, size_t size);
+void batch_outb2(uint32_t *iodata, size_t size);
+
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 extern void halt(void);	/* never returns */
@@ -24,6 +30,9 @@ extern uint64_t get_fault_addr64(void);
 
 uint8_t inb(uint16_t port);
 uint16_t inw(uint16_t port);
+
+void insb(uint16_t port, uint8_t *buf, size_t size);
+void insw(uint16_t port, uint16_t *buf, size_t size);
 
 inline 
 uint32_t HIDWORD(uint64_t n)

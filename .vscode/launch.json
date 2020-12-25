@@ -8,22 +8,19 @@
             "name": "myOS - gdbserver",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/isofiles/boot/kernel",
-            "miDebuggerServerAddress": "localhost:11234",
-            "args": [],
+            "symbolLoadInfo": {
+                "loadAll": true,
+                "exceptionList": ""
+            },
+            "program": "${workspaceRoot}/kernel",
+            "miDebuggerServerAddress": "192.168.3.13:11234",
+            "MIMode": "gdb",
+            "args": ["-s","kernel"],
             "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
+            "sourceFileMap" : { "/home/slaterd/repos/myOS" : "U:\\repos\\myOS", "/home/slaterd/repos/myOS/src" : "U:\\repos\\myOS\\src" },
             "environment": [],
-            "externalConsole": true,
-            "linux": {
-                "MIMode": "gdb"
-              },
-              "osx": {
-                "MIMode": "gdb"
-              },
-              "windows": {
-                "MIMode": "gdb"
-              }
+//            "externalConsole": true,
         },
         {
             "name": "clang++ build and debug active file",

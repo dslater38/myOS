@@ -20,7 +20,7 @@
 #include "TextFrameBuffer.h"
 #include "MultiBootInfoHeader.h"
 #include "BootInformation.h"
-
+#include "elf/elf.h"
 /*  Macros. */
 
 /*  Some screen stuff. */
@@ -172,11 +172,31 @@ static void print_bootloader_name(const multiboot_tag_string *name)
 
 }
 
+extern bool allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable);
+
+static errval_t ElfAllocatorFn(void * /* state */ , genvaddr_t base, size_t size, uint32_t flags, void **ret)
+{
+	size_t numPages = (size + 4095) / 4096;
+	auto success = allocPages(base, numPages, true, true);
+	if (success && ret)
+	{
+		*ret = reinterpret_cast<void *>(base);
+	}
+	return success;
+}
+
+
 
 static void print_module(const multiboot_tag_module *module)
 {
 	printf ("Module at 0x%08.8x-0x%08.8x. Command line %s\n",
 		  module->mod_start, module->mod_end, module->cmdline);
+//	genvaddr_t entry = 0;
+//	auto success = elf_load(EM_X86_64, ElfAllocatorFn, nullptr, module->mod_start, module->mod_end - module->mod_start, &entry);
+//	if (success == 0)
+//	{
+//		printf("elf_load() loaded module. Entry Address is : 0x%016.16lx\n", entry);
+//	}
 
 }
 
@@ -397,6 +417,21 @@ tagType2String(multiboot_uint16_t type)
 			break;
 	}
 	return "<unknown>";
+}
+
+const multiboot_tag *findMultiBootInfoHeaderTag(const MultiBootInfoHeader *addr, multiboot_uint32_t type)
+{
+	for( auto *tag = addr->tags;
+		 tag->type != MULTIBOOT_TAG_TYPE_END;
+		 tag = (struct multiboot_tag *)((multiboot_uint8_t *)tag
+		+ ((tag->size + 7) & ~7)) )
+	{
+		if( tag->type == type )
+		{
+			return tag;
+		}
+	}
+	return nullptr;
 }
 
 /*  Check if MAGIC is valid and print the Multiboot information structure

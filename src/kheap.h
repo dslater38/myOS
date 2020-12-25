@@ -5,6 +5,11 @@
 #include "ordered_array.h"
 #include "NewObj.h"
 #include "Frames.h"
+#include <functional>
+
+namespace VM {
+	class Manager;
+}
 
 constexpr uint64_t KHEAP_START = 0x00000000C0000000;
 constexpr size_t KHEAP_INITIAL_SIZE = 0x200000;
@@ -53,14 +58,18 @@ struct heap_t
 {
 public:	
 	heap_t(PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t super, uint8_t ro);	
-	static heap_t *create(PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t supervisor, uint8_t readonly);
+	heap_t(VM::Manager *pMgr, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t super, uint8_t ro);	
+	static heap_t *create(void *memory, PageAlloc alloc, PageFree free, uint64_t start, uint64_t end_addr, uint64_t max_size, uint8_t supervisor, uint8_t readonly);
 	void *alloc(uint64_t size, bool page_align);
 	void free(void *p);
+	uint64_t blockSize(void *p);
 
 private:
 	int64_t find_smallest_hole(uint64_t size, bool page_align);
 	void expand(uint64_t new_size);
 	uint64_t contract(uint64_t new_size);
+	bool allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable);
+	bool freePages(uint64_t startAddress, size_t numPages);
 private:
 	ordered_array_t<header_t *> index;
 	PageAlloc 		pageAlloc{nullptr};
@@ -70,9 +79,9 @@ private:
 	uint64_t max_address{0};   // The maximum address the heap can be expanded to.
 	uint8_t supervisor{0};     // Should extra pages requested by us be mapped as supervisor-only?
 	uint8_t readonly{0};       // Should extra pages requested by us be mapped as read-only?
-	
+	VM::Manager		*pManager{nullptr};
 };
 
-heap_t *initialKernelHeap();
+heap_t *initialKernelHeap(VM::Manager &);
 
 #endif // KHEAP_H_INCLUDED

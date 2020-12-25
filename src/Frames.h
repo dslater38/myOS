@@ -82,7 +82,7 @@ public:
 		auto frame = page->frame;
 		if( frame != 0 )
 		{
-			clear(frame);
+			clear(frame << page->OFFBITS);
 			page->frame = 0;
 		}
 	}

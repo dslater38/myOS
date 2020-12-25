@@ -4,6 +4,211 @@
 
 #include "common.h"
 
+enum PageBits
+{
+	Present      = (1 << 0),
+	ReadWrite    = (1 << 1),
+	User         = (1 << 2),
+	WriteThrough = (1 << 3),
+	CacheDisable = (1 << 4),
+	Accessed     = (1 << 5),
+	Dirty        = (1 << 6),
+	Huge         = (1 << 7),
+	Global       = (1 << 8),
+	B9			 = (1 << 9),
+	B10			 = (1 << 10),
+	B11			 = (1 << 11),
+};
+
+	template<const size_t OFFBITS_>
+	class Page2T
+	{
+		static constexpr size_t OFFBITS = OFFBITS_;
+		static constexpr size_t FRAME_BITS = (8*sizeof(uintptr_t) - OFFBITS);
+		static constexpr uintptr_t FRAME_MASK = (static_cast<uintptr_t>(-1) << OFFBITS);
+		static constexpr size_t OFFSET_BITS=OFFBITS;
+		static constexpr size_t offset_bits=OFFBITS;
+		static constexpr size_t shift=OFFBITS;
+		static constexpr bool is_huge=(OFFBITS > 12);
+		
+		static constexpr bool IsDirectory = false;
+		
+		bool present()const
+		{
+			return getBit(PageBits::Present);
+		}
+		
+		void present(bool b)const
+		{
+			setBit(PageBits::Present, b);
+		}
+		
+		bool rw()const
+		{
+			return getBit(PageBits::ReadWrite);
+		}
+		
+		void rw(bool b)const
+		{
+			setBit(PageBits::ReadWrite, b);
+		}
+		
+		bool user()const
+		{
+			return getBit(PageBits::User);
+		}
+		
+		void user(bool b)const
+		{
+			setBit(PageBits::User, b);
+		}
+
+		bool write_through()const
+		{
+			return getBit(PageBits::WriteThrough);
+		}
+		
+		void write_through(bool b)const
+		{
+			setBit(PageBits::WriteThrough, b);
+		}
+
+		bool no_cache()const
+		{
+			return getBit(PageBits::CacheDisable);
+		}
+		
+		void no_cache(bool b)const
+		{
+			setBit(PageBits::CacheDisable, b);
+		}
+
+		bool accessed()const
+		{
+			return getBit(PageBits::Accessed);
+		}
+		
+		void accessed(bool b)const
+		{
+			setBit(PageBits::Accessed, b);
+		}
+
+		bool dirty()const
+		{
+			return getBit(PageBits::Dirty);
+		}
+		
+		void dirty(bool b)const
+		{
+			setBit(PageBits::Dirty, b);
+		}
+
+		bool huge()const
+		{
+			return getBit(PageBits::Huge);
+		}
+		
+		void huge(bool b)const
+		{
+			setBit(PageBits::Huge, b);
+		}
+
+		bool global()const
+		{
+			return getBit(PageBits::Global);
+		}
+		
+		void global(bool b)const
+		{
+			setBit(PageBits::Global, b);
+		}
+
+		bool b9()const
+		{
+			return getBit(PageBits::B9);
+		}
+		
+		void b9(bool b)const
+		{
+			setBit(PageBits::B9, b);
+		}
+
+		bool b10()const
+		{
+			return getBit(PageBits::B10);
+		}
+		
+		void b10(bool b)const
+		{
+			setBit(PageBits::B10, b);
+		}
+
+		bool b11()const
+		{
+			return getBit(PageBits::B11);
+		}		
+		
+		void b11(bool b)const
+		{
+			setBit(PageBits::B11, b);
+		}
+		
+		uintptr_t frameAddr()const
+		{
+			return (addr & FRAME_MASK);
+		}
+			
+		uintptr_t frameNumber()const
+		{
+			return (frameAddr() >> OFFBITS);
+		}
+		
+		static Page2T<OFFBITS_> &toEntry(uintptr_t &n)
+		{
+			return *((Page2T<OFFBITS_> *)(&n));
+		}
+	
+		Page2T<OFFBITS> *getPage(uintptr_t )
+		{
+			return this;
+		}
+	
+		Page2T<OFFBITS> *findPage(uintptr_t )
+		{
+			return this;
+		}
+	
+		const Page2T<OFFBITS> *getPage(uintptr_t )const
+		{
+			return this;
+		}
+	
+		const Page2T<OFFBITS> *findPage(uintptr_t )const
+		{
+			return this;
+		}
+		
+		
+	private:
+		bool getBit(size_t n)const
+		{
+			return (addr & (1 << n)) ? true : false;
+		}
+		void setBit(size_t n, bool b)const
+		{
+			if (b)
+			{
+				addr |= (1 << n);
+			}
+			else
+			{
+				addr &= ~(1 << n);
+			}
+		}
+	private:
+		uintptr_t	addr{0};
+	};
+
 #if 0
 template<class UINT>
 struct PageTableBase
@@ -125,6 +330,7 @@ struct PageT
 	static constexpr size_t offset_bits=OFFBITS;
 	static constexpr size_t shift=OFFBITS;
 	static constexpr bool is_huge=(OFFBITS > 12);
+	static constexpr bool IsDirectory = false;
 	
 	using PageType=PageT<OFFBITS>;
 	
