@@ -150,6 +150,37 @@ extern "C"
 		init_keyboard_handler();
 		asm("sti");
 		
+		CpuInfo info{};
+		getCpuInfo(info);
+
+		printf("Vendor Id String: %s\n", info.vendorId);
+		printf("Stepping: %d, Model: %d, Family: %d, Type: %d, ExtendedModel: %d, ExtendedFamily: %d\n",
+		info.stepping, info.model, info.family, info.processor_type, info.extendedModelId, info.extendedFamilyId);
+
+		const char *str = getBrandString(info.brand_index);
+		if( str )
+		{
+			printf("Brand String: %s\n", str);
+		}
+
+
+
+		BootBlock boot{};
+		read(&boot, 0, sizeof(BootBlock));
+		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
+		boot.BytesPerBlock(), boot.ReservedBlocks(), boot.NumRootDirEntries(), boot.TotalNumBlocks());
+		printf("NumBlocksFat1: %d, NumBlocksPerTrack %d, NumHeads: %d, NumHiddenBlocks: %d\n",
+		boot.NumBlocksFat1(), boot.NumBlocksPerTrack(), boot.NumHeads(), boot.NumHiddenBlocks());
+		printf("TotalBlocks: %d, PhysDriveNo: %d, VolumeSerialNumber: %04.4x-%04.4x, FsId: %8.8s, BlockSig: %x\n",
+		boot.TotalBlocks(), boot.PhysDriveNo(), (boot.VolumeSerialNumber() & 0xFFFF0000)>>16, boot.VolumeSerialNumber() & 0x0000FFFF, boot.FsId(), boot.BlockSig());
+		printf("Volume Label: %11.11s\n", boot.volume_label);
+
+		dump_fat_table(boot);
+		dump_root_dir(boot);
+		printf("Dumping DRVSPACE.BIN\n");
+		print_clusters(boot, 578);
+		print_file(boot, "README  ","TXT");
+
 
 		while(true)
 		{

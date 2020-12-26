@@ -3,6 +3,22 @@ section .text
 
 %include "macros.mac"
 
+; void cpuid(CpuidInfo *info, uint32_t eax);
+PROC cpuid
+	test rdi, rdi
+	jz .error
+	mov eax, esi	; load eax with the passed in parameter
+	cpuid
+	mov dword [rdi], eax
+	mov dword [rdi+4], ebx
+	mov dword [rdi+8], ecx
+	mov dword [rdi+12], edx
+.exit:
+	ret
+.error:
+	xor eax,eax
+	jmp .exit
+ENDP
 PROC invalidate_tlb
 	invlpg [rdi]
 	ret
