@@ -6,9 +6,6 @@ CSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.c' -print)
 CXXSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.cpp' -print)
 SSOURCES:=$(wildcard $(SUBDIRS:%=%/*.s))
 OBJECTS:=$(CSOURCES:%.c=%.o) $(CXXSOURCES:%.cpp=%.o) $(SSOURCES:%.s=%.o)
-# $(info OBJECTS: $(OBJECTS))
-# OBJECTS:=$(OBJECTS:src/boot.o=)
-# $(info OBJECTS: $(OBJECTS))
 
 export LD=gcc
 export CC=clang
@@ -25,22 +22,30 @@ LDFLAGS=-no-pie -ffreestanding -nostdlib -fno-exceptions -fno-threadsafe-statics
 all : $(SUBDIRS) os.iso
 
 $(SUBDIRS):
-	@$(MAKE) -C $@ $(MAKECMDGOALS)
+	@$(MAKE) -C $@ CC="$(CC)" CXX="$(CXX)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" ASFLAGS="$(ASFLAGS)" LDFLAGS="$(LDFLAGS)"  $(MAKECMDGOALS)
 	
 $(OBJECTS) : $(SUBDIRS)
 
-os.iso : kernel isofiles/boot/grub/grub.cfg
+os.iso : kernel hello.ko isofiles/boot/grub/grub.cfg
 	cp kernel isofiles/boot/kernel
+	cp hello.ko isofiles/boot/hello.ko
 	grub-mkrescue -o os.iso isofiles
 
 clean: $(SUBDIRS)
 	-rm -f isofiles/boot/kernel
+	-rm -f isofiles/boot/hello.ko
 	-rm -f os.iso
 
+src/kernel : $(SUBDIRS)
 
-kernel: $(OBJECTS) | link.ld
-	$(LD) $(LDFLAGS) -o $@ $^
-	nm $@ | awk '{ print $$1" "$$3 }' > $@.sym
+modules/hello.ko : $(SUBDIRS)
+
+hello.ko : modules/hello.ko
+	cp $^ $@
+
+# kernel: $(OBJECTS) | link.ld
+kernel: src/kernel
+	cp $^ $@
 	
 #	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
 

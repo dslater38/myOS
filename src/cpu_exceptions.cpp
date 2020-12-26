@@ -181,7 +181,7 @@ void page_fault(registers64_t regs)
 	// asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
 
 	// The error code gives us details of what happened.
-	int present   = !(regs.err_code & 0x1); // Page not present
+	int present = (regs.err_code & 0x1);    // Page not present
 	int rw = regs.err_code & 0x2;           // Write operation?
 	int us = regs.err_code & 0x4;           // Processor was in user-mode?
 	int reserved = regs.err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
@@ -191,7 +191,7 @@ void page_fault(registers64_t regs)
 	printf("Page fault! at 0x%016.16lX\n\t( %s %s %s %s )\n", 
         faulting_address,
         present ? "present" : "absent",
-        rw ? "read-only" : "read/write",
+        rw ? "write" : "read",
         us ? "user-mode" : "kernel-mode",
         reserved ? "reserved" : "not-reserved"
        );

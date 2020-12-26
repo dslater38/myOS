@@ -113,7 +113,7 @@ extern "C"
 		
     	// const auto *tag = findMultiBootInfoHeaderTag(mboot_header, MULTIBOOT_TAG_TYPE_MMAP);
 		// VM::Manager mgr {reinterpret_cast <const multiboot_tag_mmap *>(tag)};
-		VM::Manager mgr {bootInfo.mmap};
+		VM::Manager mgr{bootInfo.mmap};
 		
 		
 		auto *frames = initHeap(mgr);

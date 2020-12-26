@@ -14,10 +14,15 @@ ASFLAGS+=-g -F dwarf
 CPPFLAGS+=-I.
 
 .PHONY: all
-all: $(OBJECTS)
+# all: $(OBJECTS)
+all : kernel
 
 clean:
 	@rm -f *.o *.d *.d.* *.ds kernel
+
+kernel: $(OBJECTS) | link.ld
+	$(LD) $(LDFLAGS) -o $@ $^
+	nm $@ | awk '{ print $$1" "$$3 }' > $@.sym
 
 .s.o:
 	nasm $(ASFLAGS) -o $@ $<
