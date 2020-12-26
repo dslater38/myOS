@@ -1,0 +1,7 @@
+**/*.visualgdb/*
+*.vcxproj.user
+*.sym
+**/.vs/*
+**/Debug/*
+**/*.vgdbsettings.*.user
+

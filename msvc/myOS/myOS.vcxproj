@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{0B75D75C-01E3-43C8-93F2-5CF88526B5AF}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="VisualGDBPackageDefinitions">
+    <ToolchainID>com.sysprogs.toolchain.default-llvm</ToolchainID>
+  </PropertyGroup>
+  <ImportGroup Label="VisualGDBFindComponents">
+    <Import Project="$(LOCALAPPDATA)\VisualGDB\FindComponents.props" />
+  </ImportGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\c++\8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\x86_64-linux-gnu\c++\8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\c++\8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include;..\..\include;..\..\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)myOS-Debug.vgdbsettings</NMakeOutput>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\c++\8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\x86_64-linux-gnu\c++\8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\c++\8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0004\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\sol\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)"  "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)myOS-Release.vgdbsettings</NMakeOutput>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="..\..\bochsrc.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\samples\src\common.c" />
+    <ClCompile Include="..\..\samples\src\descriptor_tables.c" />
+    <ClCompile Include="..\..\samples\src\isr.c" />
+    <ClCompile Include="..\..\samples\src\kheap.c" />
+    <ClCompile Include="..\..\samples\src\main.c" />
+    <ClCompile Include="..\..\samples\src\monitor.c" />
+    <ClCompile Include="..\..\samples\src\ordered_array.c" />
+    <ClCompile Include="..\..\samples\src\paging.c" />
+    <ClCompile Include="..\..\samples\src\timer.c" />
+    <ClCompile Include="..\..\src\AtaController.cpp" />
+    <ClCompile Include="..\..\src\cmain.cpp" />
+    <ClCompile Include="..\..\src\cpu.cpp" />
+    <ClCompile Include="..\..\src\cpu_exceptions.cpp" />
+    <ClCompile Include="..\..\src\elf.cpp" />
+    <ClCompile Include="..\..\src\elf32.cpp" />
+    <ClCompile Include="..\..\src\elf64.cpp" />
+    <ClCompile Include="..\..\src\Foobar.cpp" />
+    <ClCompile Include="..\..\src\idt64.cpp" />
+    <ClCompile Include="..\..\src\isr.cpp" />
+    <ClCompile Include="..\..\src\keyb.cpp" />
+    <ClCompile Include="..\..\src\kheap.cpp" />
+    <ClCompile Include="..\..\src\kmain64.cpp" />
+    <ClCompile Include="..\..\src\kmalloc.cpp" />
+    <ClCompile Include="..\..\src\malloc.c" />
+    <ClCompile Include="..\..\src\memcpy.cpp" />
+    <ClCompile Include="..\..\src\memset.cpp" />
+    <ClCompile Include="..\..\src\multibootheader.cpp" />
+    <ClCompile Include="..\..\src\new.cpp" />
+    <ClCompile Include="..\..\src\panic.cpp" />
+    <ClCompile Include="..\..\src\pcSpeaker.cpp" />
+    <ClCompile Include="..\..\src\placement_address.cpp" />
+    <ClCompile Include="..\..\src\rtc.cpp" />
+    <ClCompile Include="..\..\src\runtime_init.cpp" />
+    <ClCompile Include="..\..\src\serial.cpp" />
+    <ClCompile Include="..\..\src\ssfn_impl.cpp" />
+    <ClCompile Include="..\..\src\strlen.cpp" />
+    <ClCompile Include="..\..\src\TextFrameBuffer.cpp" />
+    <ClCompile Include="..\..\src\timer.cpp" />
+    <ClCompile Include="..\..\src\vesavga.cpp" />
+    <ClCompile Include="..\..\src\vgaFont.cpp" />
+    <ClCompile Include="..\..\src\VgaFrameBuffer.cpp" />
+    <ClCompile Include="..\..\src\VMManager.cpp" />
+    <ClCompile Include="..\..\src\VmmPageStack.cpp" />
+    <ClCompile Include="..\..\src\vsprintf.cpp" />
+    <ClCompile Include="keyb.cpp" />
+    <ClInclude Include="..\..\idt64.h" />
+    <ClInclude Include="..\..\include\ata.h" />
+    <ClInclude Include="..\..\include\AtaController.h" />
+    <ClInclude Include="..\..\include\BootInformation.h" />
+    <ClInclude Include="..\..\include\common.h" />
+    <ClInclude Include="..\..\include\console.h" />
+    <ClInclude Include="..\..\include\cpu.h" />
+    <ClInclude Include="..\..\include\descriptor_tables.h" />
+    <ClInclude Include="..\..\include\elf\elf.h" />
+    <ClInclude Include="..\..\include\errors\errno.h" />
+    <ClInclude Include="..\..\include\Foobar.h" />
+    <ClInclude Include="..\..\include\Frames.h" />
+    <ClInclude Include="..\..\include\FsNode.h" />
+    <ClInclude Include="..\..\include\isr.h" />
+    <ClInclude Include="..\..\include\kallocator.h" />
+    <ClInclude Include="..\..\include\kheap.h" />
+    <ClInclude Include="..\..\include\kmalloc.h" />
+    <ClInclude Include="..\..\include\memcmp.h" />
+    <ClInclude Include="..\..\include\memcpy.h" />
+    <ClInclude Include="..\..\include\multiboot2.h" />
+    <ClInclude Include="..\..\include\MultiBootInfoHeader.h" />
+    <ClInclude Include="..\..\include\new.h" />
+    <ClInclude Include="..\..\include\NewObj.h" />
+    <ClInclude Include="..\..\include\ordered_array.h" />
+    <ClInclude Include="..\..\include\PageDirectory.h" />
+    <ClInclude Include="..\..\include\PageT.h" />
+    <ClInclude Include="..\..\include\rtc.h" />
+    <ClInclude Include="..\..\include\serial.h" />
+    <ClInclude Include="..\..\include\ssfn.h" />
+    <ClInclude Include="..\..\include\TextFrameBuffer.h" />
+    <ClInclude Include="..\..\include\timer.h" />
+    <ClInclude Include="..\..\include\vesavga.h" />
+    <ClInclude Include="..\..\include\vfs.h" />
+    <ClInclude Include="..\..\include\VgaFrameBuffer.h" />
+    <ClInclude Include="..\..\include\VMManager.h" />
+    <ClInclude Include="..\..\include\VmmPageStack.h" />
+    <ClInclude Include="..\..\samples\src\common.h" />
+    <ClInclude Include="..\..\samples\src\descriptor_tables.h" />
+    <ClInclude Include="..\..\samples\src\isr.h" />
+    <ClInclude Include="..\..\samples\src\kheap.h" />
+    <ClInclude Include="..\..\samples\src\monitor.h" />
+    <ClInclude Include="..\..\samples\src\ordered_array.h" />
+    <ClInclude Include="..\..\samples\src\paging.h" />
+    <ClInclude Include="..\..\samples\src\timer.h" />
+    <ClInclude Include="..\..\src\gnu\stubs-x32.h" />
+    <ClInclude Include="..\..\src\ssfn\ssfn.h" />
+    <None Include="..\..\isofiles\boot\grub\grub.cfg" />
+    <None Include="..\..\link.ld" />
+    <None Include="..\..\Makefile" />
+    <None Include="..\..\serial.out" />
+    <None Include="..\..\src\boot.s" />
+    <None Include="..\..\src\common64.s" />
+    <None Include="..\..\src\crti.s" />
+    <None Include="..\..\src\crtn.s" />
+    <None Include="..\..\src\gdtconst.mac" />
+    <None Include="..\..\src\interrupts.s" />
+    <None Include="..\..\src\macros.mac" />
+    <None Include="..\..\src\Makefile" />
+    <None Include="..\..\src\mbootconst.mac" />
+    <None Include="myOS-Debug.vgdbsettings" />
+    <None Include="myOS-Release.vgdbsettings" />
+  </ItemGroup>
+</Project>
