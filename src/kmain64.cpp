@@ -13,7 +13,12 @@
 #include "vfs.h"
 #include "timer.h"
 #include "cpu.h"
+#include "cpuinfo.h"
 #include "VMManager.h"
+#include "fat.h"
+#include "ata.h"
+#include "mbr.h"
+#include <array>
 
 void init_idt64_table();
 
@@ -38,7 +43,7 @@ extern void init_keyboard_handler();
 void testVmmPageStack(const MultiBootInfoHeader *mboot_header);
 
 static void detectControllers();
-extern void detectControllersOld();
+// static void detectControllersOld();
 static void dumpPageTables();
 static void accessP4Table();
 extern const multiboot_tag *findMultiBootInfoHeaderTag(const MultiBootInfoHeader *addr, multiboot_uint32_t type);
@@ -163,8 +168,40 @@ extern "C"
 			printf("Brand String: %s\n", str);
 		}
 
-
-
+		auto &ctl = AtaController::secondary();
+		
+		GenericMBR mbr{};
+		ctl.read(AtaController::Drive::Primary, &mbr, 0, sizeof(GenericMBR));
+		
+		printf("MBR: active: %s, type: %u\n", mbr.partitions[0].active() ? "true" : "false", mbr.partitions[0].type());
+		auto start = mbr.partitions[0].first();
+		printf("MBR: Start CHS: (%u/%u/%u)\n", start.cylinder, start.head, start.sector);
+		auto last = mbr.partitions[0].last();
+		printf("MBR: End CHS: (%u/%u/%u)\n", last.cylinder, last.head, last.sector);
+		printf("MBR: firstLBA: %u\n", mbr.partitions[0].firstLBA());
+		printf("MBR: sectorCount: %u\n", mbr.partitions[0].sectorCount());
+		printf("Logical Heads: %d, Logical Sectors: %d\n", mbr.partitions[0].numHeads(), mbr.partitions[0].numSectors());
+		
+		FATFileSystem fs {};
+		memset(&fs, 0, sizeof(fs));
+		fs.ctl = &ctl;
+		fs.d = AtaController::Drive::Primary;
+		fs.offset = mbr.partitions[0].firstLBA();
+		auto &boot = fs.boot;
+		
+		ctl.read(AtaController::Drive::Primary, &boot, mbr.partitions[0].firstLBA(), sizeof(BootBlock));
+		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
+		boot.BytesPerBlock(), boot.ReservedBlocks(), boot.NumRootDirEntries(), boot.TotalNumBlocks());
+		printf("NumBlocksFat1: %d, NumBlocksPerTrack %d, NumHeads: %d, NumHiddenBlocks: %d\n",
+		boot.NumBlocksFat1(), boot.NumBlocksPerTrack(), boot.NumHeads(), boot.NumHiddenBlocks());
+		printf("TotalBlocks: %d, PhysDriveNo: %d, VolumeSerialNumber: %04.4x-%04.4x, FsId: %8.8s, BlockSig: %x\n",
+		boot.TotalBlocks(), boot.PhysDriveNo(), (boot.VolumeSerialNumber() & 0xFFFF0000)>>16, boot.VolumeSerialNumber() & 0x0000FFFF, boot.FsId(), boot.BlockSig());
+		printf("Volume Label: %11.11s\n", boot.volume_label);
+		
+		dump_fat_table(fs);
+		dump_root_dir(fs);
+		print_file(fs, "AUTOEXEC  ","BAT");
+#if 0
 		BootBlock boot{};
 		read(&boot, 0, sizeof(BootBlock));
 		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
@@ -180,7 +217,7 @@ extern "C"
 		printf("Dumping DRVSPACE.BIN\n");
 		print_clusters(boot, 578);
 		print_file(boot, "README  ","TXT");
-
+#endif // 0
 
 		while(true)
 		{

@@ -41,11 +41,9 @@ kernel: $(OBJECTS) | link.ld
 
 %.ds : %.s
 	@set -e; rm -f $@; \
-	echo $(patsubst %.s,%.o,$<) $(patsubst %.s,%.ds,$<) : $< > $@
-
-%.ds : %.s
-	@set -e; rm -f $@; \
-	echo $(patsubst %.s,%.o,$<) $(patsubst %.s,%.ds,$<) : $< > $@
+	nasm -M $(ASFLAGS) -o $(basename $<).o $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
 
 -include $(CSOURCES:.c=.d)
 -include $(CXXSOURCES:.cpp=.d)

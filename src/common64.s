@@ -116,8 +116,9 @@ PROC batch_outb2
 	test rsi,rsi
 	jz .done
 .loop:	
-	mov al, BYTE [rdi]
-	mov dx, WORD [rdi+2]
+	mov edx, DWORD [rdi]
+	mov al, dl
+	shr edx, 16
 	out dx, al
 	add rdi, 4
 	dec rsi

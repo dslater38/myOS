@@ -13,6 +13,10 @@
     <MemoryWindowPreferences>
       <MemoryWindowPreferences>
         <ExpressionHistory>
+          <string>fatTable</string>
+          <string>table</string>
+          <string>&amp;boot</string>
+          <string>buffer</string>
           <string>0x00000000c0101000</string>
           <string>$rdi</string>
           <string>0x0000000000132000</string>
@@ -22,7 +26,7 @@
         <Format>
           <DataWidth>OneByte</DataWidth>
           <DataFormat>Hexadecimal</DataFormat>
-          <TextFormat>None</TextFormat>
+          <TextFormat>ANSI</TextFormat>
         </Format>
         <LiveMemorySettings>
           <Enabled>false</Enabled>

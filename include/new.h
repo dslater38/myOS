@@ -1,6 +1,7 @@
 #ifndef NEW_H_INCLUDED
 #define NEW_H_INCLUDED
 
+#include <cstring>
 #include <cstdint>
 #include <cstddef>
 #include <new>

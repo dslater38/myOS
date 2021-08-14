@@ -41,6 +41,24 @@ struct MBRPartitionEntry
         return *reinterpret_cast<const uint32_t *>(&record[12]);
     }
 
+	uint32_t numHeads()const noexcept {
+		const auto f = first();
+		const auto l = last();
+		const auto LBA0 = firstLBA();
+		const auto LBA1 = LBA0 + sectorCount() - 1;
+		return (f.head + l.head + LBA0*l.head - LBA1*f.head + f.head*l.sector - l.head*f.sector) /
+			    (f.cylinder - l.cylinder - LBA0*l.cylinder + LBA1*f.cylinder - f.cylinder*l.sector + l.cylinder*f.sector);
+	}
+
+	uint32_t numSectors()const noexcept {
+		const auto f = first();
+		const auto l = last();
+		const auto LBA0 = firstLBA();
+		const auto LBA1 = LBA0 + sectorCount() - 1;
+		return (f.cylinder-l.cylinder-LBA0*l.cylinder+LBA1*f.cylinder-f.cylinder*l.sector+l.cylinder*f.sector) /
+			    (f.cylinder*l.head-l.cylinder*f.head);
+	}
+	
 private:
     uint8_t record[16];
 };

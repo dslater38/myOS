@@ -1,7 +1,7 @@
 #include "kmalloc.h"
 #include "vesavga.h"
 #include "kheap.h"
-
+#include <algorithm>
 
 Page4K *getPage(void *vaddr);
 extern heap_t *kernelHeap;

@@ -64,6 +64,7 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="..\..\bochsrc-gdb.txt" />
     <Text Include="..\..\bochsrc.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -79,13 +80,16 @@
     <ClCompile Include="..\..\samples\src\ordered_array.c" />
     <ClCompile Include="..\..\samples\src\paging.c" />
     <ClCompile Include="..\..\samples\src\timer.c" />
+    <ClCompile Include="..\..\src\ata.cpp" />
     <ClCompile Include="..\..\src\AtaController.cpp" />
     <ClCompile Include="..\..\src\cmain.cpp" />
     <ClCompile Include="..\..\src\cpu.cpp" />
+    <ClCompile Include="..\..\src\cpuinfo.cpp" />
     <ClCompile Include="..\..\src\cpu_exceptions.cpp" />
     <ClCompile Include="..\..\src\elf.cpp" />
     <ClCompile Include="..\..\src\elf32.cpp" />
     <ClCompile Include="..\..\src\elf64.cpp" />
+    <ClCompile Include="..\..\src\fat.cpp" />
     <ClCompile Include="..\..\src\Foobar.cpp" />
     <ClCompile Include="..\..\src\idt64.cpp" />
     <ClCompile Include="..\..\src\isr.cpp" />
@@ -105,6 +109,7 @@
     <ClCompile Include="..\..\src\runtime_init.cpp" />
     <ClCompile Include="..\..\src\serial.cpp" />
     <ClCompile Include="..\..\src\ssfn_impl.cpp" />
+    <ClCompile Include="..\..\src\strcmp.cpp" />
     <ClCompile Include="..\..\src\strlen.cpp" />
     <ClCompile Include="..\..\src\TextFrameBuffer.cpp" />
     <ClCompile Include="..\..\src\timer.cpp" />
@@ -125,6 +130,7 @@
     <ClInclude Include="..\..\include\descriptor_tables.h" />
     <ClInclude Include="..\..\include\elf\elf.h" />
     <ClInclude Include="..\..\include\errors\errno.h" />
+    <ClInclude Include="..\..\include\fat.h" />
     <ClInclude Include="..\..\include\Foobar.h" />
     <ClInclude Include="..\..\include\Frames.h" />
     <ClInclude Include="..\..\include\FsNode.h" />
@@ -132,6 +138,7 @@
     <ClInclude Include="..\..\include\kallocator.h" />
     <ClInclude Include="..\..\include\kheap.h" />
     <ClInclude Include="..\..\include\kmalloc.h" />
+    <ClInclude Include="..\..\include\mbr.h" />
     <ClInclude Include="..\..\include\memcmp.h" />
     <ClInclude Include="..\..\include\memcpy.h" />
     <ClInclude Include="..\..\include\multiboot2.h" />
@@ -171,6 +178,8 @@
     <None Include="..\..\src\crtn.s" />
     <None Include="..\..\src\gdtconst.mac" />
     <None Include="..\..\src\interrupts.s" />
+    <None Include="..\..\src\kernel.sym" />
+    <None Include="..\..\src\link.ld" />
     <None Include="..\..\src\macros.mac" />
     <None Include="..\..\src\Makefile" />
     <None Include="..\..\src\mbootconst.mac" />

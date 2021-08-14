@@ -96,7 +96,7 @@ bool heap_t::freePages(uint64_t startAddress, size_t numPages)
 {
 	if( pManager )
 	{
-		return pManager->freePages(startAddress, numPages);
+		return pManager->freePages(startAddress, (numPages>>12));
 	}
 	else if(pageFree)
 	{

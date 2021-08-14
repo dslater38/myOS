@@ -4,7 +4,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <string.h>
+#include <cstring>
 #include <cstdint>
 #include <cstdio>
 

@@ -1,12 +1,4 @@
 Next at t=0
 (0) [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
 <bochs:1> c
-(0).[1229674892] [0x000000101006] 0008:00000000c0101006 (code+6): sldt word ptr ds:[rcx] (code+9) ; 0f0001
-Next at t=1229674893
-(0) [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
-<bochs:2> c
-(0).[1661512738] [0x000000101006] 0008:00000000c0101006 (code+6): sldt word ptr ds:[rcx] (code+9) ; 0f0001
-Next at t=1661512739
-(0) [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
-<bochs:3> q
-(0).[1661512739] [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
+(0).[27225202000] [0x0000001298c2] 0008:00000000c01298c2 (halt+2): jmp .-4 (0x00000000c01298c0) ; ebfc

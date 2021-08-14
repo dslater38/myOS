@@ -49,14 +49,14 @@ SECTIONS
 	}
 	. = ALIGN(CONSTANT (MAXPAGESIZE));
     .init           : AT (ADDR (.init) - VM_BASE)
-	{
+    {
 		KEEP (*(SORT_NONE(.init)))
-	}
+    }
 		
 	.fini           : AT (ADDR (.fini) - VM_BASE)
-	{
+    {
 		KEEP (*(SORT_NONE(.fini)))
-	}
+    }
 	.preinit_array    : AT (ADDR (.preinit_array) - VM_BASE)
 	{
 		PROVIDE_HIDDEN (__preinit_array_start = .);

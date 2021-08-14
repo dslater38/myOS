@@ -237,7 +237,7 @@ namespace VM {
 		
 
 		const uint64_t kernelStartFrame = ((reinterpret_cast<uint64_t>(&kernel_begin) - VM_BASE) >> 12);
-		uint64_t kernelEndFrame = (( (placement_address+4095) - VM_BASE) >> 12);
+		uint64_t kernelEndFrame = (0x0000000000200000>>12); // (( (placement_address+4095) - VM_BASE) >> 12);
 		auto kernelLen = kernelEndFrame - kernelStartFrame;
 		// now, we need to trim the kernel block out of the PhysicalMemoryBlock blocks so we don't allocate
 		// kernel space 

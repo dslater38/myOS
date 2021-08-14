@@ -72,4 +72,3 @@ IRQ   15,    47
 
 COMMON_STUB isr_common_stub, isr64_handler
 COMMON_STUB irq_common_stub, irq64_handler
-

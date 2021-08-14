@@ -120,13 +120,18 @@
 #define      ATA_READ      0x00
 #define      ATA_WRITE     0x013
 
+#if 0
+
 typedef struct {
 	uint8_t drive;
 } ide_private_data;
+
+
 
 extern void ata_init();
 void detectControllers();
 void write(void *buffer, uint32_t address, size_t size);
 void read(void *buffer, uint32_t address, size_t size);
+#endif // 0
 
 #endif

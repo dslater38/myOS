@@ -249,6 +249,18 @@
     <ClCompile Include="..\..\src\VMManager.cpp">
       <Filter>Source files\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\fat.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ata.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cpuinfo.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\strcmp.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\boot.s">
@@ -282,6 +294,10 @@
     <None Include="..\..\src\Makefile">
       <Filter>Source files\src</Filter>
     </None>
+    <None Include="..\..\src\link.ld">
+      <Filter>Source files\src</Filter>
+    </None>
+    <None Include="..\..\src\kernel.sym" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\VmmPageStack.h">
@@ -383,8 +399,15 @@
     <ClInclude Include="..\..\include\VgaFrameBuffer.h">
       <Filter>Header files\include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\fat.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mbr.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\bochsrc.txt" />
+    <Text Include="..\..\bochsrc-gdb.txt" />
   </ItemGroup>
 </Project>

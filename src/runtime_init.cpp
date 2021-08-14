@@ -35,4 +35,9 @@ extern "C"
 		PANIC("Pure Virtual Call...");
 	}
 
+	
+	int atexit( void(*)(void) )
+	{
+		return 0;
+	}
 }

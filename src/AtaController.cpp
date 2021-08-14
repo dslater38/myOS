@@ -278,7 +278,7 @@ private:
 
     static void setup_for_io(Drive drive, uint32_t address, uint8_t count, IoDirection dir)
     {
-        const uint8_t drv = drive==Drive::Primary ? 0x00 : 0x01;
+        const uint8_t drv = drive==Drive::Primary ? 0x00 : 0x10;
         uint8_t cmd = ((dir == IoDirection::Write) ? ATA_CMD_WRITE_PIO : ATA_CMD_READ_PIO);
 
         uint32_t io[] = {
@@ -311,7 +311,8 @@ private:
             cmd
         };
 
-        batch_outb(regs, data, 7);
+        // batch_outb(regs, data, 7);
+	    batch_outb2(io, 7);
         // ide_poll();
 #if 0
         // LBL28 addressing

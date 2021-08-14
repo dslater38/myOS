@@ -1,5 +1,6 @@
 // main.c -- Defines the C-code kernel entry point, calls initialisation routines.
 // Made for JamesM's tutorials
+#if 0
 
 #include "vesavga.h"
 #include "common.h"
@@ -131,3 +132,4 @@ void read(void *buffer, uint32_t address, size_t size)
 	//~ }
 }
 
+#endif // 0

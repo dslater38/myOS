@@ -7,7 +7,6 @@ ffff800000001000 __code
 ffff800000003000 data
 ffff800000003000 _data
 ffff800000003000 __data
-ffff800000002060 __GNU_EH_FRAME_HDR
 ffff800000001000 hello
 ffff800000000000 __mod_begin
 ffff800000000000 _mod_begin

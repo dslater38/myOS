@@ -2,6 +2,8 @@
 #define FAT_H_INCLUDED
 
 #include <cstdint>
+#include "AtaController.h"
+#include "NewObj.h"
 
 struct BootBlock
 {
@@ -86,6 +88,53 @@ struct BootBlock
 
 };
 
+struct FATFileSystem
+{
+	uint64_t rootDirectoryOffset()const
+	{
+        auto fat_tables_size = fatTableSize() * boot.num_FAT_tables;
+        auto off = this->offset + boot.ReservedBlocks() + fat_tables_size / 512;
+		return off;
+	}
+	
+	uint64_t dataOffset()const
+	{
+		auto offset = rootDirectoryOffset();
+	    auto root_directory_size = boot.NumRootDirEntries() * 32;
+		offset += root_directory_size / 512;
+		return offset;
+	}
+	
+	uint64_t fatTableOffset()const
+	{
+		return offset + boot.ReservedBlocks();
+	}
+	
+	size_t fatTableSize()const
+	{
+		return boot.NumBlocksFat1() * boot.BytesPerBlock();
+	}
+	
+	size_t rootDirectorySize()const
+	{
+		return boot.NumRootDirEntries() * 32;
+	}
+	
+	size_t numFatTables()const
+	{
+		return boot.num_FAT_tables;
+	}
+	
+	size_t sectorsPerCluster()const
+	{
+		return boot.blocks_per_alloc;
+	}
+	BootBlock   boot {};
+	uint64_t    offset{0};
+	const AtaController *ctl{nullptr};
+	AtaController::Drive d {AtaController::Drive::Primary};
+};
+
 enum FileAttrs : uint8_t
 {
     READONLY = 0x01u,
@@ -123,5 +172,22 @@ struct DirectoryEntry
         return *reinterpret_cast<const uint32_t *>(file_size);
     }
 };
+
+class Directory
+{
+	Directory();
+	const DirectoryEntry *getEntry(const char *fileName, const char *ext);
+private:
+	uniquePtr<DirectoryEntry[]> dir {};
+	const FATFileSystem *fs{nullptr};
+};
+
+#if 1
+void dump_fat_table(const FATFileSystem &fs);
+void dump_root_dir(const FATFileSystem &fs);
+void print_clusters(const FATFileSystem &fs, uint16_t startCluster);
+void print_file(const FATFileSystem &fs, const char *fileName, const char *ext);
+
+#endif // 0
 
 #endif // FAT_H_INCLUDED

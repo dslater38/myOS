@@ -22,11 +22,11 @@
  * in-kernel, 64-bit mode
  * userspace, 64-bit mode
  */
-#include <assert.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <string.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdint>
+#include <cstddef>
+#include <cstring>
 //~ #include <barrelfish_kpi/paging_arch.h>
 //~ #include <barrelfish_kpi/types.h>
 #include <errors/errno.h>

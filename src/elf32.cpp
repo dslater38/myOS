@@ -12,11 +12,11 @@
  * ETH Zurich D-INFK, Haldeneggsteig 4, CH-8092 Zurich. Attn: Systems Group.
  */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <string.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdint>
+#include <cstddef>
+#include <cstring>
 //~ #include <barrelfish_kpi/paging_arch.h>
 //~ #include <barrelfish_kpi/types.h>
 #include <errors/errno.h>
