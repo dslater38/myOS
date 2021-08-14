@@ -1,4 +1,0 @@
-Next at t=0
-(0) [0x0000fffffff0] f000:fff0 (no symbol): jmpf 0xf000:e05b          ; ea5be000f0
-c
-(0).[3675426000] [0x00000010bf5a] 0008:000000000010bf5a (halt+2): jmp .-4 (0x000000000010bf58) ; ebfc
