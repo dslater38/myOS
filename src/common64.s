@@ -6,6 +6,7 @@ section .text
 [GLOBAL inb]
 [GLOBAL inw]
 [GLOBAL ind]
+[GLOBAL insl]
 
 [GLOBAL get_fault_addr64]
 [GLOBAL halt]
@@ -69,6 +70,13 @@ inw:
 ind:
 	mov rdx, rdi
 	in eax, dx
+	ret
+
+insl:
+	mov rcx, rdx
+	mov rdx, rdi
+	mov rdi, rsi
+	rep insd
 	ret
 
 get_fault_addr64:

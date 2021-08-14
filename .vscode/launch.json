@@ -19,8 +19,8 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/isofiles/boot/kernel",
-            "miDebuggerServerAddress": "192.168.42.128:11234",
-            "args": [],
+            "miDebuggerServerAddress": "127.0.0.1:11234",
+            127.0.0.1
             "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
             "environment": [],

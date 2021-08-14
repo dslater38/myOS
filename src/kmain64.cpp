@@ -164,8 +164,12 @@ extern "C"
 			printf("Brand String: %s\n", str);
 		}
 
+		if( info.apic )
+		{
+			printf("APIC detected...\n");
+		}
 
-		asm("cli");
+//		asm("cli");
 		BootBlock boot{};
 		read(&boot, 0, sizeof(BootBlock));
 		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
@@ -182,7 +186,7 @@ extern "C"
 		// print_clusters(boot, 578);
 		// print_file(boot, "README  ","TXT");
 		// printf("================== DONE =====================\n");
-		asm("sti");
+//		asm("sti");
 
 
 		while(true)

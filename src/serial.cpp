@@ -194,7 +194,7 @@ uint8_t init_serial_imp( uint16_t port, uint32_t speed, uint8_t bits, uint8_t pa
 	// most UARTs need Auxiliary Output 2 set to a logical "1" to enable interrupts.
 	modem_ctl = (AUX_OUT_2|RTS|DTR);
 	
-	outb( com_port + INT_ENABLE, DISABLE_INTERRUPTS );   // Disable all interrupts
+//	outb( com_port + INT_ENABLE, DISABLE_INTERRUPTS );   // Disable all interrupts
 	outb( com_port + LINE_CTL, ENABLE_DLAB);			// Enable DLAB (set baud rate divisor)
 	outb( com_port + DIV_LOBYTE, LOBYTE(divisor) );		// Set divisor low byte
 	outb( com_port + DIV_HIBYTE, HIBYTE(divisor) );		// Set divisor high byte
