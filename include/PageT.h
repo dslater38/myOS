@@ -194,7 +194,7 @@ enum PageBits
 		{
 			return (addr & (1 << n)) ? true : false;
 		}
-		void setBit(size_t n, bool b)const
+		void setBit(size_t n, bool b)
 		{
 			if (b)
 			{
