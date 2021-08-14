@@ -101,7 +101,7 @@ extern "C"
 
 		CpuInfo info{};
 		getCpuInfo(info);
-
+#ifdef BROKEN
 		if(info.pge)
 		{
 			SetGlobalPageBits();
@@ -115,7 +115,7 @@ extern "C"
 			pte->physical[256] = phys;
 			invalidate_all_tlbs();
 		}
-
+#endif // BROKEN - page fault
 
 		auto *frames = initHeap();
 		printf("Heap Initialized...\n");
