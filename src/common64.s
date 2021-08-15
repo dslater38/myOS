@@ -1,5 +1,12 @@
 section .text
 [BITS 64]                       ; All instructions should be 32-bit.
+[GLOBAL outb]
+[GLOBAL outw]
+[GLOBAL outd]
+[GLOBAL inb]
+[GLOBAL inw]
+[GLOBAL ind]
+[GLOBAL insl]
 
 %include "macros.mac"
 
@@ -124,6 +131,13 @@ PROC batch_outb2
 	dec rsi
 	jnz .loop
 .done:
+	ret
+ENDP
+PROC insl
+	mov rcx, rdx
+	mov rdx, rdi
+	mov rdi, rsi
+	rep insd
 	ret
 ENDP
 PROC get_fault_addr64

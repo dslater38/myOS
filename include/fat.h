@@ -173,6 +173,7 @@ struct DirectoryEntry
     }
 };
 
+
 class Directory
 {
 	Directory();
@@ -189,5 +190,17 @@ void print_clusters(const FATFileSystem &fs, uint16_t startCluster);
 void print_file(const FATFileSystem &fs, const char *fileName, const char *ext);
 
 #endif // 0
+
+class FatVfsNode : public IVfsNode
+{
+    uint32_t read(uint64_t offset, uint64_t size, uint8_t *buffer)noexcept override;
+    virtual uint32_t write(uint64_t offset, uint64_t size, const uint8_t *buffer)noexcept override;
+    virtual void open(bool forWrite)noexcept override;
+    virtual void close()noexcept override;
+    virtual size_t  size()noexcept override;
+    virtual IVfsNode *link()noexcept override;
+
+};
+
 
 #endif // FAT_H_INCLUDED

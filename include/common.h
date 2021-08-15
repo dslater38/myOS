@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+constexpr uint64_t	KERNEL_ADDRESS_SPACE_START = 0xFFFF800000000000ul;
+
 void outb(uint16_t port, uint8_t value);
 void outw(uint16_t port, uint16_t value);
 void outd(uint16_t port, uint32_t value);

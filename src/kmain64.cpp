@@ -9,7 +9,6 @@
 #include "TextFrameBuffer.h"
 #include "MultiBootInfoHeader.h"
 #include "BootInformation.h"
-#include "Foobar.h"
 #include "vfs.h"
 #include "timer.h"
 #include "cpu.h"
@@ -30,9 +29,9 @@ volatile int foo___ = 0;
 static void test_page_fault();
 static void reportPartition(int which);
 
-void cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr);
+uint32_t indent=0;
 
-extern Foobar barfoo;
+void cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr);
 
 extern Frames<uint64_t> *initHeap(VM::Manager &mgr);
 void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
@@ -58,13 +57,18 @@ extern "C"
 	extern void startup_data_end();
 	extern void report_idt_info();
 
+	extern uint64_t p3_gb_mapped_table[512];
+	extern uint64_t p4_table[512];
+
+	extern void invalidate_all_tlbs();
+
 	void kmain64(uint32_t magic, const MultiBootInfoHeader *mboot_header)
 	{
 		// Entry - at this point, we're in 64-bit long mode with a basic
 		// page table that identity maps the first 2 MB or RAM
 		// install our interrupt handlers
 //		init_idt64_table();
-		
+
 //		__libc_init_array();
 
 		/*  Am I booted by a Multiboot-compliant boot loader? */
@@ -74,8 +78,8 @@ extern "C"
 			sprintf(buffer,"Invalid magic number: 0x%x\n", (unsigned) magic);
 			PANIC (buffer);
 		}
-		
-		
+
+
 		if(mboot_header && placement_address < reinterpret_cast<uint64_t>(mboot_header))
 		{
 			// if the mboot header is higher up in memory that placement_address
@@ -88,16 +92,16 @@ extern "C"
 		}
 		initTextFrameBuffer();
 		set_foreground_color((uint8_t)TextColors::GREEN);
-		set_background_color((uint8_t)TextColors::BLACK);	
-		
+		set_background_color((uint8_t)TextColors::BLACK);
+
 		printf("Hello World from 64-bit long mode!!!!!\n");
-		
+
 		auto success = init_serial(2, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
 		if (success == SUCCESS)
 		{
 			printf("Initialized COM2\n");
 		}
-		
+
 		debug_out("Startup Data Block: start 0x%016.16lx, end: 0x%016.16lx\n",(uint64_t)&startup_data_start, (uint64_t)&startup_data_end);
 		report_idt_info();
 		
@@ -123,7 +127,7 @@ extern "C"
 		
 		auto *frames = initHeap(mgr);
 		printf("Heap Initialized...\n");
-		
+
 		success = init_serial(1, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
 		if( success == SUCCESS )
 		{
@@ -154,13 +158,12 @@ extern "C"
 		init_rct_interrupts();
 		init_keyboard_handler();
 		asm("sti");
-		
-		CpuInfo info{};
-		getCpuInfo(info);
 
 		printf("Vendor Id String: %s\n", info.vendorId);
 		printf("Stepping: %d, Model: %d, Family: %d, Type: %d, ExtendedModel: %d, ExtendedFamily: %d\n",
 		info.stepping, info.model, info.family, info.processor_type, info.extendedModelId, info.extendedFamilyId);
+		printf("Global Page Support: %s, SYSCALL support: %s, 1GB Page Support %s\n", yn(info.pge), yn(info.syscall), yn(info.page1gb));
+		printf("4MB Page Support: %s, PAE support: %s, IA-32e Support: %s\n", yn(info.pse), yn(info.pae), yn(info.intel64));
 
 		const char *str = getBrandString(info.brand_index);
 		if( str )
@@ -201,7 +204,13 @@ extern "C"
 		dump_fat_table(fs);
 		dump_root_dir(fs);
 		print_file(fs, "AUTOEXEC  ","BAT");
+
+		if( info.apic )
+		{
+			printf("APIC detected...\n");
+		}
 #if 0
+//		asm("cli");
 		BootBlock boot{};
 		read(&boot, 0, sizeof(BootBlock));
 		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
@@ -212,7 +221,7 @@ extern "C"
 		boot.TotalBlocks(), boot.PhysDriveNo(), (boot.VolumeSerialNumber() & 0xFFFF0000)>>16, boot.VolumeSerialNumber() & 0x0000FFFF, boot.FsId(), boot.BlockSig());
 		printf("Volume Label: %11.11s\n", boot.volume_label);
 
-		dump_fat_table(boot);
+		// dump_fat_table(boot);
 		dump_root_dir(boot);
 		printf("Dumping DRVSPACE.BIN\n");
 		print_clusters(boot, 578);
@@ -226,7 +235,7 @@ extern "C"
 		}
 
 		// test_page_fault();
-		
+
 
 	}
 
@@ -270,8 +279,7 @@ static void test_page_fault()
 	monitor_write("After page fault! SHOULDN'T GET HERE \n");
 }
 
-
-const char *getTheString()
+static void SetGlobalPageBits()
 {
 
 	static const char *SSS="This is the initial string";
@@ -668,4 +676,9 @@ void testVmmPageStack(const MultiBootInfoHeader *mboot_header)
 		stack.freePage(p4);
 		stack.freePage(p5);
 	}
+	// Incomming change from dan/msvc
+	// PTE_64_4K *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
+	// printf("pte->physical[511] == 0x%016.16lx\n", pte->physical[511]);
+	// pte->physical[511] |= (1<<8);
+	// // make the recursive entry in plme4 global
 }

@@ -60,7 +60,19 @@ enum
     CPUID_FEAT_EDX_HTT          = 1 << 28, 
     CPUID_FEAT_EDX_TM1          = 1 << 29, 
     CPUID_FEAT_EDX_IA64         = 1 << 30,
-    CPUID_FEAT_EDX_PBE          = 1 << 31
+    CPUID_FEAT_EDX_PBE          = 1 << 31,
+
+    // EAX == 0x800000001
+    // ECX
+    CPUID_FEAT_ECX_LAHF64       = 1 << 0,
+    CPUID_FEAT_ECX_LZCNT        = 1 << 5,
+    CPUID_FEAT_ECX_PREFETCHW    = 1 << 8,
+    // EDX    
+    CPUID_FEAT_EDX_SYSCALL      = 1 << 11,
+    CPUID_FEAT_EDX_EXECUTEDISABLE = 1 << 20,
+    CPUID_FEAT_EDX_PAGE1GB      = 1 << 26,
+    CPUID_FEAT_EDX_RDTSCP       = 1 << 27,
+    CPUID_FEAT_EDX_INTEL64      = 1 << 29
 };
 
 inline
@@ -204,5 +216,21 @@ void getCpuInfo(CpuInfo &info)
     info.tm1    = test(cpuInfo.edx, CPUID_FEAT_EDX_TM1);
     info.pbe    = test(cpuInfo.edx, CPUID_FEAT_EDX_PBE);
 
+    cpuInfo.eax = cpuInfo.ebx = cpuInfo.ecx = cpuInfo.edx = 0;
 
+    cpuid(&cpuInfo, 2);
+
+    cpuInfo.eax = cpuInfo.ebx = cpuInfo.ecx = cpuInfo.edx = 0;
+    
+    cpuid(&cpuInfo, 0x80000001);
+
+    info.lahf64 = test(cpuInfo.ecx, CPUID_FEAT_ECX_LAHF64);
+    info.lzcnt = test(cpuInfo.ecx, CPUID_FEAT_ECX_LZCNT);
+    info.prefetchw = test(cpuInfo.ecx, CPUID_FEAT_ECX_PREFETCHW);
+
+    info.syscall = test(cpuInfo.edx, CPUID_FEAT_EDX_SYSCALL);
+    info.executebitdisable = test(cpuInfo.edx, CPUID_FEAT_EDX_EXECUTEDISABLE);
+    info.page1gb = test(cpuInfo.edx, CPUID_FEAT_EDX_PAGE1GB);
+    info.rdtscp = test(cpuInfo.edx, CPUID_FEAT_EDX_RDTSCP);
+    info.intel64 = test(cpuInfo.edx, CPUID_FEAT_EDX_INTEL64);
 }

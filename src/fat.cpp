@@ -6,12 +6,13 @@
 #include "ata.h"
 #include <new>
 #include <cstdio>
-#include <list>
+// #include <list>
 #include <algorithm>
 #include "kmalloc.h"
 #include "NewObj.h"
 #include <vector>
 
+using vector=std::vector<uint16_t ,KAllocator<uint16_t>>;
 
 std::vector<int> globalVector {};
 
@@ -230,8 +231,9 @@ void print_file(const FATFileSystem &fs, const char *fileName, const char *ext)
             auto size = dir->FileSize();
             if( size>0 )
             {
-              char buffer[513];
-              for( auto it = std::begin(list), e = std::end(list);
+                auto list = get_clusters(boot, start_cluster, size);
+                char buffer[514];
+                for( auto it = std::begin(list), e = std::end(list);
                     it != e;
                     ++it )
                     {
@@ -240,6 +242,7 @@ void print_file(const FATFileSystem &fs, const char *fileName, const char *ext)
 	                    const auto addr = fs.dataOffset() + (cluster - 2)*fs.sectorsPerCluster();
                         fs.ctl->read(fs.d, buffer, addr, read_size);
                         buffer[read_size] = '\0';
+                        buffer[read_size+1] = '\0';
                         printf("%s",buffer);
                         size -= read_size;
                     }  

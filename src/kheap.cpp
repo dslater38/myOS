@@ -168,8 +168,21 @@ void heap_t::expand(uint64_t new_size)
 	}
     else
     {
-        PANIC("FAILED TO EXPAND THE KERNEL HEAP\n");
+        if( !pageAlloc(start_address + i, 1, supervisor, !readonly) )
+        {
+            PANIC("FAILED TO EXPAND THE KERNEL HEAP\n");
+        }
+        i += 0x1000;
     }
+    end_address = start_address+new_size;
+	// if ( pageAlloc(start_address + i, new_size - old_size, supervisor, !readonly) )
+	// {
+	// 	end_address = start_address+new_size;
+	// }
+    // else
+    // {
+    //     PANIC("FAILED TO EXPAND THE KERNEL HEAP\n");
+    // }
 }
 
 uint64_t heap_t::contract(uint64_t new_size)
@@ -197,10 +210,16 @@ uint64_t heap_t::contract(uint64_t new_size)
     }
     else
     {
-        PANIC("KERNEL PAGE FREE FAILED.\n");
+        if(!pageFree(start_address+i, 1) )
+        {
+            PANIC("KERNEL PAGE FREE FAILED.\n");
+        }
+        i -= 0x1000;
     }
-    
-    return 0;
+
+    end_address = start_address + new_size;
+
+    return new_size;
 }
 
 
@@ -473,6 +492,19 @@ Page4K *getPage(void *vaddr)
     return pmle4->findPage(reinterpret_cast<uint64_t>(vaddr));
 }
 
+bool allocPages(uint64_t startAddress, size_t numPages, uint16_t flags)
+{
+//    debug_out("numPages: %d\n", numPages);
+    for( auto i=0; i<numPages; ++i, startAddress+=0x1000)
+    {
+//        debug_out("mapped: 0x%016.16lx\n",startAddress);
+        auto * page = pmle4->getPage(startAddress);
+        frames->alloc(page, flags);
+        invalidate_tlb((uint64_t)&startAddress);
+    }
+    return true;
+}
+
 bool allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable)
 {
 //    debug_out("numPages: %d\n", numPages);
@@ -489,9 +521,11 @@ bool allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWr
 
 bool freePages(uint64_t startAddress, size_t numPages)
 {
+    debug_out("freePages(0x%016.16lx, %lu)", startAddress, numPages);
     for( auto i=0; i<numPages; ++i,startAddress+=0x1000)
     {
         auto * page = pmle4->findPage(startAddress);
+        debug_out("found page 0x%016.16lx for startAddress 0x%016.16lx\n", (uintptr_t)(page), startAddress);
         ASSERT(page != nullptr);
         frames->free(page);
     }
