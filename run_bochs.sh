@@ -1,6 +1,10 @@
 #!/bin/bash
 set -x
 
+SCRIPTDIR="$(dirname $(realpath $0))"
+
+cd "$SCRIPTDIR"
+
 BOCHS=bochs
 BOCHSRC=bochsrc.txt
 

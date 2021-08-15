@@ -375,16 +375,25 @@ namespace VM {
 				}
 				if( pdeEntry )
 				{
-					const auto index = PTE_64_4K::index(vAddr);
-					if( (pdeEntry->physical[index] & 0xFFFFFFFFFFFFF000) != 0 )
+
+					auto *pteEntry = getPteEntry(vAddr);
+					if(!pteEntry)
 					{
-						pdeEntry->physical[index] |= 0x03;
+						auto newFr = frameStack.allocPage();						
+						setPTEEntry(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), newFr | 0x03);
+						pteEntry = getPteEntry(vAddr);
 					}
-					else
-					{
-						auto newFr = frameStack.allocPage();
-						pdeEntry->physical[index] |= (newFr | 0x03);
-					}
+
+					// const auto index = PTE_64_4K::index(vAddr);
+					// if( (pdeEntry->physical[index] & 0xFFFFFFFFFFFFF000) != 0 )
+					// {
+					// 	pdeEntry->physical[index] |= 0x03;
+					// }
+					// else
+					// {
+					// 	auto newFr = frameStack.allocPage();
+					// 	pdeEntry->physical[index] |= (newFr | 0x03);
+					// }
 					invalidate_tlb(vAddr);
 					memset(reinterpret_cast <uint64_t *>(vAddr), 0, 4096);
 					success = true;

@@ -46,8 +46,11 @@ struct MBRPartitionEntry
 		const auto l = last();
 		const auto LBA0 = firstLBA();
 		const auto LBA1 = LBA0 + sectorCount() - 1;
-		return (f.head + l.head + LBA0*l.head - LBA1*f.head + f.head*l.sector - l.head*f.sector) /
-			    (f.cylinder - l.cylinder - LBA0*l.cylinder + LBA1*f.cylinder - f.cylinder*l.sector + l.cylinder*f.sector);
+        const auto numer = (f.head + l.head + LBA0*l.head - LBA1*f.head + f.head*l.sector - l.head*f.sector);
+        const auto denom = (f.cylinder - l.cylinder - LBA0*l.cylinder + LBA1*f.cylinder - f.cylinder*l.sector + l.cylinder*f.sector);
+        return denom != 0 ? numer/denom : 0;
+		// return (f.head + l.head + LBA0*l.head - LBA1*f.head + f.head*l.sector - l.head*f.sector) /
+		// 	    (f.cylinder - l.cylinder - LBA0*l.cylinder + LBA1*f.cylinder - f.cylinder*l.sector + l.cylinder*f.sector);
 	}
 
 	uint32_t numSectors()const noexcept {
@@ -55,8 +58,9 @@ struct MBRPartitionEntry
 		const auto l = last();
 		const auto LBA0 = firstLBA();
 		const auto LBA1 = LBA0 + sectorCount() - 1;
-		return (f.cylinder-l.cylinder-LBA0*l.cylinder+LBA1*f.cylinder-f.cylinder*l.sector+l.cylinder*f.sector) /
-			    (f.cylinder*l.head-l.cylinder*f.head);
+        const auto numer = (f.cylinder-l.cylinder-LBA0*l.cylinder+LBA1*f.cylinder-f.cylinder*l.sector+l.cylinder*f.sector);
+        const auto denom = (f.cylinder*l.head-l.cylinder*f.head);
+        return denom != 0 ? numer / denom : 0;
 	}
 	
 private:

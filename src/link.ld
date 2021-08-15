@@ -13,8 +13,12 @@ ENTRY(start)
 VM_BASE = 0x00000000C0000000;
 
 SECTIONS
-{	
-	.multiboot.data 0x00100000 : {
+{
+	. = 0x00100000;
+
+	__kernel_start = .;
+
+	.multiboot.data : {
 		*(.multiboot.data)
 	}
 
@@ -23,6 +27,7 @@ SECTIONS
 	}
 
 	. += VM_BASE;
+
 
 	kernel_begin = .; _kernel_begin = .; __kernel_begin = .;
 
@@ -47,30 +52,29 @@ SECTIONS
 		bss = .; _bss = .; __bss = .;
 		*(.bss*)
 	}
-	. = ALIGN(CONSTANT (MAXPAGESIZE));
-    .init           : AT (ADDR (.init) - VM_BASE)
+	/* . = ALIGN(CONSTANT (MAXPAGESIZE)); */
+    .init ALIGN (4K)  : AT (ADDR (.init) - VM_BASE)
     {
 		KEEP (*(SORT_NONE(.init)))
     }
-		
 	.fini           : AT (ADDR (.fini) - VM_BASE)
     {
 		KEEP (*(SORT_NONE(.fini)))
     }
-	.preinit_array    : AT (ADDR (.preinit_array) - VM_BASE)
+	.preinit_array : AT (ADDR (.preinit_array) - VM_BASE)
 	{
 		PROVIDE_HIDDEN (__preinit_array_start = .);
 		KEEP (*(.preinit_array))
 		PROVIDE_HIDDEN (__preinit_array_end = .);
 	}
-	.init_array    : AT (ADDR (.init_array) - VM_BASE)
+	.init_array : AT (ADDR (.init_array) - VM_BASE)
 	{
 		PROVIDE_HIDDEN (__init_array_start = .);
 		KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
 		KEEP (*(.init_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .ctors))
 		PROVIDE_HIDDEN (__init_array_end = .);
 	}
-	.fini_array    : AT (ADDR (.fini_array) - VM_BASE)
+	.fini_array : AT (ADDR (.fini_array) - VM_BASE)
 	{
 		PROVIDE_HIDDEN (__fini_array_start = .);
 		KEEP (*(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*)))
@@ -113,7 +117,7 @@ SECTIONS
 		. = ALIGN(4096);
 		__kernel_stack = .;
 		_kernel_stack = .; 
-		kernel_stack = (. - VM_BASE);
+		kernel_stack = .;
 	}
 
 /*	end = .; _end = .; __end = .; */

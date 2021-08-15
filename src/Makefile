@@ -11,7 +11,7 @@ OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
 ASFLAGS+=-g -F dwarf
 
-CPPFLAGS+=-I.
+CPPFLAGS+=-I. -g
 
 .PHONY: all
 # all: $(OBJECTS)

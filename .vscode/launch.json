@@ -23,14 +23,12 @@
                 "exceptionList": ""
             },
             "program": "${workspaceRoot}/kernel",
-            "miDebuggerServerAddress": "127.0.0.1:11234",
+            "miDebuggerServerAddress": "127.0.0.1:2000",
             "MIMode": "gdb",
-            "args": ["-s","kernel"],
+            
             "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
-            "sourceFileMap" : { "/home/slaterd/repos/myOS" : "U:\\repos\\myOS", "/home/slaterd/repos/myOS/src" : "U:\\repos\\myOS\\src" },
-            "environment": [],
-//            "externalConsole": true,
+            "environment": []
         },
         {
             "name": "clang++ build and debug active file",
