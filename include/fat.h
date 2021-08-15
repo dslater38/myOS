@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "AtaController.h"
 #include "NewObj.h"
+#include "vfs.h"
 
 struct BootBlock
 {

@@ -47,6 +47,11 @@ static void dumpPageTables();
 static void accessP4Table();
 extern const multiboot_tag *findMultiBootInfoHeaderTag(const MultiBootInfoHeader *addr, multiboot_uint32_t type);
 
+static const char *yn(uint32_t n)
+{
+	return n ? "YES" : "no";
+}
+
 extern "C"
 {
 	extern PML4E_4K *p4_table;
@@ -58,7 +63,6 @@ extern "C"
 	extern void report_idt_info();
 
 	extern uint64_t p3_gb_mapped_table[512];
-	extern uint64_t p4_table[512];
 
 	extern void invalidate_all_tlbs();
 
@@ -158,6 +162,9 @@ extern "C"
 		init_rct_interrupts();
 		init_keyboard_handler();
 		asm("sti");
+
+		CpuInfo info{};
+		getCpuInfo(info);
 
 		printf("Vendor Id String: %s\n", info.vendorId);
 		printf("Stepping: %d, Model: %d, Family: %d, Type: %d, ExtendedModel: %d, ExtendedFamily: %d\n",
@@ -281,10 +288,10 @@ static void test_page_fault()
 
 static void SetGlobalPageBits()
 {
-
-	static const char *SSS="This is the initial string";
-	return SSS;
-
+	PTE_64_4K *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
+	printf("pte->physical[511] == 0x%016.16lx\n", pte->physical[511]);
+	pte->physical[511] |= (1<<8);
+	// make the recursive entry in plme4 global
 }
 
 static void checkMem(uint8_t *alloc, bool init)
