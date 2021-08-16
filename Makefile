@@ -55,8 +55,7 @@ hello.ko : modules/hello.ko
 # kernel: $(OBJECTS) | link.ld
 kernel: src/kernel
 	cp $^ $@
-	
-#	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
+	nm $@ | grep " T " | awk '{ print $$1" "$$3 }' > $@.sym
 
 
 .SUFFIXES:

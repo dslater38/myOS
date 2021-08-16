@@ -20,7 +20,7 @@ CPPFLAGS+=-I.
 all : hello.ko
 
 clean:
-	@rm -f *.o *.d *.d.* *.ds
+	@rm -f *.o *.d *.d.* *.ds *.ko *.ko.sym
 
 
 hello.o : hello.cpp
