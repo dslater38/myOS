@@ -1,3 +1,3 @@
 symbol-file kernel
-target remote 192.168.3.13:11234
+target remote 127.0.0.1:2000
 directory $cwd/src
