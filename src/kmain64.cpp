@@ -178,7 +178,7 @@ extern "C"
 			printf("Brand String: %s\n", str);
 		}
 
-		auto &ctl = AtaController::secondary();
+		auto &ctl = AtaController::primary();
 		
 		GenericMBR mbr{};
 		ctl.read(AtaController::Drive::Primary, &mbr, 0, sizeof(GenericMBR));

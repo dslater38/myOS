@@ -243,41 +243,117 @@ private:
         outb(CTRL_BASE, 0x00);
     }
 
+    // static void ide_wait_irq() {
+    // while (!channels[channel].interrupt)
+    //     asm("hlt");
+    // channels[channel].interrupt = 0;
+    // }
+
     static void ide_poll()
     {
-        io_wait();
-        uint8_t status{0};
-        auto count = 0;
-        do {
-            status = readStatusReg();
-            if(++count > 1000000)
-            {
-                printf("ide_poll: timeout waiting for ATA_SR_BSY to clear.");
-                return;
-            }
-        }while( (status & ATA_SR_BSY) ==  ATA_SR_BSY );
-        count = 0;
-        do{
-            status = readStatusReg();
-            if(status & ATA_SR_ERR)
-            {
-                PANIC("ERR set, device failure!\n");
-            }
-            if(++count > 1000000)
-            {
-                printf("ide_poll: timeout waiting for ATA_SR_DRQ to set.");
-                return;
-            }
-        }while((status & ATA_SR_DRQ) == 0);
+        //ide_wait_irq(ATA_PRIMARY);
+        // return ;
+        for(int i=0; i< 4; i++)
+        {
+            ide_read(ATA_REG_ALTSTATUS);
+        }
+    //	for(int i=0; i< 4; i++)
+    //		inb(io + ATA_REG_ALTSTATUS);
+
+    retry:;
+        // uint8_t status = inb(io + ATA_REG_STATUS);
+        uint8_t status = ide_read(ATA_REG_ALTSTATUS);
+        //mprint("testing for BSY\ATA_PRIMARY, 
+        if(status & ATA_SR_BSY) goto retry;
+        //mprint("BSY cleared\n");
+    retry2:	status = inb(REGS_BASE + ATA_REG_STATUS);
+        if(status & ATA_SR_ERR)
+        {
+            PANIC("ERR set, device failure!\n");
+        }
+        //mprint("testing for DRQ\n");
+        if(!(status & ATA_SR_DRQ)) goto retry2;
+        //mprint("DRQ set, ready to PIO!\n");
+        return;
     }
+
+
+    // static void ide_poll()
+    // {
+    //     io_wait();
+    //     uint8_t status{0};
+    //     auto count = 0;
+    //     do {
+    //         status = readStatusReg();
+    //         if(++count > 1000000)
+    //         {
+    //             printf("ide_poll: timeout waiting for ATA_SR_BSY to clear.");
+    //             return;
+    //         }
+    //     }while( (status & ATA_SR_BSY) ==  ATA_SR_BSY );
+    //     count = 0;
+    //     do{
+    //         status = readStatusReg();
+    //         if(status & ATA_SR_ERR)
+    //         {
+    //             PANIC("ERR set, device failure!\n");
+    //         }
+    //         if(++count > 1000000)
+    //         {
+    //             printf("ide_poll: timeout waiting for ATA_SR_DRQ to set.");
+    //             return;
+    //         }
+    //     }while((status & ATA_SR_DRQ) == 0);
+    // }
 
     static constexpr uint32_t make_regio(uint16_t reg, uint8_t data)
     {
         return ((static_cast<uint32_t>(reg)<<16)|static_cast<uint32_t>(data));
     }
 
+    static uint16_t select_port(uint8_t reg)
+    {
+        return (reg < 0x08) ? REGS_BASE  + reg - 0x00 :
+            (reg < 0x0C) ? REGS_BASE  + reg - 0x06 :
+            (reg < 0x0E) ? CTRL_BASE  + reg - 0x0A :
+            (reg < 0x16) ? 0 + reg - 0x0E : 0;
+
+    }
+
+    static void ide_write(uint8_t reg, uint8_t data) {
+        if (reg > 0x07 && reg < 0x0C)
+            ide_write(ATA_REG_CONTROL, 0x80 | 0);
+
+        const auto port = select_port(reg);
+        if(port > 0 )
+        {
+            outb(port, data);
+        }
+        
+        if (reg > 0x07 && reg < 0x0C)
+            ide_write(ATA_REG_CONTROL, 0);
+    }
+
+    static uint8_t ide_read(uint8_t reg) {
+        uint8_t result;
+        if (reg > 0x07 && reg < 0x0C)
+            ide_write(ATA_REG_CONTROL, 0x80 | 0);
+
+        const auto port = select_port(reg);
+        if(port > 0 )
+        {
+            result = inb(port);
+        }
+
+        if (reg > 0x07 && reg < 0x0C)
+            ide_write(ATA_REG_CONTROL, 0);
+        return result;
+    }
+
+
     static void setup_for_io(Drive drive, uint32_t address, uint8_t count, IoDirection dir)
     {
+#if 0        
         const uint8_t drv = drive==Drive::Primary ? 0x00 : 0x10;
         uint8_t cmd = ((dir == IoDirection::Write) ? ATA_CMD_WRITE_PIO : ATA_CMD_READ_PIO);
 
@@ -314,22 +390,26 @@ private:
         // batch_outb(regs, data, 7);
 	    batch_outb2(io, 7);
         // ide_poll();
-#if 0
-        // LBL28 addressing
-        const uint8_t drv = drive==Drive::Primary ? 0x00 : 0x01;
-        unsigned char cmd = ((dir == IoDirection::Write) ? ATA_CMD_WRITE_PIO : ATA_CMD_READ_PIO);
-        outb(REGS_BASE + ATA_REG_HDDEVSEL, ( (0xE0|drv) | (uint8_t)((address >> 24 & 0x0F))));
-        outb(REGS_BASE + 1, 0x00);
-        outb(REGS_BASE + ATA_REG_SECCOUNT0, count);
-        unsigned char c = (unsigned char)(address );
-        outb(REGS_BASE + ATA_REG_LBA0, c);
-        c = (unsigned char)(address >> 8);
-        outb(REGS_BASE + ATA_REG_LBA1, c);
-        c = (unsigned char)(address >> 16);
-        outb(REGS_BASE + ATA_REG_LBA2, c);
-        //c = (unsigned char)(  ((address & 0xFF000000) >> 24) & 0x0F);
-        // c |= 0xE0|(1<<4);
-        outb(REGS_BASE + ATA_REG_COMMAND, cmd);
+#else
+	    uint8_t cmd = ((dir  == IoDirection::Write) ? ATA_CMD_WRITE_PIO : ATA_CMD_READ_PIO);
+
+        ide_write(ATA_REG_HDDEVSEL, (0xE0 | (uint8_t)((address >> 24 & 0x0F))));
+       
+        ide_write(ATA_REG_FEATURES, 0x00);
+
+        ide_write(ATA_REG_SECCOUNT0, 0x01);
+
+        auto c = static_cast<uint8_t>(address & 0x000000FF);
+        ide_write(ATA_REG_LBA0, c);
+
+        c = static_cast<uint8_t>((address >> 8) & 0x000000FF);
+        ide_write(ATA_REG_LBA1, c);
+
+        c = static_cast<uint8_t>((address >> 16) & 0x000000FF);
+        ide_write(ATA_REG_LBA2, c);
+
+        ide_write(ATA_REG_COMMAND, cmd);
+        
         ide_poll();
 #endif // 0        
     }

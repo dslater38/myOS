@@ -11,7 +11,7 @@ export LD=gcc
 export CC=clang
 export CXX=clang++
 
-export CPPFLAGS:=-I../include -D_LIBCPP_HAS_NO_BUILTIN_OPERATOR_NEW_DELETE
+export CPPFLAGS:=-I../include -D_LIBCPP_HAS_NO_BUILTIN_OPERATOR_NEW_DELETE -v
 export CFLAGS:=-std=c11 -fno-use-cxa-atexit -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -fpie -ffreestanding
 export CXXFLAGS:=-std=c++17 -fno-use-cxa-atexit -mno-sse2 -nostdlib -stdlib=libc++ -fno-rtti -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -fpie -ffreestanding
 export ASFLAGS=-felf64 -Xvc

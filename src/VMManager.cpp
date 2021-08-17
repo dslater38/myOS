@@ -157,8 +157,23 @@ namespace VM {
 			{
 				pDir->physical[pteIndex] = val;
 				invalidate_all_tlbs();
-				auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
-				memset(ptr, 0, 4096);
+				// can only write the page if it is present and writable.
+				if( (val & 0x03) == 0x03 )
+				{
+					auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
+					memset(ptr, 0, 4096);
+				}
+				return true;
+			}
+			return false;
+		}
+
+		bool getPTEFrame(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t &val)
+		{
+			auto *pDir = reinterpret_cast <PTE_64_4K *>(PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, 0));
+			if( pDir )
+			{
+				val = ( pDir->physical[pteIndex] & 0xFFFFFFFFFFFFF000 );
 				return true;
 			}
 			return false;
@@ -321,25 +336,39 @@ namespace VM {
 	
 	bool Manager::unMapPage(uint64_t vAddr)
 	{
-		auto *pdeEntry = getPdeEntry(vAddr);
-		if( pdeEntry )
+
+		auto success = false;
+		auto *pmle4Entry = getPlme4Entry(vAddr);
+		if( pmle4Entry )
 		{
-			const auto index = PTE_64_4K::index(vAddr);
-			auto frame = (pdeEntry->physical[index] & 0xFFFFFFFFFFFFF000);
-			pdeEntry->physical[index] = 0;
-			if( frame != 0 )
+			auto *pdptEntry = getPdpteEntry(vAddr);
+			if( pdptEntry )
 			{
-				if( frame < 1024 * 1024 )
+				auto *pdeEntry = getPdeEntry(vAddr);
+				if( pdeEntry )
 				{
-					lowMemFrameStack.freePage(frame);
+					auto *pteEntry = getPteEntry(vAddr);
+					if(pteEntry)
+					{
+						uint64_t frame = 0;
+						auto success = getPTEFrame(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), frame);
+						if( success )
+						{
+							setPTEEntry(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), 0x00 | 0x00);
+							if( frame < 1024 * 1024 )
+							{
+								lowMemFrameStack.freePage(frame);
+							}
+							else
+							{
+								frameStack.freePage(frame);
+							}
+							invalidate_tlb(vAddr);
+							return true;
+						}
+					}
 				}
-				else
-				{
-					frameStack.freePage(frame);
-				}
-			}
-			invalidate_tlb(vAddr);
-			return true;
+			}			
 		}
 		return false;
 	}
