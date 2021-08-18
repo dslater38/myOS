@@ -259,7 +259,7 @@ std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const FATFileSystem &fs, 
     
     auto l = std::list<uint16_t ,KAllocator<uint16_t>>{};
 
-    for(auto cluster = startCluster; cluster!=end_of_chain && cluster != 0; cluster = fat12_entry(table, cluster))
+    for(auto cluster = startCluster; cluster!=end_of_chain; cluster = fat12_entry(table, cluster))
     {
         l.emplace_back(cluster);
     }
