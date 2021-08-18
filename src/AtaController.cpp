@@ -397,7 +397,7 @@ private:
        
         ide_write(ATA_REG_FEATURES, 0x00);
 
-        ide_write(ATA_REG_SECCOUNT0, 0x01);
+        ide_write(ATA_REG_SECCOUNT0, count);
 
         auto c = static_cast<uint8_t>(address & 0x000000FF);
         ide_write(ATA_REG_LBA0, c);

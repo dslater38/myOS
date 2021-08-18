@@ -201,21 +201,25 @@ uint64_t heap_t::contract(uint64_t new_size)
     if (new_size < HEAP_MIN_SIZE)
         new_size = HEAP_MIN_SIZE;
 
-    auto old_size = end_address-start_address;
-    auto i = old_size - 0x1000;
-    if( freePages(start_address, i))
+
+    auto new_end_address = start_address + new_size;
+
+    auto num_to_free = end_address-new_end_address;
+    
+    if( freePages(new_end_address, num_to_free))
     {
         end_address = start_address + new_size;
         return new_size;
     }
-    else
-    {
-        if(!pageFree(start_address+i, 1) )
-        {
-            PANIC("KERNEL PAGE FREE FAILED.\n");
-        }
-        i -= 0x1000;
-    }
+    // else
+    // {
+    //     auto i = num_to_free - 0x1000;
+    //     if(!pageFree(new_end_address+i, 1) )
+    //     {
+    //         PANIC("KERNEL PAGE FREE FAILED.\n");
+    //     }
+    //     i -= 0x1000;
+    // }
 
     end_address = start_address + new_size;
 

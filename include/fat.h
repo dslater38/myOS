@@ -34,59 +34,114 @@ struct BootBlock
     uint8_t fs_id[8];
     uint8_t bootstrap2[0x1c0];
     uint8_t block_sig[2];
+    #define COPY(member) r(member, sizeof(member))
+    void readFromBuffer(uint8_t *buffer)
+    {
+        auto r = [&](uint8_t *member, size_t size) {
+            memcpy(member, buffer, size);
+            buffer += size;
+        };
 
+        COPY(bootstrap);
+        COPY(description);
+        COPY(bytes_per_block);
+        blocks_per_alloc = *buffer++;
+        COPY(reserved_blocks);
+        num_FAT_tables = *buffer++;
+        COPY(num_root_dir_entries);
+        COPY(total_num_blocks);
+        media_descriptor = *buffer++;
+        COPY(num_blocks_fat1);
+        COPY(num_blocks_per_track);
+        COPY(num_heads);
+        COPY(num_hidden_blocks);
+        COPY(total_blocks);
+        COPY(phys_drive_num);
+        extended_boot_record = *buffer++;
+        COPY(volume_serial);
+        COPY(volume_label);
+        COPY(fs_id);
+        COPY(bootstrap2);
+        COPY(block_sig);
+    }
+#undef COPY
     uint16_t BytesPerBlock()const noexcept{
         return *reinterpret_cast<const uint16_t *>(bytes_per_block);
     }
+
+    const uint16_t *dbgBytesPerBlock = reinterpret_cast<const uint16_t *>(bytes_per_block);
 
     uint16_t ReservedBlocks()const noexcept{
         return *reinterpret_cast<const uint16_t *>(reserved_blocks);
     }
 
+    const uint16_t *dbgReservedBlocks = reinterpret_cast<const uint16_t *>(reserved_blocks);
+
     uint16_t NumRootDirEntries()const noexcept{
         return *reinterpret_cast<const uint16_t *>(num_root_dir_entries);
     }
+
+    const uint16_t *dbgNumRootDirEntries = reinterpret_cast<const uint16_t *>(num_root_dir_entries);
 
     uint16_t TotalNumBlocks()const noexcept{
         return *reinterpret_cast<const uint16_t *>(total_num_blocks);
     }
 
+    const uint16_t *dbgTotalNumBlocks = reinterpret_cast<const uint16_t *>(total_num_blocks);
+
     uint16_t NumBlocksFat1()const noexcept{
         return *reinterpret_cast<const uint16_t *>(num_blocks_fat1);
     }
+
+    const uint16_t *dbgNumBlocksFat1 = reinterpret_cast<const uint16_t *>(num_blocks_fat1);
 
     uint16_t NumBlocksPerTrack()const noexcept{
         return *reinterpret_cast<const uint16_t *>(num_blocks_per_track);
     }
 
+    const uint16_t *dbgNumBlocksPerTrack = reinterpret_cast<const uint16_t *>(num_blocks_per_track);
+
     uint16_t NumHeads()const noexcept{
         return *reinterpret_cast<const uint16_t *>(num_heads);
     }
+
+    const uint16_t *dbgNumHeads = reinterpret_cast<const uint16_t *>(num_heads);
 
     uint32_t NumHiddenBlocks()const noexcept{
         return *reinterpret_cast<const uint32_t *>(num_hidden_blocks);
     }
 
+    const uint32_t *dbgNumHiddenBlocks = reinterpret_cast<const uint32_t *>(num_hidden_blocks);
+
     uint32_t TotalBlocks()const noexcept{
         return *reinterpret_cast<const uint32_t *>(total_blocks);
     }
+
+    const uint32_t *dbgTotalBlocks = reinterpret_cast<const uint32_t *>(total_blocks);
 
     uint16_t PhysDriveNo()const noexcept{
         return *reinterpret_cast<const uint16_t *>(phys_drive_num);
     }
 
+    const uint16_t *dbgPhysDriveNo = reinterpret_cast<const uint16_t *>(phys_drive_num);
+
     uint32_t VolumeSerialNumber()const noexcept{
         return *reinterpret_cast<const uint32_t *>(volume_serial);
     }
+
+    const uint32_t *dbgVolumeSerialNumber = reinterpret_cast<const uint32_t *>(volume_serial);
 
     const char * FsId()const noexcept{
         return reinterpret_cast<const char *>(fs_id);
     }
 
+    const char *dbgFsId = reinterpret_cast<const char *>(fs_id);
+
     uint16_t BlockSig()const noexcept{
         return *reinterpret_cast<const uint16_t *>(block_sig);
     }
 
+    const uint16_t *dbgBlockSig = reinterpret_cast<const uint16_t *>(block_sig);
 };
 
 struct FATFileSystem

@@ -199,7 +199,11 @@ extern "C"
 		fs.offset = mbr.partitions[0].firstLBA();
 		auto &boot = fs.boot;
 		
-		ctl.read(AtaController::Drive::Primary, &boot, mbr.partitions[0].firstLBA(), sizeof(BootBlock));
+		auto tmpBuffer = uniquePtr<uint8_t[]> {new(std::nothrow) uint8_t[512]};
+
+		ctl.read(AtaController::Drive::Primary, tmpBuffer.get(), mbr.partitions[0].firstLBA(), 512);
+		boot.readFromBuffer(tmpBuffer.get());
+		tmpBuffer.reset();
 		printf("BootBlock: BytesPerBlock %d, ReservedBlocks %d, NumRootDirEntries %d, TotalNumBlocks: %d\n",
 		boot.BytesPerBlock(), boot.ReservedBlocks(), boot.NumRootDirEntries(), boot.TotalNumBlocks());
 		printf("NumBlocksFat1: %d, NumBlocksPerTrack %d, NumHeads: %d, NumHiddenBlocks: %d\n",

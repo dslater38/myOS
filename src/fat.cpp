@@ -133,7 +133,9 @@ void dump_fat_table(const FATFileSystem &fs)
 uniquePtr<DirectoryEntry[]> read_root_directory(const FATFileSystem &fs)
 {
 	auto root_directory_size = fs.rootDirectorySize();
-	uniquePtr<DirectoryEntry[]> dir { new(std::nothrow) DirectoryEntry[fs.boot.NumRootDirEntries()] };
+    const auto nEntries = fs.boot.NumRootDirEntries();
+	uniquePtr<DirectoryEntry[]> dir { new(std::nothrow) DirectoryEntry[nEntries] };
+    memset(dir.get(),'\0', nEntries*sizeof(DirectoryEntry));
 	auto offset = fs.rootDirectoryOffset();
     fs.ctl->read(fs.d, dir.get(), offset, root_directory_size);
 	return dir;
@@ -257,7 +259,7 @@ std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const FATFileSystem &fs, 
     
     auto l = std::list<uint16_t ,KAllocator<uint16_t>>{};
 
-    for(auto cluster = startCluster; cluster!=end_of_chain; cluster = fat12_entry(table, cluster))
+    for(auto cluster = startCluster; cluster!=end_of_chain && cluster != 0; cluster = fat12_entry(table, cluster))
     {
         l.emplace_back(cluster);
     }
