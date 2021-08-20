@@ -125,13 +125,12 @@ private:
     {
         setup_for_io(drive, address, count, IoDirection::Read);
         size_t num = count ? count : 256;   // a count of 0 == 256 sectors
-        // ide_poll();
+
         for(auto i=0u; i<num; ++i )
         {
             ide_poll();
             insw(REGS_BASE + ATA_REG_DATA, buffer, 256);
             buffer += 256;
-//            io_wait();
         }
         return true;
     }
@@ -141,7 +140,7 @@ private:
         setup_for_io(drive, address, count, IoDirection::Write);
         auto *ptr = buffer;
         size_t num = count ? count : 256;   // a count of 0 == 256 sectors
-        // ide_poll();
+
         for(auto i=0u; i<num; ++i )
         {
             // can't use rep outsw for writing
@@ -152,7 +151,6 @@ private:
                 outw(REGS_BASE + ATA_REG_DATA, *ptr);
                 ++ptr;
             }
-            // io_wait();
         }
         return true;
     }
