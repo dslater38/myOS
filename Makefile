@@ -4,7 +4,7 @@ SUBDIRS:=$(MAKEFILES:/Makefile=)
 
 CSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.c' -print)
 CXXSOURCES=$(shell find $(SUBDIRS) -maxdepth 1 -name '*.cpp' -print)
-SSOURCES:=$(wildcard $(SUBDIRS:%=%/*.s))
+SSOURCES:=$(wildcard $(SUBDIRS:%=%/*.s)) 
 OBJECTS:=$(CSOURCES:%.c=%.o) $(CXXSOURCES:%.cpp=%.o) $(SSOURCES:%.s=%.o)
 
 export LD=gcc
