@@ -290,6 +290,16 @@ class PageEntry
 };
 #endif // 0
 
+extern uint32_t indent;
+
+inline void INDENT()
+{
+	for(auto i=0; i<indent; ++i )
+	{
+		debug_out("\t");
+	}
+}
+
 template<const size_t OFFBITS_=12>
 struct PageT
 {
@@ -374,10 +384,10 @@ struct PageT
 		return this;
 	}
 	
-	void dump()const
+	void dump(uint64_t vaddr)const
 	{
-#if 0
-		// printf("\tPage Entry: 0x%016.16lx\n", *(uint64_t *)(this));
+#if 1
+		INDENT();debug_out("\tvaddr: 0x%016.16lx, Page Entry: 0x%016.16lx\n", (vaddr | this->frame), *(uint64_t *)(this));
 #endif // 1
 	}
 

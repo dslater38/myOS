@@ -117,6 +117,26 @@ struct CpuInfo
     uint32_t    ia64 : 1;
     uint32_t    pbe : 1;
 
+    // EAX == 0x80000001
+    // ECX
+    uint32_t    lahf64 : 1;
+    uint32_t    reserved7 : 4;
+    uint32_t    lzcnt : 1;
+    uint32_t    reserved8 : 2;
+    uint32_t    prefetchw : 1;
+    uint32_t    reserved9 : 23;
+    // EDX
+    uint32_t    reserved10 : 11;
+    uint32_t    syscall : 1;
+    uint32_t    reserved11 : 8;
+    uint32_t    executebitdisable : 1;
+    uint32_t    reserved12 : 5;
+    uint32_t    page1gb : 1;
+    uint32_t    rdtscp : 1;
+    uint32_t    reserved13 : 1;
+    uint32_t    intel64 : 1;
+    uint32_t    reserved14 : 2;
+
 };
 
 void getCpuInfo(CpuInfo &info);

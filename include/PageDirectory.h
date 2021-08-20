@@ -6,6 +6,10 @@
 #include "memcpy.h"
 #include "NewObj.h"
 
+template<const int SHIFT>
+const char *DirectoryName();
+
+
 template<typename T, const int SHIFT, const int BITS>
 struct PageDirectory
 {
@@ -21,7 +25,7 @@ struct PageDirectory
 	
 	static constexpr size_t shift=T::shift+BITS;
 	
-	static constexpr uintptr_t ATTRS = ((OFFSET_BITS >12 ) ? 0x43 : 0x03);
+	static constexpr uintptr_t ATTRS = ((OFFSET_BITS >12 ) ? 0x03 : 0x03);
 
 	static constexpr bool IsDirectory = true;
 	
@@ -69,23 +73,43 @@ struct PageDirectory
 		return table ? table->findPage(vaddr) : nullptr;
 	}
 
-	void dump()const
+	void dump(uint64_t vaddr)const
 	{
-#if 0	
-		printf("PageDirectory<T,%d,%d>: this 0x%016.16lx\n", SHIFT, BITS, (uint64_t)this);
-		for (auto i = 0u; i < NUM_ENTRIES; ++i)
+#if 1 // PageDirectory<T,%d,%d>
+		if( 0 != (vaddr & 0x0000800000000000) )
 		{
+			vaddr |= 0xFFFF000000000000;
+		}
+
+		INDENT();debug_out("%s: this 0x%016.16lx\n", DirectoryName<SHIFT>(), (uint64_t)this);
+		++indent;
+		for (auto i = 0ul; i < NUM_ENTRIES; ++i)
+		{
+			auto vaddr2 = (vaddr | (i<<SHIFT));
 			uint64_t entry = (uint64_t)physical[i];
 			if( entry != 0)
 			{
-				printf("entry: %d == 0x%016.16lx \n", i, entry);
-				if (physical[i])
+				INDENT();debug_out("0x%016.16lx, %d == 0x%016.16lx \n", vaddr2, i, entry);
+				if constexpr(sizeof(T) != sizeof(Page4K))
 				{
-					reinterpret_cast<T *>( entry & 0xFFFFFFFFFFFFF000)->dump();
+					if ( (SHIFT == 30 || SHIFT == 21) && (entry & (1<<7)))	// check for a 1GB page entry in the level 3 table
+					{														// or a 2MB page entry in the level 2 table
+						;
+					}
+					else
+					{
+					
+						auto *ptr = (*this)[i];
+						if (ptr)
+						{
+							ptr->dump(vaddr2);
+						}
+					}
 				}
 			}
 		}
-		printf("===========================================\n");
+		--indent;
+		INDENT();debug_out("===========================================\n");
 #endif // 0		
 	}
 };
@@ -226,6 +250,34 @@ using PML4E_2M=PageDirectory<PDPTE_64_2M,PDPTE_64_2M::shift,9>;
 // 64-bit 1G page table
 using PDPTE_64_1G=PageDirectory<Page64_1G,Page64_1G::shift,9>;
 using PML4E_1G=PageDirectory<PDPTE_64_1G,PDPTE_64_1G::shift,9>;
+
+template<>
+inline
+const char *DirectoryName<39>()
+{
+	return "PML4E";
+}
+
+template<>
+inline
+const char *DirectoryName<30>()
+{
+	return "PDPTE";
+}
+
+template<>
+inline
+const char *DirectoryName<21>()
+{
+	return "PDE";
+}
+
+template<>
+inline
+const char *DirectoryName<12>()
+{
+	return "PTE";
+}
 
 
 

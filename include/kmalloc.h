@@ -17,9 +17,39 @@ void *krealloc(void *p, size_t size);
 void kfree(void *vaddr);
 
 
+
 #ifdef __cplusplus
 }
 #endif
 
+
+
+template<class T>
+struct KAllocator
+{
+    using value_type=T;
+    KAllocator() = default;
+	template <class U> constexpr KAllocator(const KAllocator<U>&) noexcept
+	{
+
+	}
+	[[nodiscard]]
+	T* allocate(std::size_t n)noexcept 
+	{
+		if(n > std::size_t(-1) / sizeof(T)) 
+		{
+			return nullptr;
+		}
+		return static_cast<T*>(kmalloc(n*sizeof(T)));
+	}
+
+	void deallocate(T* p, std::size_t) noexcept 
+	{
+		if( p != nullptr)
+		{
+			kfree(p); 
+		}
+	}
+};
 
 #endif // KMALLOC_H_INCLUDED

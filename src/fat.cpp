@@ -11,23 +11,24 @@
 #include "kmalloc.h"
 #include "NewObj.h"
 #include <vector>
+#include <cstdint>
 
 
 std::vector<int> globalVector {};
 
-template<class T>
-struct KAllocator
-{
-    using value_type=T;
-    KAllocator() = default;
-    template <class U> constexpr KAllocator(const KAllocator<U>&) noexcept {}
-  [[nodiscard]] T* allocate(std::size_t n)noexcept {
-    if(n > std::size_t(-1) / sizeof(T)) return nullptr;
-    return static_cast<T*>(kmalloc(n*sizeof(T)));
-  }
-  void deallocate(T* p, std::size_t) noexcept { kfree(p); }
+// template<class T>
+// struct KAllocator
+// {
+//     using value_type=T;
+//     KAllocator() = default;
+//     template <class U> constexpr KAllocator(const KAllocator<U>&) noexcept {}
+//   [[nodiscard]] T* allocate(std::size_t n)noexcept {
+//     if(n > std::size_t(-1) / sizeof(T)) return nullptr;
+//     return static_cast<T*>(kmalloc(n*sizeof(T)));
+//   }
+//   void deallocate(T* p, std::size_t) noexcept { kfree(p); }
 
-};
+// };
 
 std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const FATFileSystem &fs, uint16_t startCluster);
 /*
@@ -132,7 +133,9 @@ void dump_fat_table(const FATFileSystem &fs)
 uniquePtr<DirectoryEntry[]> read_root_directory(const FATFileSystem &fs)
 {
 	auto root_directory_size = fs.rootDirectorySize();
-	uniquePtr<DirectoryEntry[]> dir { new(std::nothrow) DirectoryEntry[fs.boot.NumRootDirEntries()] };
+    const auto nEntries = fs.boot.NumRootDirEntries();
+	uniquePtr<DirectoryEntry[]> dir { new(std::nothrow) DirectoryEntry[nEntries] };
+    memset(dir.get(),'\0', nEntries*sizeof(DirectoryEntry));
 	auto offset = fs.rootDirectoryOffset();
     fs.ctl->read(fs.d, dir.get(), offset, root_directory_size);
 	return dir;
@@ -231,7 +234,7 @@ void print_file(const FATFileSystem &fs, const char *fileName, const char *ext)
             if( size>0 )
             {
               char buffer[513];
-              for( auto it = std::begin(list), e = std::end(list);
+                for( auto it = std::begin(list), e = std::end(list);
                     it != e;
                     ++it )
                     {
@@ -240,6 +243,7 @@ void print_file(const FATFileSystem &fs, const char *fileName, const char *ext)
 	                    const auto addr = fs.dataOffset() + (cluster - 2)*fs.sectorsPerCluster();
                         fs.ctl->read(fs.d, buffer, addr, read_size);
                         buffer[read_size] = '\0';
+                        buffer[read_size+1] = '\0';
                         printf("%s",buffer);
                         size -= read_size;
                     }  

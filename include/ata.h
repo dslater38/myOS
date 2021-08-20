@@ -108,9 +108,12 @@
 #define ATA_REG_LBA3       0x09
 #define ATA_REG_LBA4       0x0A
 #define ATA_REG_LBA5       0x0B
+#define ATA_REG_CONTROL    0x0C
+#define ATA_REG_ALTSTATUS  0x0C
+#define ATA_REG_DEVADDRESS 0x0D
 
-#define ATA_REG_ALTSTATUS  0x00
-#define ATA_REG_DEVADDRESS 0x01
+// #define ATA_REG_ALTSTATUS  0x00
+// #define ATA_REG_DEVADDRESS 0x01
 
 // Channels:
 #define      ATA_PRIMARY      0x00

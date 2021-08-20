@@ -26,6 +26,8 @@ struct AtaController
     virtual AtaDeviceType detect(Drive drv)const=0;
     static const AtaController &primary();
     static const AtaController &secondary();
+
+    uint8_t  interrupt{0};
 };
 
 

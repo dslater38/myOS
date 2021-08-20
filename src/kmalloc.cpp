@@ -61,6 +61,10 @@ extern "C"
 
 	static void *kmalloc_generic(size_t sz, bool align, void **phys)
 	{
+		if(sz == 0)
+		{
+			return nullptr;
+		}
 		if(kernelHeap)
 		{
 			void *vaddr = kernelHeap->alloc(sz, align);
