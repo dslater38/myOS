@@ -9,7 +9,7 @@
             "request": "attach",
             "name": "Attach to gdbserver",
             "executable": "/home/slaterd/repos/myOS/kernel",
-            "target": "192.168.42.128:11234",
+            "target": "127.0.0.1:2000",
             "remote": true,
             "cwd": "${workspaceRoot}",
             "valuesFormatting": "parseText"
@@ -18,23 +18,17 @@
             "name": "myOS - gdbserver",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/isofiles/boot/kernel",
-            "miDebuggerServerAddress": "127.0.0.1:11234",
-            127.0.0.1
+            "symbolLoadInfo": {
+                "loadAll": true,
+                "exceptionList": ""
+            },
+            "program": "${workspaceRoot}/kernel",
+            "miDebuggerServerAddress": "127.0.0.1:2000",
+            "MIMode": "gdb",
+            
             "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
-            "environment": [],
-            "externalConsole": true,
-            "linux": {
-                "MIMode": "gdb"
-              },
-              "osx": {
-                "MIMode": "gdb"
-              },
-              "windows": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "c:\\mingw-w64\\x86_64-7.3.0-posix-seh-rt_v5-rev0\\mingw64\\bin\\gdb.exe"
-              }
+            "environment": []
         },
         {
             "name": "clang++ build and debug active file",

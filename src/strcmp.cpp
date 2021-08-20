@@ -61,8 +61,4 @@ extern "C"
         }
         return c1 - c2;
     }
-
-
-
-
 }

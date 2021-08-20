@@ -10,10 +10,10 @@ floppy_bootsig_check: disabled=0
 floppya: type=1_44
 # no floppyb
 ata0: enabled=true, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-ata0-master: type=disk, path="R:\repos\myOS\hda.img", mode=flat, cylinders=0, heads=0, spt=0, sect_size=512, model="Generic 1234", biosdetect=auto, translation=auto
-ata0-slave: type=cdrom, path="R:\repos\myOS\os.iso", status=ejected, model="Generic 1234", biosdetect=auto
+ata0-master: type=disk, path="hda.img", mode=flat, cylinders=0, heads=0, spt=0, sect_size=512, model="Generic 1234", biosdetect=auto, translation=auto
+ata0-slave: type=cdrom, path="os.iso", status=ejected, model="Generic 1234", biosdetect=auto
 ata1: enabled=true, ioaddr1=0x170, ioaddr2=0x370, irq=15
-ata1-master: type=none
+ata1-master: type=disk path="hdb.img", mode=flat, cylinders=512, heads=4, spt=32, sect_size=512, model="Generic 128/16/63", biosdetect=auto, translation=auto
 ata1-slave: type=none
 ata2: enabled=false
 ata3: enabled=false

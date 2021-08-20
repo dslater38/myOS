@@ -43,7 +43,7 @@
 #define ELF_H
 
 #include <sys/cdefs.h>
-
+#include "errors/errno.h"
 
 typedef uint64_t genvaddr_t;
 // typedef uint32_t errval_t;

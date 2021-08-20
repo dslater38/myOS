@@ -4,24 +4,25 @@
   <Project xsi:type="com.visualgdb.project.linux">
     <CustomSourceDirectories>
       <Directories />
-      <PathStyle>Unknown</PathStyle>
+      <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
+    <AutoProgramSPIFFSPartition>true</AutoProgramSPIFFSPartition>
     <BuildHost>
-      <HostName>debian</HostName>
+      <HostName>sol</HostName>
       <Transport>SSH</Transport>
       <UserName>slaterd</UserName>
     </BuildHost>
     <MountInfo>
       <Mode>UserProvidedMount</Mode>
       <RemoteHost>
-        <HostName>debian</HostName>
+        <HostName>sol</HostName>
         <Transport>SSH</Transport>
         <UserName>slaterd</UserName>
       </RemoteHost>
-      <LocalDirectory>R:\repos\myOS</LocalDirectory>
+      <LocalDirectory>U:\repos\myOS</LocalDirectory>
       <RemoteDirectory>/home/slaterd/repos/myOS</RemoteDirectory>
     </MountInfo>
-    <AllowChangingHostForMainCommands>true</AllowChangingHostForMainCommands>
+    <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
     <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
@@ -29,7 +30,9 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.custom">
+    <BuildLogMode xsi:nil="true" />
     <ToolchainID>
+      <ID>com.sysprogs.toolchain.default-llvm</ID>
       <Version>
         <Revision>0</Revision>
       </Version>
@@ -37,15 +40,19 @@
     <BuildCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>debian</HostName>
-        <Transport>SSH</Transport>
-        <UserName>slaterd</UserName>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
       <Command>make</Command>
-      <Arguments>--jobs=4</Arguments>
-      <WorkingDirectory>/home/slaterd/repos/myOS</WorkingDirectory>
+      <Arguments>--jobs=6</Arguments>
+      <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
-        <Records />
+        <Records>
+          <Record>
+            <VariableName>LANG</VariableName>
+            <Value>en_US.UTF-8</Value>
+          </Record>
+        </Records>
         <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
@@ -53,21 +60,25 @@
     <CleanCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>debian</HostName>
-        <Transport>SSH</Transport>
-        <UserName>slaterd</UserName>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
       <Command>make</Command>
-      <Arguments>--jobs=4 clean</Arguments>
-      <WorkingDirectory>/home/slaterd/repos/myOS</WorkingDirectory>
+      <Arguments>clean</Arguments>
+      <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
-        <Records />
+        <Records>
+          <Record>
+            <VariableName>LANG</VariableName>
+            <Value>en_US.UTF-8</Value>
+          </Record>
+        </Records>
         <EnvironmentSetupFiles />
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </CleanCommand>
     <MainBuildDirectory>$(SourceDir)</MainBuildDirectory>
-    <AbsoluteTargetPath>/home/slaterd/repos/myOS/isofiles/boot/kernel</AbsoluteTargetPath>
+    <AbsoluteTargetPath>/home/slaterd/repos/myOS/kernel</AbsoluteTargetPath>
     <AutoUpdateMakefiles>true</AutoUpdateMakefiles>
   </Build>
   <CustomBuild>
@@ -82,10 +93,11 @@
       <CustomActionBase xsi:type="CommandLineAction">
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <RemoteHost>
-          <HostName>BuildMachine</HostName>
-          <Transport>BuiltinShortcut</Transport>
+          <HostName>sol</HostName>
+          <Transport>SSH</Transport>
+          <UserName>slaterd</UserName>
         </RemoteHost>
-        <Command>/usr/bin/rm</Command>
+        <Command>/bin/rm</Command>
         <Arguments>-f /home/slaterd/repos/myOS/*.lock</Arguments>
         <WorkingDirectory>$(BuildDir)</WorkingDirectory>
         <BackgroundMode>false</BackgroundMode>
@@ -93,7 +105,7 @@
     </PreDebugActions>
     <PostDebugActions />
     <DebugStopActions />
-    <BreakMode>Interrupt</BreakMode>
+    <BreakMode>Default</BreakMode>
     <CustomBreakCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
@@ -114,15 +126,6 @@
     <ExtraSettings>
       <HideErrorsInSystemHeaders>true</HideErrorsInSystemHeaders>
       <SupportLightweightReferenceAnalysis>true</SupportLightweightReferenceAnalysis>
-      <DiscoverySettings>
-        <Mode>Enabled</Mode>
-        <SearchInProjectDir>true</SearchInProjectDir>
-        <SearchInSourceDirs>true</SearchInSourceDirs>
-        <SearchInIncludeSubdirs>true</SearchInIncludeSubdirs>
-        <ExtraSearchDirs>
-          <string>$(ProjectDir)../../src/</string>
-        </ExtraSearchDirs>
-      </DiscoverySettings>
       <CheckForClangFormatFiles>true</CheckForClangFormatFiles>
       <FormattingEngine xsi:nil="true" />
     </ExtraSettings>
@@ -137,21 +140,21 @@
     <AdditionalGDBSettings>
       <Features>
         <DisableAutoDetection>false</DisableAutoDetection>
-        <UseFrameParameter>false</UseFrameParameter>
-        <SimpleValuesFlagSupported>false</SimpleValuesFlagSupported>
-        <ListLocalsSupported>false</ListLocalsSupported>
-        <ByteLevelMemoryCommandsAvailable>false</ByteLevelMemoryCommandsAvailable>
-        <ThreadInfoSupported>false</ThreadInfoSupported>
-        <PendingBreakpointsSupported>false</PendingBreakpointsSupported>
-        <SupportTargetCommand>false</SupportTargetCommand>
-        <ReliableBreakpointNotifications>false</ReliableBreakpointNotifications>
+        <UseFrameParameter>true</UseFrameParameter>
+        <SimpleValuesFlagSupported>true</SimpleValuesFlagSupported>
+        <ListLocalsSupported>true</ListLocalsSupported>
+        <ByteLevelMemoryCommandsAvailable>true</ByteLevelMemoryCommandsAvailable>
+        <ThreadInfoSupported>true</ThreadInfoSupported>
+        <PendingBreakpointsSupported>true</PendingBreakpointsSupported>
+        <SupportTargetCommand>true</SupportTargetCommand>
+        <ReliableBreakpointNotifications>true</ReliableBreakpointNotifications>
       </Features>
       <EnableSmartStepping>false</EnableSmartStepping>
       <FilterSpuriousStoppedNotifications>false</FilterSpuriousStoppedNotifications>
       <ForceSingleThreadedMode>false</ForceSingleThreadedMode>
       <UseAppleExtensions>false</UseAppleExtensions>
       <CanAcceptCommandsWhileRunning>false</CanAcceptCommandsWhileRunning>
-      <MakeLogFile>true</MakeLogFile>
+      <MakeLogFile>false</MakeLogFile>
       <IgnoreModuleEventsWhileStepping>true</IgnoreModuleEventsWhileStepping>
       <UseRelativePathsOnly>false</UseRelativePathsOnly>
       <ExitAction>None</ExitAction>
@@ -163,20 +166,15 @@
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
       <MaxBreakpointLimit>0</MaxBreakpointLimit>
+      <EnableVerboseMode>true</EnableVerboseMode>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersGDBStub">
-      <GDBExe>/usr/local/bin/gdb</GDBExe>
-      <RemoteHostOverride>
-        <HostName>BuildMachine</HostName>
-        <Transport>BuiltinShortcut</Transport>
-      </RemoteHostOverride>
-      <DebuggedProgram>/home/slaterd/repos/myOS/isofiles/boot/kernel</DebuggedProgram>
+      <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBStubCommand>
         <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
         <RemoteHost>
-          <HostName>debian</HostName>
-          <Transport>SSH</Transport>
-          <UserName>slaterd</UserName>
+          <HostName>DeploymentMachine</HostName>
+          <Transport>BuiltinShortcut</Transport>
         </RemoteHost>
         <Command>/home/slaterd/repos/myOS/run_bochs.sh</Command>
         <Arguments>-g</Arguments>
@@ -185,29 +183,24 @@
           <Records>
             <Record>
               <VariableName>DISPLAY</VariableName>
-              <Value>192.168.42.1:0</Value>
+              <Value />
             </Record>
           </Records>
           <EnvironmentSetupFiles />
         </Environment>
         <BackgroundMode xsi:nil="true" />
       </GDBStubCommand>
-      <GDBServerPort>11234</GDBServerPort>
-      <GDBServerSettings>
-        <SendCtrlCToGDBServer>false</SendCtrlCToGDBServer>
-        <SuccessfullyStartedRegex />
-        <PortGroupIndexInStartedRegex>0</PortGroupIndexInStartedRegex>
-        <StartTimeout>0</StartTimeout>
-        <ExitTimeout>0</ExitTimeout>
-        <TerminateGDBServerOnExit>false</TerminateGDBServerOnExit>
-      </GDBServerSettings>
+      <GDBServerPort>2000</GDBServerPort>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
-    <X11WindowMode>Local</X11WindowMode>
+    <SuppressArgumentVariablesCheck>false</SuppressArgumentVariablesCheck>
+    <X11WindowMode>Disabled</X11WindowMode>
     <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
     <RunGDBUnderSudo>false</RunGDBUnderSudo>
     <DeploymentMode>Auto</DeploymentMode>
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <StripDebugSymbolsDuringDeployment>false</StripDebugSymbolsDuringDeployment>
     <SuppressTTYCreation>false</SuppressTTYCreation>
+    <IndexDebugSymbols>false</IndexDebugSymbols>
   </Debug>
 </VisualGDBProjectSettings2>

@@ -2,227 +2,412 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source files">
-      <UniqueIdentifier>{e943ab5a-7563-49b2-8996-1dac18e08a2e}</UniqueIdentifier>
+      <UniqueIdentifier>{e86b8bb9-fe95-4d8d-aeeb-3fc511eb7e8d}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Header files">
-      <UniqueIdentifier>{04d545f5-b4a8-4a8e-8269-da8d4f65471a}</UniqueIdentifier>
+      <UniqueIdentifier>{28860590-764f-4e9e-9892-284f4279a059}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource files">
-      <UniqueIdentifier>{57d518ab-72d9-4afb-9e8c-961c88de848e}</UniqueIdentifier>
+      <UniqueIdentifier>{92fe04c9-cf0f-4032-9e28-f29907a4de5f}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Source files\include">
+      <UniqueIdentifier>{39489812-392a-4572-80a8-c4dc0a907dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include\elf">
+      <UniqueIdentifier>{9ae57272-27ee-4d0e-856a-63fe8b7c0769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include\errors">
+      <UniqueIdentifier>{c323cde8-39dc-4e79-ad5b-69a70462fb2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\samples">
+      <UniqueIdentifier>{cf1e5993-c8e6-46e0-80df-1af8b067c2cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\samples\src">
+      <UniqueIdentifier>{d826f0b5-75de-4c54-a192-08e25854510f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src">
+      <UniqueIdentifier>{23a90dfb-8e65-46d6-b4b4-06e6b049e3c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\gnu">
+      <UniqueIdentifier>{e6f1bcd1-c4ec-422c-81c0-1904298e76c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\ssfn">
+      <UniqueIdentifier>{edfe1dca-5e12-44a0-a0b5-c507575e1789}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include">
+      <UniqueIdentifier>{49d6a10d-9eb5-4340-9cfb-0b91a3e69c39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\elf">
+      <UniqueIdentifier>{f689cfc3-a1bf-4d9f-b800-fadc4ea1c73f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\errors">
+      <UniqueIdentifier>{fbbb909c-422b-491e-a6a8-ff184e7b1f3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\samples">
+      <UniqueIdentifier>{bd239000-fe2b-4433-aa49-3d01a38a254f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\samples\src">
+      <UniqueIdentifier>{101aaabb-d62f-4a56-aa8a-08a6dc03f766}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src">
+      <UniqueIdentifier>{5eb05e4c-1a8c-40b3-ba8d-7e40c2a6ca8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\gnu">
+      <UniqueIdentifier>{05fa7812-7ef0-45d4-9bad-3fc6b31fcbb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\ssfn">
+      <UniqueIdentifier>{aadba762-dcc8-4589-b81f-0ec50c9c8122}</UniqueIdentifier>
+    </Filter>
     <Filter Include="VisualGDB settings">
-      <UniqueIdentifier>{185db035-e457-43a2-a95b-a546c8a61bc3}</UniqueIdentifier>
+      <UniqueIdentifier>{7e6a71ca-98dc-4486-8f6a-f4bfebaf7c7b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Assembly">
-      <UniqueIdentifier>{da513047-a387-4a22-a64b-026ab31f87ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{afe1ec83-3e88-4ec9-818a-31e13cb4b05a}</UniqueIdentifier>
+    <Filter Include="Source files\assembly">
+      <UniqueIdentifier>{977f750b-fb12-407e-95dd-32ffb14e22fa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\samples\src\common.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\descriptor_tables.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\isr.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\kheap.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\main.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\monitor.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\ordered_array.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\paging.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\samples\src\timer.c">
+      <Filter>Source files\samples\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AtaController.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cmain.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\cpu_exceptions.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\elf.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\elf32.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\elf64.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Foobar.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\idt64.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\isr.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\kheap.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\kmain64.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\kmalloc.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memcpy.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\memset.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\multibootheader.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\new.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\panic.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pcSpeaker.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\placement_address.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\rtc.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\runtime_init.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\serial.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ssfn_impl.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\strlen.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TextFrameBuffer.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\timer.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vesavga.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vgaFont.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\VgaFrameBuffer.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vsprintf.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\idt64.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\elf\elf.h">
+      <Filter>Header files\include\elf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\errors\errno.h">
+      <Filter>Header files\include\errors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\common.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\descriptor_tables.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\isr.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\kheap.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\monitor.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\ordered_array.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\paging.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\samples\src\timer.h">
+      <Filter>Header files\samples\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gnu\stubs-x32.h">
+      <Filter>Header files\src\gnu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ssfn\ssfn.h">
+      <Filter>Header files\src\ssfn</Filter>
+    </ClInclude>
     <None Include="myOS-Debug.vgdbsettings">
       <Filter>VisualGDB settings</Filter>
     </None>
     <None Include="myOS-Release.vgdbsettings">
       <Filter>VisualGDB settings</Filter>
     </None>
-    <None Include="..\..\src\boot.s">
-      <Filter>Assembly</Filter>
-    </None>
-    <None Include="..\..\src\common64.s">
-      <Filter>Assembly</Filter>
-    </None>
-    <None Include="..\..\src\crti.s">
-      <Filter>Assembly</Filter>
-    </None>
-    <None Include="..\..\src\crtn.s">
-      <Filter>Assembly</Filter>
-    </None>
-    <None Include="..\..\src\interrupts.s">
-      <Filter>Assembly</Filter>
-    </None>
-    <None Include="..\..\Makefile" />
-    <None Include="..\..\src\Makefile">
-      <Filter>src</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\src\ata.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\malloc.c">
+      <Filter>Source files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cmain.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\cpu.cpp">
+      <Filter>Source files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cpu_exceptions.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="keyb.cpp">
+      <Filter>Header files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\cpuinfo.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\keyb.cpp">
+      <Filter>Source files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\elf.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\VmmPageStack.cpp">
+      <Filter>Source files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\elf32.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\elf64.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\VMManager.cpp">
+      <Filter>Source files\src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\fat.cpp">
-      <Filter>Source files</Filter>
+      <Filter>Source files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Foobar.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\ata.cpp">
+      <Filter>Source files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\idt64.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\cpuinfo.cpp">
+      <Filter>Source files\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\isr.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\kheap.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\kmain64.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\kmalloc.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\memcpy.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\memset.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\multibootheader.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\new.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\panic.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\pcSpeaker.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\placement_address.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\rtc.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\runtime_init.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\serial.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\strlen.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\TextFrameBuffer.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\timer.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vesavga.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\vsprintf.cpp">
-      <Filter>Source files</Filter>
+    <ClCompile Include="..\..\src\strcmp.cpp">
+      <Filter>Source files\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\ata.h">
-      <Filter>Header files</Filter>
+    <None Include="..\..\src\boot.s">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\src\common64.s">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\src\crti.s">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\src\crtn.s">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\src\interrupts.s">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\src\gdtconst.mac">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\src\macros.mac">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\src\mbootconst.mac">
+      <Filter>Source files\assembly</Filter>
+    </None>
+    <None Include="..\..\link.ld" />
+    <None Include="..\..\serial.out" />
+    <None Include="..\..\Makefile" />
+    <None Include="..\..\isofiles\boot\grub\grub.cfg" />
+    <None Include="..\..\src\Makefile">
+      <Filter>Source files\src</Filter>
+    </None>
+    <None Include="..\..\src\link.ld">
+      <Filter>Source files\src</Filter>
+    </None>
+    <None Include="..\..\src\kernel.sym" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\VmmPageStack.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\BootInformation.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\VMManager.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\common.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\ata.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\console.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\AtaController.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\cpuinfo.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\BootInformation.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\descriptor_tables.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\common.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\fat.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\console.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Foobar.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\cpu.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Frames.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\descriptor_tables.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\isr.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\Foobar.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\kernel.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\Frames.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\kheap.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\FsNode.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\kmalloc.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\isr.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mbr.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\kallocator.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\memcpy.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\kheap.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\multiboot2.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\kmalloc.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\MultiBootInfoHeader.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\memcmp.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\new.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\memcpy.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\NewObj.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\multiboot2.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\ordered_array.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\MultiBootInfoHeader.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\PageDirectory.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\new.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\PageT.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\NewObj.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\rtc.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\ordered_array.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\serial.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\PageDirectory.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\TextFrameBuffer.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\PageT.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\timer.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\rtc.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\vesavga.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\serial.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\vfs.h">
-      <Filter>Header files</Filter>
+    <ClInclude Include="..\..\include\ssfn.h">
+      <Filter>Header files\include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\TextFrameBuffer.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\timer.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\vesavga.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\vfs.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\VgaFrameBuffer.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\fat.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\mbr.h">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\bochsrc.txt" />
+    <Text Include="..\..\bochsrc-gdb.txt" />
   </ItemGroup>
 </Project>

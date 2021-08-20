@@ -8,14 +8,10 @@ section .text
 [GLOBAL ind]
 [GLOBAL insl]
 
-[GLOBAL get_fault_addr64]
-[GLOBAL halt]
-[GLOBAL invalidate_tlb]
-[GLOBAL invalidate_all_tlbs]
-[GLOBAL cpuid]
+%include "macros.mac"
 
 ; void cpuid(CpuidInfo *info, uint32_t eax);
-cpuid:
+PROC cpuid
 	test rdi, rdi
 	jz .error
 	mov eax, esi	; load eax with the passed in parameter
@@ -29,61 +25,140 @@ cpuid:
 .error:
 	xor eax,eax
 	jmp .exit
-
-invalidate_tlb:
+ENDP
+PROC invalidate_tlb
 	invlpg [rdi]
 	ret
-
-invalidate_all_tlbs:
+ENDP
+PROC invalidate_all_tlbs
 	mov rax, cr3
 	mov cr3, rax
 	ret
-
-outb:
+ENDP
+PROC outb
 	mov rdx, rdi
 	mov rax, rsi
 	out dx, al
 	ret
-	
-outw:
+ENDP
+PROC outw
 	mov rdx, rdi
 	mov rax, rsi
 	out dx, ax
 	ret
-	
-outd:
+ENDP
+PROC outd
 	mov rdx, rdi
 	mov rax, rsi
 	out dx, eax
 	ret
-
-inb:
+ENDP
+PROC outsb
+	mov rdx, rdi
+	mov rdi, rsi
+	mov rcx, rdx
+	rep outsb
+	ret
+ENDP
+PROC outsw
+	mov rdx, rdi
+	mov rdi, rsi
+	mov rcx, rdx
+	rep outsw
+	ret
+ENDP
+PROC inb
 	mov rdx, rdi
 	in al, dx
 	ret
-
-inw:
+ENDP
+PROC inw
 	mov rdx, rdi
 	in ax, dx
 	ret
-
-ind:
+ENDP
+PROC ind
 	mov rdx, rdi
 	in eax, dx
 	ret
-
-insl:
+ENDP
+; on entry rdi has port, rsi has address, rdx has size
+; to execute, need rcx==size, rdi==address, rdx==port
+PROC insb
+	cld
+	mov r10, rdx ; save size into r10
+	mov rdx, rdi ; move port into rdx
+	mov rcx, r10  ; move saved size into rcx
+	mov rdi, rsi  ; move address into rdi
+	rep insb	  ; execute the insb
+	ret
+ENDP
+; on entry rdi has port, rsi has address, rdx has size
+; to execute, need rcx==size, rdi==address, rdx==port
+PROC insw
+	cld
+	mov r10, rdx ; save size into r10
+	mov rdx, rdi ; move port into rdx
+	mov rcx, r10  ; move saved size into rcx
+	mov rdi, rsi  ; move address into rdi
+	rep insw
+	ret
+ENDP
+PROC batch_outb
+	mov rcx, rdx
+	test rcx,rcx
+	jz .done
+.loop:
+	mov dx, WORD [rdi]
+	mov al, BYTE [rsi]
+	out dx, al
+	add rdi, 2
+	inc rsi
+	dec rcx
+	jnz .loop
+.done:
+	ret
+ENDP
+PROC batch_outb2
+	test rsi,rsi
+	jz .done
+.loop:	
+	mov edx, DWORD [rdi]
+	mov al, dl
+	shr edx, 16
+	out dx, al
+	add rdi, 4
+	dec rsi
+	jnz .loop
+.done:
+	ret
+ENDP
+PROC insl
 	mov rcx, rdx
 	mov rdx, rdi
 	mov rdi, rsi
 	rep insd
 	ret
-
-get_fault_addr64:
+ENDP
+PROC get_fault_addr64
 	mov rax, cr2
 	ret
-	
-halt:
+ENDP
+PROC halt
 	cli
 	hlt
 	jmp halt
+ENDP
+PROC Cpuid
+	xor rax,rax
+	mov eax, [rdi]
+	cpuid
+	mov [rdi + 4], ebx
+	mov [rdi + 8], ecx
+	mov [rdi + 12], edx
+	ret
+ENDP
+PROC dbgInterrupt
+	mov bx, bx
+	ret
+ENDP

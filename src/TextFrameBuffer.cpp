@@ -92,7 +92,7 @@ void TextFrameBuffer::copy_cur_line()
 	{
 		j += (ROWS - (cur_line+1));
 	}
-	j += cur_line+1;
+	j += cur_line;
 	copy_line(j, cur_line);
 }
 

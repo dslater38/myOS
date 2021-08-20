@@ -6,12 +6,23 @@
       <Directories />
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
+    <AutoProgramSPIFFSPartition>true</AutoProgramSPIFFSPartition>
     <BuildHost>
-      <HostName>debian</HostName>
+      <HostName>sol</HostName>
       <Transport>SSH</Transport>
       <UserName>slaterd</UserName>
     </BuildHost>
-    <AllowChangingHostForMainCommands>true</AllowChangingHostForMainCommands>
+    <MountInfo>
+      <Mode>UserProvidedMount</Mode>
+      <RemoteHost>
+        <HostName>sol</HostName>
+        <Transport>SSH</Transport>
+        <UserName>slaterd</UserName>
+      </RemoteHost>
+      <LocalDirectory>U:\repos\myOS</LocalDirectory>
+      <RemoteDirectory>/home/slaterd/repos/myOS</RemoteDirectory>
+    </MountInfo>
+    <AllowChangingHostForMainCommands>false</AllowChangingHostForMainCommands>
     <SkipBuildIfNoSourceFilesChanged>false</SkipBuildIfNoSourceFilesChanged>
     <IgnoreFileTransferErrors>false</IgnoreFileTransferErrors>
     <RemoveRemoteDirectoryOnClean>false</RemoveRemoteDirectoryOnClean>
@@ -19,7 +30,9 @@
     <MainSourceDirectoryForLocalBuilds>$(ProjectDir)</MainSourceDirectoryForLocalBuilds>
   </Project>
   <Build xsi:type="com.visualgdb.build.custom">
+    <BuildLogMode xsi:nil="true" />
     <ToolchainID>
+      <ID>com.sysprogs.toolchain.default-llvm</ID>
       <Version>
         <Revision>0</Revision>
       </Version>
@@ -27,41 +40,55 @@
     <BuildCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>debian</HostName>
-        <Transport>SSH</Transport>
-        <UserName>slaterd</UserName>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
       <Command>make</Command>
-      <Arguments>--jobs=4</Arguments>
-      <WorkingDirectory>/home/slaterd/repos/myOS</WorkingDirectory>
+      <Arguments>--jobs=6</Arguments>
+      <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
-        <Records />
+        <Records>
+          <Record>
+            <VariableName>LANG</VariableName>
+            <Value>en_US.UTF-8</Value>
+          </Record>
+        </Records>
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </BuildCommand>
     <CleanCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>debian</HostName>
-        <Transport>SSH</Transport>
-        <UserName>slaterd</UserName>
+        <HostName>BuildMachine</HostName>
+        <Transport>BuiltinShortcut</Transport>
       </RemoteHost>
       <Command>make</Command>
-      <Arguments>--jobs=4 clean</Arguments>
-      <WorkingDirectory>/home/slaterd/repos/myOS</WorkingDirectory>
+      <Arguments>clean</Arguments>
+      <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
-        <Records />
+        <Records>
+          <Record>
+            <VariableName>LANG</VariableName>
+            <Value>en_US.UTF-8</Value>
+          </Record>
+        </Records>
       </Environment>
       <BackgroundMode xsi:nil="true" />
     </CleanCommand>
     <MainBuildDirectory>$(SourceDir)</MainBuildDirectory>
-    <AbsoluteTargetPath>/home/slaterd/repos/myOS/run_bochs.sh -g</AbsoluteTargetPath>
+    <AbsoluteTargetPath>/home/slaterd/repos/myOS/kernel</AbsoluteTargetPath>
     <AutoUpdateMakefiles>true</AutoUpdateMakefiles>
   </Build>
   <CustomBuild>
     <PreSyncActions />
+    <PreBuildActions />
+    <PostBuildActions />
+    <PreCleanActions />
+    <PostCleanActions />
   </CustomBuild>
   <CustomDebug>
+    <PreDebugActions />
+    <PostDebugActions />
     <DebugStopActions />
     <BreakMode>Default</BreakMode>
   </CustomDebug>
@@ -113,17 +140,24 @@
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
       <MaxBreakpointLimit>0</MaxBreakpointLimit>
+      <EnableVerboseMode>true</EnableVerboseMode>
     </AdditionalGDBSettings>
-    <LaunchGDBSettings xsi:type="GDBLaunchParametersCustom">
-      <SessionStartMode>UsingRun</SessionStartMode>
-      <AttachPID>0</AttachPID>
+    <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
+      <DebuggedProgram>$(TargetPath)</DebuggedProgram>
+      <GDBServerPort>2000</GDBServerPort>
+      <ProgramArguments />
+      <WorkingDirectory>$(BuildDir)</WorkingDirectory>
+      <ArgumentEscapingMode>Auto</ArgumentEscapingMode>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
+    <SuppressArgumentVariablesCheck>false</SuppressArgumentVariablesCheck>
     <X11WindowMode>Local</X11WindowMode>
     <KeepConsoleAfterExit>false</KeepConsoleAfterExit>
     <RunGDBUnderSudo>false</RunGDBUnderSudo>
     <DeploymentMode>Auto</DeploymentMode>
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
+    <StripDebugSymbolsDuringDeployment>false</StripDebugSymbolsDuringDeployment>
     <SuppressTTYCreation>false</SuppressTTYCreation>
+    <IndexDebugSymbols>false</IndexDebugSymbols>
   </Debug>
 </VisualGDBProjectSettings2>

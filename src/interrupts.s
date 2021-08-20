@@ -3,21 +3,20 @@ section .text
 
 %include "macros.mac"
 
-[GLOBAL enable_interrupts]
-enable_interrupts:
+PROC enable_interrupts
 	sti
 	ret
+ENDP
 
-
-[GLOBAL disable_interrupts]
-disable_interrupts:
+PROC disable_interrupts
 	cli
 	ret
+ENDP
 
-[GLOBAL idt_flush]
-idt_flush:
+PROC idt_flush
 	lidt [rdi]        ; Load the IDT pointer.
 	ret
+ENDP
 
 ISR_NOERRCODE 0
 ISR_NOERRCODE 1
@@ -73,4 +72,3 @@ IRQ   15,    47
 
 COMMON_STUB isr_common_stub, isr64_handler
 COMMON_STUB irq_common_stub, irq64_handler
-

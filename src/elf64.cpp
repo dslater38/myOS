@@ -22,15 +22,20 @@
  * in-kernel, 64-bit mode
  * userspace, 64-bit mode
  */
-#include <assert.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <stddef.h>
-#include <string.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdint>
+#include <cstddef>
+#include <cstring>
 //~ #include <barrelfish_kpi/paging_arch.h>
 //~ #include <barrelfish_kpi/types.h>
 #include <errors/errno.h>
 #include <elf/elf.h>
+
+extern "C"
+{
+	void dbgInterrupt();
+}
 
 /**
  * \brief Calculates the base of the loadable portion of the elf image in
@@ -349,6 +354,8 @@ errval_t elf64_load(uint16_t em_machine, elf_allocator_fn allocate_func,
             }
             assert(dest != NULL);
 
+	        dbgInterrupt();
+	        
             // Copy file segment into memory
             memcpy(dest, (void *)(base + (uintptr_t)p->p_offset), p->p_filesz);
 

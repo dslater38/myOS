@@ -1,11 +1,16 @@
 #!/bin/bash
+set -x
 
+SCRIPTDIR="$(dirname $(realpath $0))"
+
+cd "$SCRIPTDIR"
 
 BOCHS=bochs
 BOCHSRC=bochsrc.txt
 
+DISPLAY=${DISPLAY:-192.168.3.175:1}
 
-if [ -e /usr/local/bochs/bin/bochs ]; then
+if [ -r /usr/local/bochs/bin/bochs ]; then
 	BOCHS=/usr/local/bochs/bin/bochs
 fi
 
