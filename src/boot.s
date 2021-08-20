@@ -173,12 +173,9 @@ gdt:
 align 0x1000
 page_table:
 p4_table:						; PML4E
-	dq (p3_table + 3 - VM_BASE)			; pointer to PDPTE table with rw & present bits set
-	TIMES 255 dq 0				; write 254 null entries to fill the table.
-	dq (p3_table.next + 3 - VM_BASE)		; pointer to PDPTE table for high memory with rw & present bits set
-	TIMES 253 dq 0				; write 254 null entries to fill the table.
-	dq 387						; 1GB huge page maps the first 1GB of memory. 0xFFFFFFFF80000000 linear => 0x0000000000000000 physical
-	dq (p4_table + 3 - VM_BASE)			; write final recursive entry. Constructing appropriate virtual addresses will give us access to the page tables
+	dq (p3_table + 3)			; pointer to PDPTE table with rw & present bits set
+	TIMES 510 dq 0			; write 511 null entries to fill the table.
+	dq (p4_table + 3)			; recursive last table entry points back to p4_table (with present & rw bits set)
 p3_table:						; PDPTE
 	dq (p2_table + 3 - VM_BASE)			; pointer to PDE table with rw & present bits set.
 	dq 0x0000000000000000
@@ -199,10 +196,9 @@ p2_table:						; PDE
 ;	dq (p1_table + 3 - VM_BASE)			; pointer to the PTE table with rw & present bits set
 ;	TIMES 511 dq 0				; write 511 null entries for a total of 512 entries
 p1_table:						; PTE 
-	%assign p 0x03				; set the rw & present bits (0x03) 
+	%assign p 0x03			; set the rw & present bits (0x03) 
 	%rep 512					; write 511 of 512 entries to the PTE table
 	dq p						; write page entry
-	%assign p p+ 0x00001000		; increment page entry virtual ( and physical ) address by page size (4K)
-	%endrep						; end of loop
-page_table.end:
+	%assign p p+ 0x00001000	; increment page entry virtual ( and physical ) address by page size (4K)
+	%endrep					; end of loop
 startup_data_end:
