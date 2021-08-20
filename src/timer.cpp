@@ -7,15 +7,22 @@
 
 uint64_t tick = 0;
 
-static void timer_callback(registers_t regs)
+static void timer_callback(registers64_t regs)
 {
 	tick++;
+//	printf("tick: %ld\n", tick);
 }
 
 static void set_repeat_mode()
 {
 	// Send the command byte.
 	outb(PIT_COMMAND_PORT, PIT_SET_MODE_REPEAT);
+}
+
+static void set_terminal_mode()
+{
+	// Send the command byte.
+	outb(PIT_COMMAND_PORT, PIT_SET_MODE_TERMINAL_COUNT);
 }
 
 static void set_frequency(uint32_t frequency)
@@ -38,9 +45,10 @@ static void set_frequency(uint32_t frequency)
 void init_timer(uint32_t frequency)
 {
 	// Firstly, register our timer callback.
-	register_interrupt_handler(IRQ0, &timer_callback);
+	register_interrupt_handler64(IRQ0, &timer_callback);
 
-	set_repeat_mode();
-	set_frequency(frequency);
+	// set_repeat_mode();
+	set_terminal_mode();
+	// set_frequency(frequency);
 }
 

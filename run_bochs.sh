@@ -1,21 +1,16 @@
 #!/bin/bash
+set -x
 
+SCRIPTDIR="$(dirname $(realpath $0))"
 
-BOCHS=bochs
-BOCHSRC=bochsrc.txt
-
-#~ set -x
-
-#~ if [ "$1" == "-g" ]; then
-	#~ PATH=/home/slaterd/.local/bochs269/bin:${PATH} /home/slaterd/.local/bochs269/bin/bochs -q -f bochsrc-gdb.txt
-#~ else
-	#~ bochs -q -dbglog debug.log -f bochsrc.txt
-#~ fi
+cd "$SCRIPTDIR"
 
 BOCHS=bochs
 BOCHSRC=bochsrc.txt
 
-if [ -e /usr/local/bochs/bin/bochs ]; then
+DISPLAY=${DISPLAY:-192.168.3.175:1}
+
+if [ -r /usr/local/bochs/bin/bochs ]; then
 	BOCHS=/usr/local/bochs/bin/bochs
 fi
 

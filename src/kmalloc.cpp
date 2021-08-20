@@ -1,5 +1,10 @@
 #include "kmalloc.h"
 #include "vesavga.h"
+#include "kheap.h"
+#include <algorithm>
+
+Page4K *getPage(void *vaddr);
+extern heap_t *kernelHeap;
 
 extern "C"
 {
@@ -11,6 +16,22 @@ extern "C"
 	void *kmalloc(size_t sz)
 	{
 		return kmalloc_generic(sz,false,nullptr);
+	}
+
+	void *krealloc(void *p, size_t sz)
+	{
+		void *newMem = kmalloc(sz);
+		if(newMem && p)
+		{
+			auto oldSize = kernelHeap->blockSize(p);
+			auto copyLen = std::min(sz, oldSize);
+			if(copyLen>0)
+			{
+				memcpy(newMem, p, copyLen);
+			}
+			kfree(p);
+		}
+		return newMem;
 	}
 
 	void *kmalloc_aligned(size_t sz)
@@ -40,18 +61,43 @@ extern "C"
 
 	static void *kmalloc_generic(size_t sz, bool align, void **phys)
 	{
-		if( align )
+		if(sz == 0)
 		{
-			page_align_placement();
+			return nullptr;
 		}
+		if(kernelHeap)
+		{
+			void *vaddr = kernelHeap->alloc(sz, align);
+			if (phys != 0)
+			{
+				auto *page = getPage(vaddr);
+				*phys = reinterpret_cast<void *>(page->frame*0x1000 + reinterpret_cast<uint64_t>(vaddr)&0xFFFull);
+			}
+			return vaddr;
+		}
+		else
+		{
+			if( align )
+			{
+				page_align_placement();
+			}
 
-		auto *tmp = reinterpret_cast<void *>(placement_address);
-		if (phys)
-		{
-			*phys = tmp;
-		}
+			auto *tmp = reinterpret_cast<void *>(placement_address);
+			if (phys)
+			{
+				*phys = tmp;
+			}
 		
-		placement_address += sz;
-		return tmp;
+			placement_address += sz;
+			return tmp;
+
+		}
+	}
+	void kfree(void *vaddr)
+	{
+		if(kernelHeap)
+		{
+			kernelHeap->free(vaddr);
+		}
 	}
 }

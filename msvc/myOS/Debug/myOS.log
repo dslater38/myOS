@@ -1,0 +1,4 @@
+﻿  VisualGDB: Run "make --jobs=4" in directory "/home/slaterd/repos/myOS" on slaterd@debian (SSH)
+  make[1]: Entering directory '/home/slaterd/repos/myOS/src'
+  make[1]: Nothing to be done for 'all'.
+  make[1]: Leaving directory '/home/slaterd/repos/myOS/src'

@@ -1,34 +1,17 @@
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 
 extern "C"
 {
-	int strcmp(const char *str1, const char *str2)
-	{
-		while(*str1)
-		{
-			// if characters differ or end of second string is reached
-			if (*str1 != *str2)
-				break;
 
-			// move to next pair of characters
-			str1++;
-			str2++;
-		}
-
-		// return the ASCII difference after converting char* to unsigned char*
-		return *(const unsigned char*)str1 - *(const unsigned char*)str2;
-	}
-
-
-// Copy len bytes from src to dest.
-void *memcpy(void *dest, const void *src, size_t len)
-{
-    const uint8_t *sp = (const uint8_t *)src;
-    uint8_t *dp = (uint8_t *)dest;
-    for(; len != 0; len--) *dp++ = *sp++;
-     return dest;
-}
+//~ // Copy len bytes from src to dest.
+//~ void *memcpy(void *dest, const void *src, size_t len)
+//~ {
+    //~ const uint8_t *sp = (const uint8_t *)src;
+    //~ uint8_t *dp = (uint8_t *)dest;
+    //~ for(; len != 0; len--) *dp++ = *sp++;
+     //~ return dest;
+//~ }
 
 // Write len copies of val into dest.
 void * memset(void *vdest, int val, size_t len)

@@ -4,11 +4,11 @@
 # rule, as we use nasm instead of GNU as.
 
 SOURCES=boot.o main.o monitor.o common.o descriptor_tables.o isr.o interrupt.o gdt.o timer.o \
-        kheap.o paging.o
+        kheap.o paging.o ordered_array.o
 
-CFLAGS=-m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector
-LDFLAGS=-melf_i386 -Tlink.ld
-ASFLAGS=-felf
+CFLAGS=-nostdlib -nostdinc -fno-builtin -fno-stack-protector -O0 -g
+LDFLAGS=-Tlink.ld -g
+ASFLAGS=-felf -g
 
 all: $(SOURCES) link
 
@@ -16,7 +16,7 @@ clean:
 	-rm *.o kernel
 
 link:
-	ld $(LDFLAGS) -o kernel $(SOURCES)
+	$(LD) $(LDFLAGS) -o kernel $(SOURCES)
 
 .s.o:
 	nasm $(ASFLAGS) $<

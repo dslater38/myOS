@@ -3,13 +3,12 @@
  * Wirzenius wrote this portably, Torvalds fucked it up :-)
  */
 
-// #define strlen(a) strlen32(a)
-#include "stdarg.h"
-#define memset memset32
-#include <string.h>
-#undef memset
+// #include <stdarg.h>
+#include <cstdarg>
+#include <cstring>
 #include "common.h"
 #include "vesavga.h"
+#include "serial.h"
 
 /* we use this so that we can do without the ctype library */
 #define is_digit(c)	((c) >= '0' && (c) <= '9')
@@ -17,10 +16,10 @@
 
 static int skip_atoi(const char **s)
 {
-	int i=0;
+	int i = 0;
 
-	while (is_digit(**s))
-		i = i*10 + *((*s)++) - '0';
+	while(is_digit(**s))
+		i = i * 10 + *((*s)++) - '0';
 	return i;
 }
 
@@ -33,238 +32,391 @@ static int skip_atoi(const char **s)
 #define SMALL	64		/* use 'abcdef' instead of 'ABCDEF' */
 
 #define do_div(n,base) ({ \
-int __res; \
-__asm__("divl %4":"=a" (n),"=d" (__res):"0" (n),"1" (0),"r" (base)); \
+long __res; \
+__asm__("divq %4":"=a" (n),"=d" (__res):"0" (n),"1" (0),"r" (base)); \
 __res; })
 
-static char * number(char * str, int num, int base, int size, int precision
-	,int type)
+static char * number(char * str, long num, long base, int size, int precision
+					 , int type)
 {
-	char c,sign,tmp[36];
-	const char *digits="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	int i;
+	char sign = '\0', tmp[36];
+	const char *digits =  (type&SMALL)  ? "0123456789abcdefghijklmnopqrstuvwxyz" : "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	if (type&SMALL) digits="0123456789abcdefghijklmnopqrstuvwxyz";
-	if (type&LEFT) type &= ~ZEROPAD;
-	if (base<2 || base>36)
-		return 0;
-	c = (type & ZEROPAD) ? '0' : ' ' ;
-	if (type&SIGN && num<0) {
-		sign='-';
-		num = -num;
-	} else
-		sign=(type&PLUS) ? '+' : ((type&SPACE) ? ' ' : 0);
-	if (sign) size--;
-	if (type&SPECIAL) {
-		if (base==16) {size -= 2;}
-		else if (base==8) {size--;}
+	if(type&LEFT)
+	{
+		type &= ~ZEROPAD;
 	}
-	i=0;
-	if (num==0)
-		tmp[i++]='0';
-	else while (num!=0)
-		tmp[i++]=digits[do_div(num,base)];
-	if (i>precision) precision=i;
+
+	if(base < 2 || base>36)
+	{
+		return 0;
+	}
+
+	char c = (type & ZEROPAD) ? '0' : ' ';
+	if( (type&SIGN) && (num < 0) )
+	{
+		sign = '-';
+		num = -num;
+	}
+	else if( type&PLUS )
+	{
+		sign = '+';
+	}
+	else if( type&SPACE )
+	{
+		sign = ' ';
+	}
+
+	if(sign)
+	{
+		size--;
+	}
+
+	if(type&SPECIAL)
+	{
+		if(base == 16)
+		{
+			size -= 2;
+		}
+		else if(base == 8)
+		{
+			size--;
+		}
+	}
+	int i = 0;
+	if(num == 0)
+	{
+		tmp[i++] = '0';
+	}
+	else
+	{
+		while(num != 0)
+		{
+			tmp[i++] = digits[do_div(num, base)];
+		}
+	}
+
+	if(i > precision)
+	{
+		precision = i;
+	}
+
 	size -= precision;
-	if (!(type&(ZEROPAD+LEFT)))
-		while(size-->0)
+	if(!(type&(ZEROPAD + LEFT)))
+	{
+		while(size-- > 0)
+		{
 			*str++ = ' ';
-	if (sign)
+		}
+	}
+
+	if(sign)
+	{
 		*str++ = sign;
-	if (type&SPECIAL) {
-		if (base==8) {
+	}
+
+	if(type&SPECIAL)
+	{
+		if(base == 8)
+		{
 			*str++ = '0';
 		}
-		else if (base==16) {
+		else if(base == 16)
+		{
 			*str++ = '0';
 			*str++ = digits[33];
 		}
 	}
-	if (!(type&LEFT))
-		while(size-->0)
+	if(!(type&LEFT))
+	{
+		while(size-- > 0)
+		{
 			*str++ = c;
-	while(i<precision--)
+		}
+	}
+
+	while(i < precision--)
+	{
 		*str++ = '0';
-	while(i-->0)
+	}
+
+	while(i-- > 0)
+	{
 		*str++ = tmp[i];
-	while(size-->0)
+	}
+
+	while(size-- > 0)
+	{
 		*str++ = ' ';
+	}
+
 	return str;
+}
+
+static
+unsigned long
+get_integer(int qualifier, va_list args)
+{
+	unsigned long n = 0;
+
+	switch(qualifier)
+	{
+		case 'l':
+			n = static_cast<unsigned long>(va_arg(args, unsigned long));
+			break;
+		case 'h':
+			n = static_cast<unsigned long>(va_arg(args, unsigned int));
+			break;
+		case (('l' << 8) | 'l'):
+			n = static_cast<unsigned long>(va_arg(args, unsigned long long));
+			break;
+		case (('h' << 8) | 'h'):
+			n = static_cast<unsigned long>(va_arg(args, unsigned int));
+			break;
+		default:
+			n = va_arg(args, unsigned long);
+			break;
+	}
+
+	return n;
 }
 
 static
 int vsprintf_imp(char *buf, const char *fmt, va_list args)
 {
-	int len;
-	int i;
-	char * str;
-	char *s;
-	int *ip;
+//	size_t len=0;
+	int i=0;
+	char * str=nullptr;
+// 	char *s=nullptr;
+//	int *ip=nullptr;
 
-	int flags;		/* flags to number() */
+//	int flags=0;		/* flags to number() */
 
-	int field_width;	/* width of output field */
-	int precision;		/* min. # of digits for integers; max
-				   number of chars for from string */
-	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
+// 	int field_width=0;	/* width of output field */
+//	int precision=0;		/* min. # of digits for integers; max
+//				   number of chars for from string */
+//	int qualifier=0;		/* 'h', 'l', or 'L' for integer fields */
 
-	for (str=buf ; *fmt ; ++fmt) {
-		if (*fmt != '%') {
+	for(str = buf; *fmt; ++fmt)
+	{
+		if(*fmt != '%')
+		{
 			*str++ = *fmt;
 			continue;
 		}
-			
+
 		/* process flags */
-		flags = 0;
-		repeat:
-			++fmt;		/* this also skips first '%' */
-			switch (*fmt) {
-				case '-': flags |= LEFT; goto repeat;
-				case '+': flags |= PLUS; goto repeat;
-				case ' ': flags |= SPACE; goto repeat;
-				case '#': flags |= SPECIAL; goto repeat;
-				case '0': flags |= ZEROPAD; goto repeat;
-				}
-		
+		int flags = 0;
+	repeat:
+		++fmt;		/* this also skips first '%' */
+		switch(*fmt)
+		{
+		case '-': flags |= LEFT; goto repeat;
+		case '+': flags |= PLUS; goto repeat;
+		case ' ': flags |= SPACE; goto repeat;
+		case '#': flags |= SPECIAL; goto repeat;
+		case '0': flags |= ZEROPAD; goto repeat;
+		}
+
 		/* get field width */
-		field_width = -1;
-		if (is_digit(*fmt))
+		int field_width = -1;
+		if(is_digit(*fmt))
+		{
 			field_width = skip_atoi(&fmt);
-		else if (*fmt == '*') {
+		}
+		else if(*fmt == '*')
+		{
 			/* it's the next argument */
 			field_width = va_arg(args, int);
-			if (field_width < 0) {
+			if(field_width < 0)
+			{
 				field_width = -field_width;
 				flags |= LEFT;
 			}
 		}
 
 		/* get the precision */
-		precision = -1;
-		if (*fmt == '.') {
-			++fmt;	
-			if (is_digit(*fmt))
+		int precision = -1;
+		if(*fmt == '.')
+		{
+			++fmt;
+			if(is_digit(*fmt))
 				precision = skip_atoi(&fmt);
-			else if (*fmt == '*') {
+			else if(*fmt == '*')
+			{
 				/* it's the next argument */
 				precision = va_arg(args, int);
 			}
-			if (precision < 0)
+			if(precision < 0)
 				precision = 0;
 		}
 
 		/* get the conversion qualifier */
-		qualifier = -1;
-		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L') {
+		int qualifier = -1;
+		if(*fmt == 'h' || *fmt == 'l' || *fmt == 'L')
+		{
 			qualifier = *fmt;
 			++fmt;
+			if(qualifier == 'h' && *fmt == 'h')
+			{
+				qualifier = (((qualifier & 0xFF) << 8) | 'h');
+				++fmt;
+			}
+			else if(qualifier == 'l' && *fmt == 'l')
+			{
+				qualifier = (((qualifier & 0xFF) << 8) | 'l');
+				++fmt;
+			}
 		}
 
-		switch (*fmt) {
+		switch(*fmt)
+		{
 		case 'c':
-			if (!(flags & LEFT))
-				while (--field_width > 0)
+			if(!(flags & LEFT))
+			{
+				while(--field_width > 0)
+				{
 					*str++ = ' ';
-			*str++ = (unsigned char) va_arg(args, int);
-			while (--field_width > 0)
+				}
+			}
+
+			*str++ = (unsigned char)va_arg(args, int);
+			while(--field_width > 0)
+			{
 				*str++ = ' ';
+			}
 			break;
 
 		case 's':
-			s = va_arg(args, char *);
-			len = strlen(s);
-			if (precision < 0)
+		{
+			char *s = va_arg(args, char *);
+			int len = static_cast<int>(strlen(s));
+			if(precision < 0)
+			{
 				precision = len;
-			else if (len > precision)
+			}
+			else if(len > precision)
+			{
 				len = precision;
+			}
 
-			if (!(flags & LEFT))
-				while (len < field_width--)
+			if(!(flags & LEFT))
+			{
+				while(len < field_width--)
+				{
 					*str++ = ' ';
-			for (i = 0; i < len; ++i)
+				}
+			}
+			for(i = 0; i < len; ++i)
+			{
 				*str++ = *s++;
-			while (len < field_width--)
+			}
+			while(len < field_width--)
+			{
 				*str++ = ' ';
+			}
 			break;
-
+		}
 		case 'o':
-			str = number(str, va_arg(args, unsigned long), 8,
-				field_width, precision, flags);
+		{
+			unsigned long n = get_integer(qualifier, args);
+			str = number(str, n, 8, field_width, precision, flags);
 			break;
-
+		}
 		case 'p':
-			if (field_width == -1) {
-				field_width = 8;
+			if(field_width == -1)
+			{
+				field_width = 16;
 				flags |= ZEROPAD;
 			}
 			str = number(str,
-				(unsigned long) va_arg(args, void *), 16,
-				field_width, precision, flags);
+				(unsigned long)va_arg(args, void *), 16,
+						 field_width, precision, flags);
 			break;
 
 		case 'x':
 			flags |= SMALL;
 		case 'X':
-			str = number(str, va_arg(args, unsigned long), 16,
-				field_width, precision, flags);
+		{
+			unsigned long n = get_integer(qualifier, args);
+			str = number(str, n, 16, field_width, precision, flags);
 			break;
+		}
 
 		case 'd':
 		case 'i':
 			flags |= SIGN;
 		case 'u':
-			str = number(str, va_arg(args, unsigned long), 10,
-				field_width, precision, flags);
+		{
+			unsigned long n = get_integer(qualifier, args);
+			str = number(str, n, 10, field_width, precision, flags);
 			break;
-
+		}
 		case 'n':
-			ip = va_arg(args, int *);
+		{
+			long *ip = va_arg(args, long *);
 			*ip = (str - buf);
 			break;
-
+		}
 		default:
-			if (*fmt != '%')
+			if(*fmt != '%')
+			{
 				*str++ = '%';
-			if (*fmt)
+			}
+			if(*fmt)
+			{
 				*str++ = *fmt;
+			}
 			else
+			{
 				--fmt;
+			}
 			break;
 		}
 	}
 	*str = '\0';
-	return str-buf;
+	return static_cast<int>(str - buf);
 }
 
 extern "C"
 {
 
 
-int vsprintf(char *buf, const char *fmt, va_list args)
-{
-	return vsprintf_imp(buf, fmt, args);
-}
+	int vsprintf(char *buf, const char *fmt, va_list args)
+	{
+		return vsprintf_imp(buf, fmt, args);
+	}
 
-int sprintf(char *buf, const char *fmt, ...)
-{
-	int retVal = 0;
-	va_list args;
-	va_start(args, fmt);
-	retVal = vsprintf_imp(buf, fmt, args);
-	va_end(args);
-	return retVal;
-}
+	int sprintf(char *buf, const char *fmt, ...)
+	{
+		int retVal = 0;
+		va_list args;
+		va_start(args, fmt);
+		retVal = vsprintf_imp(buf, fmt, args);
+		va_end(args);
+		return retVal;
+	}
 
-int printf(const char *fmt, ...)
-{
-	char buf[4096] = {0};
-	int retVal = 0;
-	va_list args;
-	va_start(args, fmt);
-	retVal = vsprintf_imp(buf, fmt, args);
-	va_end(args);
-	monitor_write(buf);
-	return retVal;
-}
+	int printf(const char *fmt, ...)
+	{
+		char buf[4096] = { 0 };
+		int retVal = 0;
+		va_list args;
+		va_start(args, fmt);
+		retVal = vsprintf_imp(buf, fmt, args);
+		va_end(args);
+		monitor_write(buf);
+		return retVal;
+	}
 
+	void debug_out(const char *fmt,...)
+	{
+		char buffer[1024];
+		va_list args;
+		va_start(args, fmt);
+		(void)vsprintf_imp(buffer, fmt, args);
+		va_end(args);
+		char *s = buffer;
+		serial_write(2, s);
+	}
 }
