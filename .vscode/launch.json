@@ -5,25 +5,30 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "gdb",
+            "request": "attach",
+            "name": "Attach to gdbserver",
+            "executable": "/home/slaterd/repos/myOS/kernel",
+            "target": "127.0.0.1:2000",
+            "remote": true,
+            "cwd": "${workspaceRoot}",
+            "valuesFormatting": "parseText"
+        },
+        {
             "name": "myOS - gdbserver",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/isofiles/boot/kernel",
-            "miDebuggerServerAddress": "localhost:11234",
-            "args": [],
+            "symbolLoadInfo": {
+                "loadAll": true,
+                "exceptionList": ""
+            },
+            "program": "${workspaceRoot}/kernel",
+            "miDebuggerServerAddress": "127.0.0.1:2000",
+            "MIMode": "gdb",
+            
             "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
-            "environment": [],
-            "externalConsole": true,
-            "linux": {
-                "MIMode": "gdb"
-              },
-              "osx": {
-                "MIMode": "gdb"
-              },
-              "windows": {
-                "MIMode": "gdb"
-              }
+            "environment": []
         },
         {
             "name": "clang++ build and debug active file",
@@ -45,6 +50,28 @@
             ],
             "preLaunchTask": "clang++ build active file",
             "miDebuggerPath": "/bin/lldb-mi"
+        },
+        {
+            "name": "myOS - localhost",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/isofiles/boot/kernel",
+            "miDebuggerServerAddress": "127.0.0.1:11234",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true,
+            "linux": {
+                "MIMode": "gdb"
+              },
+              "osx": {
+                "MIMode": "gdb"
+              },
+              "windows": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "c:\\mingw-w64\\x86_64-7.3.0-posix-seh-rt_v5-rev0\\mingw64\\bin\\gdb.exe"
+              }
         }
     ]
 }

@@ -357,8 +357,9 @@ extern "C"
 	{		
 		auto *dstN = reinterpret_cast<uint64_t *>(dst_index<<12);
 		const auto *srcN = reinterpret_cast<const uint64_t *>(src_index<<12);
-		auto qword_count = (page_count << 9); // there are 512 qwords in a 4096 byte page, so multiply page_count by 512
-		auto length = qword_count / 8;	// unroll the loop. 
+//		auto qword_count = (page_count << 9); // there are 512 qwords in a 4096 byte page, so multiply page_count by 512
+//		auto length = qword_count / 8;	// unroll the loop. 
+        auto length = (page_count << 6); // (page_count << 9)/8 == (page_count << 6 )
 		while(length--)
 		{
 			*dstN++ = *srcN++;

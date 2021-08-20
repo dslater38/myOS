@@ -13,3 +13,8 @@ debug.log
 serial.out
 bx_enh_dbg.ini
 kdebug.log
+*.lock
+*.ko
+*.ko.sym
+debugger.out
+*.log

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "serial.h"
+#include "isr.h"
 
 
 #define COM1 0x03f8   /* COM1 */
@@ -88,6 +89,8 @@
 
 #define CAT(a,b) a##b
 
+static void serial_interrupt_handler(registers64_t regs);
+static void serial_interrupt_handler2(registers64_t regs);
 
 static uint16_t select_speed(uint32_t speed)
 {
@@ -194,19 +197,28 @@ uint8_t init_serial_imp( uint16_t port, uint32_t speed, uint8_t bits, uint8_t pa
 	// most UARTs need Auxiliary Output 2 set to a logical "1" to enable interrupts.
 	modem_ctl = (AUX_OUT_2|RTS|DTR);
 	
-	outb( com_port + INT_ENABLE, DISABLE_INTERRUPTS );   // Disable all interrupts
+//	outb( com_port + INT_ENABLE, DISABLE_INTERRUPTS );   // Disable all interrupts
 	outb( com_port + LINE_CTL, ENABLE_DLAB);			// Enable DLAB (set baud rate divisor)
 	outb( com_port + DIV_LOBYTE, LOBYTE(divisor) );		// Set divisor low byte
 	outb( com_port + DIV_HIBYTE, HIBYTE(divisor) );		// Set divisor high byte
 	outb( com_port + LINE_CTL, flags );					// set bits, parity, & stop bit options
 	outb( com_port + FIFO_CTL, fifo_ctl ); 				// Enable FIFO, clear them, with 14-byte threshold 
 	outb( com_port + MODEM_CTL, modem_ctl);				// IRQs enabled, RTS/DSR set
+	outb( com_port + INT_ENABLE, ENABLE_INTERRUPTS );   // Enable all interrupts
 	INITED_PORTS[port] = 1;
 	return SUCCESS;
 }
 
+static int registered = 0;
+
 uint8_t init_serial( uint16_t port, uint32_t speed, uint8_t bits, uint8_t parity, uint8_t stop)
 {
+	if (!registered)
+	{		
+		register_interrupt_handler64(IRQ3, serial_interrupt_handler);
+		register_interrupt_handler64(IRQ4, serial_interrupt_handler2);
+		registered = 1;
+	}
 	return init_serial_imp(port, speed, bits, parity, stop);
 }
 
@@ -383,4 +395,14 @@ void write_string(const char *str)
 	{
 		write_string_imp(str);
 	}
+}
+
+static void serial_interrupt_handler(registers64_t regs)
+{
+	printf("IRQ3 Interrupt\n");
+}
+
+static void serial_interrupt_handler2(registers64_t regs)
+{
+	printf("IRQ4 Interrupt\n");
 }

@@ -40,15 +40,26 @@ void TextFrameBuffer::inc_cur_line()
 	cur_line = ((++cur_line ) % ROWS);
 }
 
+static uint16_t color_attribute(TextColors fg, TextColors bg)
+{
+	return (uint16_t)((bg << 4) | (fg & 0x0F));
+}
+
 uint16_t TextFrameBuffer::color_attribute()
 {
-	
-	return (uint16_t)((backColor << 4) | (foreColor & 0x0F));
+	return ::color_attribute(foreColor, backColor);
+	// return (uint16_t)((backColor << 4) | (foreColor & 0x0F));
+}
+
+static uint16_t colored_char(TextColors fg, TextColors bg, char c)
+{
+	return ( (color_attribute(fg,bg)<<8) | c);
 }
 
 uint16_t TextFrameBuffer::colored_char(char c)
 {
-	return ((color_attribute() << 8) | c);
+	return ::colored_char(foreColor, backColor, c);
+	// return ((color_attribute() << 8) | c);
 }
 
 void TextFrameBuffer::copy_line(int dstLine, int srcLine)
@@ -81,7 +92,7 @@ void TextFrameBuffer::copy_cur_line()
 	{
 		j += (ROWS - (cur_line+1));
 	}
-	j += cur_line+1;
+	j += cur_line;
 	copy_line(j, cur_line);
 }
 
@@ -258,4 +269,29 @@ void TextFrameBuffer::write(const char *str)
 	{
 		put(c);
 	}
+}
+
+void TextFrameBuffer::write_at(uint16_t row, uint16_t col, TextColors fg, TextColors bg, const char *str)
+{
+	
+	while(*str)
+	{
+		uint16_t *location = (uint16_t *)(video_memory + (row*COLS + col));
+		*location = ::colored_char(fg, bg, *str);
+		++str;
+		++col;
+	}
+	// auto oldX = cursor_x;
+	// auto oldY = cursor_y;
+	// auto oldFg = foreColor;
+	// auto oldBg = backColor;
+	// cursor_x = col;
+	// cursor_y = row;
+	// foreColor = fg;
+	// backColor = bg;
+	// write(str);
+	// backColor = oldBg;
+	// foreColor = oldFg;
+	// cursor_y = oldY;
+	// cursor_x = oldX;
 }

@@ -9,13 +9,20 @@ CXXSOURCES=$(wildcard *.cpp)
 SSOURCES=$(wildcard *.s)
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
-CPPFLAGS+=-I.
+ASFLAGS+=-g -F dwarf
+
+CPPFLAGS+=-I. -g
 
 .PHONY: all
-all: $(OBJECTS)
+# all: $(OBJECTS)
+all : kernel
 
 clean:
 	@rm -f *.o *.d *.d.* *.ds kernel
+
+kernel: $(OBJECTS) | link.ld
+	$(LD) $(LDFLAGS) -o $@ $^
+	nm $@ | awk '{ print $$1" "$$3 }' > $@.sym
 
 .s.o:
 	nasm $(ASFLAGS) -o $@ $<
@@ -34,11 +41,9 @@ clean:
 
 %.ds : %.s
 	@set -e; rm -f $@; \
-	echo $(patsubst %.s,%.o,$<) $(patsubst %.s,%.ds,$<) : $< > $@
-
-%.ds : %.s
-	@set -e; rm -f $@; \
-	echo $(patsubst %.s,%.o,$<) $(patsubst %.s,%.ds,$<) : $< > $@
+	nasm -M $(ASFLAGS) -o $(basename $<).o $< > $@.$$$$; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
 
 -include $(CSOURCES:.c=.d)
 -include $(CXXSOURCES:.cpp=.d)

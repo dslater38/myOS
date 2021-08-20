@@ -34,6 +34,17 @@
         "system_error": "cpp",
         "cinttypes": "cpp",
         "type_traits": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "*.cuh": "cpp",
+        "__tree": "cpp",
+        "iomanip": "cpp",
+        "locale": "cpp",
+        "atomic": "cpp",
+        "__config": "cpp"
+        "list": "cpp",
+        "algorithm": "cpp",
+        "memory": "cpp",
+        "iterator": "cpp",
+        "random": "cpp"
     }
 }

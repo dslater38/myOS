@@ -30,4 +30,14 @@ extern "C"
 	    __init_array_start[i] ();
 	}
 
+	void __cxa_pure_virtual()
+	{
+		PANIC("Pure Virtual Call...");
+	}
+
+	
+	int atexit( void(*)(void) )
+	{
+		return 0;
+	}
 }

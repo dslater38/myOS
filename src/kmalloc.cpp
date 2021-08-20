@@ -1,7 +1,7 @@
 #include "kmalloc.h"
 #include "vesavga.h"
 #include "kheap.h"
-
+#include <algorithm>
 
 Page4K *getPage(void *vaddr);
 extern heap_t *kernelHeap;
@@ -16,6 +16,22 @@ extern "C"
 	void *kmalloc(size_t sz)
 	{
 		return kmalloc_generic(sz,false,nullptr);
+	}
+
+	void *krealloc(void *p, size_t sz)
+	{
+		void *newMem = kmalloc(sz);
+		if(newMem && p)
+		{
+			auto oldSize = kernelHeap->blockSize(p);
+			auto copyLen = std::min(sz, oldSize);
+			if(copyLen>0)
+			{
+				memcpy(newMem, p, copyLen);
+			}
+			kfree(p);
+		}
+		return newMem;
 	}
 
 	void *kmalloc_aligned(size_t sz)
@@ -45,6 +61,10 @@ extern "C"
 
 	static void *kmalloc_generic(size_t sz, bool align, void **phys)
 	{
+		if(sz == 0)
+		{
+			return nullptr;
+		}
 		if(kernelHeap)
 		{
 			void *vaddr = kernelHeap->alloc(sz, align);
