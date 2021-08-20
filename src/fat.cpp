@@ -1,4 +1,7 @@
 #include "fat.h"
+
+#if 1
+
 #include "common.h"
 #include "ata.h"
 #include <new>
@@ -6,24 +9,29 @@
 #include <list>
 #include <algorithm>
 #include "kmalloc.h"
+#include "NewObj.h"
+#include <vector>
+#include <cstdint>
 
 
-template<class T>
-struct KAllocator
-{
-    using value_type=T;
-    KAllocator() = default;
-    template <class U> constexpr KAllocator(const KAllocator<U>&) noexcept {}
-  [[nodiscard]] T* allocate(std::size_t n)noexcept {
-    if(n > std::size_t(-1) / sizeof(T)) return nullptr;
-    return static_cast<T*>(kmalloc(n*sizeof(T)));
-  }
-  void deallocate(T* p, std::size_t) noexcept { kfree(p); }
+std::vector<int> globalVector {};
 
-};
+// template<class T>
+// struct KAllocator
+// {
+//     using value_type=T;
+//     KAllocator() = default;
+//     template <class U> constexpr KAllocator(const KAllocator<U>&) noexcept {}
+//   [[nodiscard]] T* allocate(std::size_t n)noexcept {
+//     if(n > std::size_t(-1) / sizeof(T)) return nullptr;
+//     return static_cast<T*>(kmalloc(n*sizeof(T)));
+//   }
+//   void deallocate(T* p, std::size_t) noexcept { kfree(p); }
 
-std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const BootBlock &boot, uint16_t startCluster);
+// };
 
+std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const FATFileSystem &fs, uint16_t startCluster);
+/*
 namespace std {
     namespace __detail {
         void
@@ -36,6 +44,7 @@ namespace std {
         }
     }
 }
+*/
 
 uint16_t fat16_entry(const uint8_t *fatTable, uint16_t cluster)
 {
@@ -47,9 +56,18 @@ void fat16_entry(uint8_t *fatTable, uint16_t cluster, uint16_t value)
     reinterpret_cast<uint16_t *>(fatTable)[cluster] = value;
 }
 
-uint16_t fat12_entry(const uint8_t *fatTable, uint16_t cluster)
+// FAT12 entries are 12 bit integers.
+// So, 2 entries use 3 bytes. forming a 24-bit 
+// strictly little-endian integer. The layout is:
+// If we number the nibbles from lowest to highest,
+// Then the first index is 123 and the second is 456
+// and they're laid as out bytes in memory like this:
+// 0x12 0x43 0x56
+// so index 0 == (0x12) | ((0x0F & 0x43)<<8)
+//    index 1 == ((0xF0 & 0x43)>>4) | (0x56 << 8)
+uint16_t fat12_entry(const uniquePtr<uint8_t[]> &fatTable, uint16_t cluster)
 {
-    auto *offset = fatTable + 3*(cluster/2);
+    const auto *offset = fatTable.get() + 3*(cluster/2);
     uint16_t value=0;
     if( (cluster & 0x01) == 0 )
     {
@@ -67,9 +85,9 @@ uint16_t fat12_entry(const uint8_t *fatTable, uint16_t cluster)
     return value;
 }
 
-void fat12_entry(uint8_t *fatTable, uint16_t cluster, uint16_t value)
+void fat12_entry(uniquePtr<uint8_t[]> &fatTable, uint16_t cluster, uint16_t value)
 {
-    auto *offset = fatTable + 3*(cluster/2);
+    auto *offset = fatTable.get() + 3*(cluster/2);
     if(cluster & 0x01)
     {
 	    auto *p1 = (offset + 1);
@@ -87,20 +105,21 @@ void fat12_entry(uint8_t *fatTable, uint16_t cluster, uint16_t value)
     }
 }
 
-uint8_t *read_fat_table(const BootBlock &boot)
+uniquePtr<uint8_t[]> read_fat_table(const FATFileSystem &fs)
 {
-    auto table_size = boot.NumBlocksFat1() * boot.BytesPerBlock();
-    uint8_t *buffer = new(std::nothrow) uint8_t[table_size];
+	auto table_size = fs.fatTableSize();
+	auto buffer = uniquePtr<uint8_t[]> {new(std::nothrow) uint8_t[table_size]};
     if( buffer )
     {
-        read(buffer, 1, table_size);
+        fs.ctl->read(fs.d, buffer.get(), fs.fatTableOffset(), table_size);
     }
     return buffer;
 }
 
-void dump_fat_table(const BootBlock &boot)
-{
-    auto *table = read_fat_table(boot);
+void dump_fat_table(const FATFileSystem &fs)
+{	
+    auto table = read_fat_table(fs);
+	const auto &boot = fs.boot;
     for( uint16_t cluster = 0; cluster<boot.TotalNumBlocks(); ++cluster)
     {
         uint16_t value = fat12_entry(table, cluster);
@@ -108,23 +127,18 @@ void dump_fat_table(const BootBlock &boot)
         {
             printf("cluster %d: %d (0x%x)\n", cluster, value, value);
         }
-        // else
-        // {
-        //     printf(".");
-        // }
-        
     }
-    :: operator delete [](table, std::nothrow);
 }
 
-DirectoryEntry *read_root_directory(const BootBlock &boot)
+uniquePtr<DirectoryEntry[]> read_root_directory(const FATFileSystem &fs)
 {
-    auto fat_tables_size = boot.NumBlocksFat1() * boot.BytesPerBlock() * boot.num_FAT_tables;
-    auto root_directory_size = boot.NumRootDirEntries() * 32;
-    uint8_t *buffer = new(std::nothrow) uint8_t[root_directory_size];
-    auto offset = (sizeof(BootBlock) + fat_tables_size) / 512;
-    read(buffer, offset, root_directory_size);
-    return reinterpret_cast<DirectoryEntry *>(buffer);
+	auto root_directory_size = fs.rootDirectorySize();
+    const auto nEntries = fs.boot.NumRootDirEntries();
+	uniquePtr<DirectoryEntry[]> dir { new(std::nothrow) DirectoryEntry[nEntries] };
+    memset(dir.get(),'\0', nEntries*sizeof(DirectoryEntry));
+	auto offset = fs.rootDirectoryOffset();
+    fs.ctl->read(fs.d, dir.get(), offset, root_directory_size);
+	return dir;
 }
 
 struct FileDate
@@ -180,8 +194,8 @@ const DirectoryEntry *getDirectoryEntry(const BootBlock &boot, const DirectoryEn
         }
         if( e.filename[0] != '\0')
         {
-            if(strcmp(reinterpret_cast<const char *>(e.filename), fileName) == 0 &&
-                strcmp(reinterpret_cast<const char *>(e.ext), ext) == 0)
+            if(strncmp(reinterpret_cast<const char *>(e.filename), fileName, 8) == 0 &&
+                strncmp(reinterpret_cast<const char *>(e.ext), ext, 3) == 0)
                 {
                     return &e;
                 }
@@ -190,12 +204,13 @@ const DirectoryEntry *getDirectoryEntry(const BootBlock &boot, const DirectoryEn
     return nullptr;
 }
 
-uint16_t open_file(const BootBlock &boot, const char *fileName, const char *ext)
+uint16_t open_file(const FATFileSystem &fs, const char *fileName, const char *ext)
 {
-    const DirectoryEntry *dir = read_root_directory(boot);
-    if(dir)
+    auto rootDir = read_root_directory(fs);
+    if(rootDir)
     {
-        dir = getDirectoryEntry(boot, dir, fileName, ext);
+	    const auto &boot = fs.boot;
+        auto *dir = getDirectoryEntry(boot, rootDir.get(), fileName, ext);
         if(dir)
         {
             return dir->StartCluster();
@@ -204,27 +219,31 @@ uint16_t open_file(const BootBlock &boot, const char *fileName, const char *ext)
     return 0;
 }
 
-void print_file(const BootBlock &boot, const char *fileName, const char *ext)
+void print_file(const FATFileSystem &fs, const char *fileName, const char *ext)
 {
-    auto start_cluster = open_file(boot, fileName, ext);
+    auto start_cluster = open_file(fs, fileName, ext);
     if( start_cluster > 0 )
     {
-        auto list = get_clusters(boot, start_cluster);
-        const DirectoryEntry *dir = getDirectoryEntry(boot, read_root_directory(boot), fileName, ext);
+	    const auto &boot = fs.boot;
+        auto list = get_clusters(fs, start_cluster);
+	    auto rootDir = read_root_directory(fs);
+        const DirectoryEntry *dir = getDirectoryEntry(boot, rootDir.get(), fileName, ext);
         if(dir)
         {
             auto size = dir->FileSize();
             if( size>0 )
             {
               char buffer[513];
-              for( auto it = std::begin(list), e = std::end(list);
+                for( auto it = std::begin(list), e = std::end(list);
                     it != e;
                     ++it )
                     {
                         auto cluster = *it;
                         auto read_size = std::min(size, 512u);
-                        read(buffer, cluster, read_size);
+	                    const auto addr = fs.dataOffset() + (cluster - 2)*fs.sectorsPerCluster();
+                        fs.ctl->read(fs.d, buffer, addr, read_size);
                         buffer[read_size] = '\0';
+                        buffer[read_size+1] = '\0';
                         printf("%s",buffer);
                         size -= read_size;
                     }  
@@ -233,24 +252,23 @@ void print_file(const BootBlock &boot, const char *fileName, const char *ext)
     }
 }
 
-std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const BootBlock &boot, uint16_t startCluster)
+std::list<uint16_t ,KAllocator<uint16_t>> get_clusters(const FATFileSystem &fs, uint16_t startCluster)
 {
-    auto *table = read_fat_table(boot);
+    auto table = read_fat_table(fs);
     auto end_of_chain = fat12_entry(table, 1);
-    auto cluster = startCluster;
     
     auto l = std::list<uint16_t ,KAllocator<uint16_t>>{};
 
-    for(++cluster; cluster!=end_of_chain; cluster = fat12_entry(table, cluster))
+    for(auto cluster = startCluster; cluster!=end_of_chain; cluster = fat12_entry(table, cluster))
     {
         l.emplace_back(cluster);
     }
     return l;
 }
 
-void print_clusters(const BootBlock &boot, uint16_t startCluster)
+void print_clusters(const FATFileSystem &fs, uint16_t startCluster)
 {
-    auto l = get_clusters(boot, startCluster);
+    auto l = get_clusters(fs, startCluster);
 
     auto it = std::begin(l);
     printf("{ %d", *it);
@@ -260,24 +278,14 @@ void print_clusters(const BootBlock &boot, uint16_t startCluster)
         printf(", %d", *it);
     }
     printf("}\n");
-
-    // auto *table = read_fat_table(boot);
-    // auto end_of_chain = fat12_entry(table, 1);
-    // auto cluster = startCluster;
-    // printf("{%d", cluster);
-    // for(++cluster; cluster!=end_of_chain; cluster = fat12_entry(table, cluster))
-    // {
-    //     printf(", %d", cluster);
-    // }
-    // printf("}\n");
-    // for( auto cluster = startCluster; cluster != 0xFFF; )
 }
 
-void dump_root_dir(const BootBlock &boot)
+void dump_root_dir(const FATFileSystem &fs)
 {
-    DirectoryEntry *dir = read_root_directory(boot);
+    auto dir = read_root_directory(fs);
     if( dir )
     {
+	    const auto &boot = fs.boot;
         printf(" Volume in drive A is %.8s\n", boot.volume_label);
         printf(" Volume Serial Number is %04.4x-%04.4x\n", (boot.VolumeSerialNumber() & 0xFFFF0000) >> 16, boot.VolumeSerialNumber() & 0x0000FFFF);
         printf("\n Directory of A:\\\n\n");
@@ -304,6 +312,7 @@ void dump_root_dir(const BootBlock &boot)
                 // printf(", start cluster: %d\n", e.StartCluster());
             }
         }
-        ::operator delete[]((uint8_t *)dir, std::nothrow);
     }
 }
+
+#endif // 0

@@ -2,8 +2,7 @@
 #define TEXTFRAMEBUFFER_H_INCLUDED
 
 #include <cstdint>
-
-using size_t=std::size_t;
+#include <cstddef>
 
 enum class TextColors : uint8_t
 {

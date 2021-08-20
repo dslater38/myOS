@@ -2,6 +2,7 @@
 #define VFS_H_INCLUDED__
 
 #include <cstdint>
+#include <cstddef>
 
 
 struct IVfsDirectoryNode;

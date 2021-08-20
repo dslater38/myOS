@@ -50,7 +50,7 @@ bool VmmPageStack::initStack(uint64_t &stackBaseVAddr, VM::Manager &mgr)
 		const auto numPages = physicalMemory->totalCount();
 		const auto allocSize = sizeof(address_t) * numPages;
 		stackBegin = reinterpret_cast<address_t *>(stackBaseVAddr);
-		stackEnd = reinterpret_cast<address_t *>(reinterpret_cast <uint64_t >(stackBegin) + numPages*sizeof(address_t));
+		stackEnd = reinterpret_cast<address_t *>(reinterpret_cast <uint64_t >(stackBegin) + allocSize);
 		stackPtr = stackLast = stackBegin;
 		
 //		mgr.mapPage(reinterpret_cast<uint64_t>(stackBegin), 0x03);
@@ -88,19 +88,19 @@ address_t VmmPageStack::allocPage()
 	{
 		PANIC("Out of physical memory.");
 	}
-	debug_out("allocated vAddr: 0x%08.8x%08.8x", HIDWORD(addr), LODWORD(addr));
+	debug_out("allocated vAddr: 0x%08.8x%08.8x\n", HIDWORD(addr), LODWORD(addr));
 	return addr;
 }
 
 void VmmPageStack::freePage(address_t addr)
 {
-	debug_out("free vAddr: 0x%08.8x%08.8x", HIDWORD(addr), LODWORD(addr));
+	debug_out("free vAddr: 0x%08.8x%08.8x\n", HIDWORD(addr), LODWORD(addr));
 	push(addr);
 }
 
 bool VmmPageStack::push(address_t addr)
 {
-	debug_out("push vAddr: 0x%08.8x%08.8x", HIDWORD(addr), LODWORD(addr));
+	debug_out("push vAddr: 0x%08.8x%08.8x\n", HIDWORD(addr), LODWORD(addr));
 	auto success = (stackPtr < stackLast);
 	if( !success )
 	{
@@ -124,7 +124,7 @@ bool VmmPageStack::pop(address_t &addr)
 	{
 		success = getNewFrame(addr);
 	}
-	debug_out("pop vAddr: 0x%08.8x%08.8x", HIDWORD(addr), LODWORD(addr));
+	debug_out("pop vAddr: 0x%08.8x%08.8x\n", HIDWORD(addr), LODWORD(addr));
 	return success;
 }
 

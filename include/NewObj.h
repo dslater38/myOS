@@ -41,7 +41,7 @@ struct nothrow_delete
 	
 	void operator()(T* ptr) const
 	{
-		delete(ptr, std::nothrow);
+		operator delete(ptr, std::nothrow);
 	}
 };
 
@@ -60,7 +60,7 @@ struct nothrow_delete<T[]>
 	
 	void operator()(T* ptr) const
 	{
-		delete[](ptr, std::nothrow);
+		operator delete[](ptr, std::nothrow);
 	}
 };
 

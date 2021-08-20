@@ -76,20 +76,34 @@ static void init_idt()
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
 
+static inline void io_wait(void)
+{
+    outb(0x80, 0);
+}
 
 static void remap_pics()
 {
 	// Remap the irq table.
 	outb(MASTER_PIC_COMMAND, ICW1_INIT | ICW1_ICW4);
+	io_wait();
 	outb(SLAVE_PIC_COMMAND, ICW1_INIT | ICW1_ICW4);
+	io_wait();
 	outb(MASTER_PIC_DATA, 0x20);
+	io_wait();
 	outb(SLAVE_PIC_DATA, 0x28);
+	io_wait();
 	outb(MASTER_PIC_DATA, 0x04);
+	io_wait();
 	outb(SLAVE_PIC_DATA, 0x02);
-	outb(MASTER_PIC_DATA, 0x01);
-	outb(SLAVE_PIC_DATA, 0x01);
+	io_wait();
+	outb(MASTER_PIC_DATA, ICW4_8086);
+	io_wait();
+	outb(SLAVE_PIC_DATA, ICW4_8086);
+	io_wait();
 	outb(MASTER_PIC_DATA, 0x0);
+	io_wait();
 	outb(SLAVE_PIC_DATA, 0x0);
+	io_wait();
 }
 
 static void init_irqs()

@@ -3,8 +3,9 @@
  * Wirzenius wrote this portably, Torvalds fucked it up :-)
  */
 
-#include <stdarg.h>
-#include <string.h>
+// #include <stdarg.h>
+#include <cstdarg>
+#include <cstring>
 #include "common.h"
 #include "vesavga.h"
 #include "serial.h"

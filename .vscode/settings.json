@@ -42,6 +42,9 @@
         "atomic": "cpp",
         "__config": "cpp"
         "list": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "memory": "cpp",
+        "iterator": "cpp",
+        "random": "cpp"
     }
 }

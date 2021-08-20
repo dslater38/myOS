@@ -108,9 +108,12 @@
 #define ATA_REG_LBA3       0x09
 #define ATA_REG_LBA4       0x0A
 #define ATA_REG_LBA5       0x0B
+#define ATA_REG_CONTROL    0x0C
+#define ATA_REG_ALTSTATUS  0x0C
+#define ATA_REG_DEVADDRESS 0x0D
 
-#define ATA_REG_ALTSTATUS  0x00
-#define ATA_REG_DEVADDRESS 0x01
+// #define ATA_REG_ALTSTATUS  0x00
+// #define ATA_REG_DEVADDRESS 0x01
 
 // Channels:
 #define      ATA_PRIMARY      0x00
@@ -120,13 +123,18 @@
 #define      ATA_READ      0x00
 #define      ATA_WRITE     0x013
 
+#if 0
+
 typedef struct {
 	uint8_t drive;
 } ide_private_data;
+
+
 
 extern void ata_init();
 void detectControllers();
 void write(void *buffer, uint32_t address, size_t size);
 void read(void *buffer, uint32_t address, size_t size);
+#endif // 0
 
 #endif

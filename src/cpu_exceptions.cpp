@@ -134,16 +134,15 @@ void stack_segment_fault(registers64_t)
 
 void general_protection_fault(registers64_t regs)
 {
-
     if( regs.err_code != 0)
     {
-        monitor_write("General Protection Fault");
+        printf("General Protection Fault");
         const auto code = regs.err_code;
         printf("\tSegment Error: code: 0x%lx\n", code);
 
         if( code & 0x01)
         {
-            monitor_write("\tExternally Generated Exception.\n");
+            printf("\tExternally Generated Exception.\n");
         }
         const auto table = ((code>>1) & 0x03);
         const char *strTable = nullptr;
@@ -165,38 +164,40 @@ void general_protection_fault(registers64_t regs)
         uint16_t selector_index = ((code >> 3) & 0x1FFF);
         printf("Accessing: %s, Selector Index: 0x%04.4x\n", strTable, selector_index);
     }
- 
-    PANIC("General Protection Fault")
+
+    PANIC1("General Protection Fault, RIP 0x%016.16lx", regs.rip);
 }
 
 void page_fault(registers64_t regs)
 {
-	// Output an error message.
-	//monitor_write("Page fault! ( ");
-	char buf[64] = {0};
-	// A page fault has occurred.
-	// The faulting address is stored in the CR2 register.
-	uint64_t faulting_address = get_fault_addr64();
-	// uint32_t faulting_address;
-	// asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
+    // Output an error message.
+    //monitor_write("Page fault! ( ");
+    char buf[64] = {0};
+    // A page fault has occurred.
+    // The faulting address is stored in the CR2 register.
+    uint64_t faulting_address = get_fault_addr64();
+    // uint32_t faulting_address;
+    // asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
 
-	// The error code gives us details of what happened.
-	int present = (regs.err_code & 0x1);    // Page not present
-	int rw = regs.err_code & 0x2;           // Write operation?
-	int us = regs.err_code & 0x4;           // Processor was in user-mode?
-	int reserved = regs.err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
-	int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
+    // The error code gives us details of what happened.
+    int present = (regs.err_code & 0x1);    // Page not present
+    int rw = regs.err_code & 0x2;           // Write operation?
+    int us = regs.err_code & 0x4;           // Processor was in user-mode?
+    int reserved = regs.err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
+    int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
 
-	// Output an error message.
-	printf("Page fault! at 0x%016.16lX\n\t( %s %s %s %s )\n", 
+    // Output an error message.
+    printf("Page fault! at 0x%016.16lX executing: 0x%016.16lX\n\t( %s %s %s %s )\n", 
         faulting_address,
+        regs.rip,
         present ? "present" : "absent",
         rw ? "write" : "read",
         us ? "user-mode" : "kernel-mode",
-        reserved ? "reserved" : "not-reserved"
+        reserved ? "reserved" : "not-reserved",
+        id  ? "fetch" : "data"
        );
 
- 	PANIC("Page fault");
+    PANIC("Page fault");
 
 }
 

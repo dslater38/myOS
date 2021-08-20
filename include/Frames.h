@@ -6,6 +6,44 @@
 #include "common.h"
 #include "memcpy.h"
 
+enum class PageFlags : uintptr_t
+{
+	PRESENT = (1<<0),
+	READWRITE = (1<<1),
+	USER = (1<<2),
+	WRITETHRU = (1<<3),
+	CACHEDISABLE = (1<<4),
+	ACCESSED = (1<<5),
+	RESERVED0 = (1<<6),
+	HUGE_PAGE = (1<<7),
+	GLOBAL = (1<<8)
+};
+
+inline
+uintptr_t operator|(PageFlags a, PageFlags b)
+{
+	return (static_cast<uintptr_t>(a) | static_cast<uintptr_t>(b));
+}
+
+inline
+uintptr_t operator|(uintptr_t a, PageFlags b)
+{
+	return (a | static_cast<uintptr_t>(b));
+}
+
+inline
+uintptr_t operator&(PageFlags a, PageFlags b)
+{
+	return (static_cast<uintptr_t>(a) & static_cast<uintptr_t>(b));
+}
+
+inline
+uintptr_t operator&(uintptr_t a, PageFlags b)
+{
+	return (a & static_cast<uintptr_t>(b));
+}
+
+
 template<class Uint, const unsigned PAGE_SIZE=4096u>
 class Frames
 {
@@ -51,6 +89,39 @@ public:
 		// }
 	}
 
+	void alloc(PageT<> *page, uintptr_t flags)
+	{
+		if( page->frame == 0 )
+		{
+			Uint offset = 0;
+			Uint index = first(offset);
+			if( index == static_cast<Uint>(-1) )
+			{
+				PANIC("No free frames!");
+			}
+			
+			ASSERT( INDEX_FROM_BIT(index*8*sizeof(Uint)+offset) == index );
+			ASSERT( OFFSET_FROM_BIT(index*8*sizeof(Uint)+offset) == offset );
+			
+			// ++nAllocated;
+			// set(idx*0x1000);
+			
+			frames[index] |= (((Uint)0x1u) << offset);
+			page->present = flags & PageFlags::PRESENT ? 1 : 0;
+			page->rw = flags & PageFlags::READWRITE ? 1 : 0;
+			page->user = flags & PageFlags::USER ? 1 : 0;
+			page->write_through = flags & PageFlags::WRITETHRU ? 1 : 0;
+			page->no_cache = flags & PageFlags::CACHEDISABLE ? 1 : 0;
+			page->dirty = 0;
+			page->huge = flags & PageFlags::HUGE_PAGE ? 1 : 0;
+			page->global = flags & PageFlags::GLOBAL ? 1 : 0;
+			page->bit9 = page->bit10 = page->bit11 = 0;
+			uintptr_t fr = index*sizeof(Uint)*8+offset;
+			page->frame = fr;
+		}
+
+	}
+
 	void alloc(PageT<> *page, int isKernel, int isWritable)
 	{
 		// static unsigned int nAllocated = 0;
@@ -73,7 +144,8 @@ public:
 			page->present = 1;
 			page->rw = (isWritable ? 1 : 0);
 			page->user = (isKernel ? 0 : 1);
-			page->frame = index*sizeof(Uint)*8+offset;
+			uintptr_t fr = index*sizeof(Uint)*8+offset;
+			page->frame = fr;
 		}
 	}
 
@@ -84,6 +156,7 @@ public:
 		{
 			clear(frame << page->OFFBITS);
 			page->frame = 0;
+			(*page) = PageT<>{};
 		}
 	}
 
@@ -112,6 +185,7 @@ private:
 
 	void clear(Uint addr)
 	{
+		debug_out("addr:0x%016.16x\n",addr);
 		auto frame = addr / PAGE_SIZE;
 		auto idx = INDEX_FROM_BIT(frame);
 		auto off = OFFSET_FROM_BIT(frame);

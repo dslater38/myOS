@@ -4,13 +4,15 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <string.h>
+#include <cstring>
 #include <cstdint>
 #include <cstdio>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+constexpr uint64_t	KERNEL_ADDRESS_SPACE_START = 0xFFFF800000000000ul;
 
 void outb(uint16_t port, uint8_t value);
 void outw(uint16_t port, uint16_t value);

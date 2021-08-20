@@ -6,7 +6,7 @@
 OUTPUT_FORMAT(elf64-x86-64)
 ENTRY(start)
 
-
+sdfgsd fgsdf gsdf
 
 /* VM_BASE = 0xFFFF800000000000; */
 /* VM_BASE = 0x0000000000000000; */
@@ -32,6 +32,7 @@ SECTIONS
 /*		src/boot.o(.text) */
 		*(.text*)
 	}
+	. = DATA_SEGMENT_ALIGN(0x10000, 0x2000);
 	.rodata ALIGN (4K) : AT (ADDR (.rodata) - VM_BASE)
 	{
 		rodata = .; _rodata = .; __rodata = .;
@@ -106,6 +107,11 @@ SECTIONS
 		KEEP (*(SORT(.dtors.*)))
 		KEEP (*(.dtors))
 	}
+	.got ALIGN (4K) :  AT (ADDR (.got) - VM_BASE)
+	{
+		KEEP( *(.got) )
+		KEEP( *(.igot) )
+	}
 	.stack ALIGN (4K) : AT (ADDR (.stack) - VM_BASE)
 	{
 		kernel_stack_base = .; _kernel_stack_base = .; __kernel_stack_base = .; 
@@ -115,6 +121,8 @@ SECTIONS
 		_kernel_stack = .; 
 		kernel_stack = (. - VM_BASE);
 	}
+	. = DATA_SEGMENT_RELRO_END(24, .);
+	. = DATA_SEGMENT_END(.);
 
 /*	end = .; _end = .; __end = .; */
 	kernel_end = .; _kernel_end = .; __kernel_end = .;
