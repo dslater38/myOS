@@ -19,27 +19,22 @@ public:
         size_t written{0};
         const auto *ptr = reinterpret_cast<const uint16_t *>(buffer);
         auto numSectors = (size>>9);  // 512 byte sectors
-        while( numSectors>256 )
-        {
-            if(write_sectors(drive, ptr, 0, address))
-            {
-                ptr += 256*256;     // we just wrote 256 words 256 times for 256*256 words total.
-                address += 512*256; 
-                size -= 512*256;
-                written += 512*256;
-                numSectors -= 256;
-            }
-        }
 
-        if(numSectors>0)
+        while( numSectors > 0)
         {
-            if(write_sectors(drive, ptr, static_cast<uint8_t>(numSectors), address))
+            const auto writeCount = std::min(numSectors, 256ul );
+            if(write_sectors(drive, ptr, static_cast<uint8_t>(writeCount), address))
             {
-                ptr += 256*numSectors;     // we just wrote 256 words numSectors times for 256*numSectors words total.
-                address += 512*numSectors; 
-                size -= 512*numSectors;
-                written += 512*numSectors;
-                numSectors -= numSectors;
+                ptr += 256*writeCount;     // we just wrote 256 words numSectors times for 256*numSectors words total.
+                address += 512*writeCount; 
+                size -= 512*writeCount;
+                written += 512*writeCount;
+                numSectors -= writeCount;
+            }
+            else
+            {
+                debug_out("write_sectors() failed.\n");
+                return 0;
             }
         }
 
@@ -67,28 +62,25 @@ public:
         size_t read{0};
         auto *ptr = reinterpret_cast<uint16_t *>(buffer);
         auto numSectors = (size>>9);  // 512 byte sectors
-        while( numSectors>256 )
+
+        while( numSectors > 0)
         {
-            if(read_sectors(drive, ptr, 0, address))
+            const auto readCount = std::min(numSectors, 256ul );
+            if(read_sectors(drive, ptr, static_cast<uint8_t>(readCount), address))
             {
-                ptr += 256*256;     // we just read 256 words 256 times for 256*256 words total.
-                address += 512*256; 
-                size -= 512*256;
-                read += 512*256;
-                numSectors -= 256;
+                ptr += 256*readCount;     // we just read 256 words numSectors times for 256*numSectors words total.
+                address += 512*readCount; 
+                size -= 512*readCount;
+                read += 512*readCount;
+                numSectors -= readCount;
+            }
+            else
+            {
+                debug_out("read_sectors() failed.\n");
+                return 0;
             }
         }
-        if(numSectors>0)
-        {
-            if(read_sectors(drive, ptr, static_cast<uint8_t>(numSectors), address))
-            {
-                ptr += 256*numSectors;     // we just read 256 words numSectors times for 256*numSectors words total.
-                address += 512*numSectors; 
-                size -= 512*numSectors;
-                read += 512*numSectors;
-                numSectors -= numSectors;
-            }
-        }
+
         if(size>0)
         {
             std::array<uint16_t,512> tmp{};
@@ -133,12 +125,13 @@ private:
     {
         setup_for_io(drive, address, count, IoDirection::Read);
         size_t num = count ? count : 256;   // a count of 0 == 256 sectors
-        ide_poll();
+        // ide_poll();
         for(auto i=0u; i<num; ++i )
-        {            
+        {
+            ide_poll();
             insw(REGS_BASE + ATA_REG_DATA, buffer, 256);
             buffer += 256;
-            io_wait();
+//            io_wait();
         }
         return true;
     }
@@ -148,17 +141,18 @@ private:
         setup_for_io(drive, address, count, IoDirection::Write);
         auto *ptr = buffer;
         size_t num = count ? count : 256;   // a count of 0 == 256 sectors
-        ide_poll();
+        // ide_poll();
         for(auto i=0u; i<num; ++i )
         {
             // can't use rep outsw for writing
             // There needs to be a small delay between each call to outw
+            ide_poll();
             for( auto j=0u; j<256u; ++j )
-            {
+            {                
                 outw(REGS_BASE + ATA_REG_DATA, *ptr);
                 ++ptr;
             }
-            io_wait();
+            // io_wait();
         }
         return true;
     }
@@ -393,24 +387,24 @@ private:
 #else
 	    uint8_t cmd = ((dir  == IoDirection::Write) ? ATA_CMD_WRITE_PIO : ATA_CMD_READ_PIO);
 
-        ide_write(ATA_REG_HDDEVSEL, (0xE0 | (uint8_t)((address >> 24 & 0x0F))));
+        ide_write(ATA_REG_HDDEVSEL, (0xE0 | (uint8_t)((address >> 24 & 0x0F))));        // Select the drive
        
-        ide_write(ATA_REG_FEATURES, 0x00);
+        ide_write(ATA_REG_FEATURES, 0x00);                                                                  // set features flags 
 
-        ide_write(ATA_REG_SECCOUNT0, count);
+        ide_write(ATA_REG_SECCOUNT0, count);                                                            // set the number of sectors to read/write
 
         auto c = static_cast<uint8_t>(address & 0x000000FF);
-        ide_write(ATA_REG_LBA0, c);
+        ide_write(ATA_REG_LBA0, c);                                                                             // set LBA28 address lowest 8 bits
 
         c = static_cast<uint8_t>((address >> 8) & 0x000000FF);
-        ide_write(ATA_REG_LBA1, c);
+        ide_write(ATA_REG_LBA1, c);                                                                             // set LBA28 address middle 8bits
 
         c = static_cast<uint8_t>((address >> 16) & 0x000000FF);
-        ide_write(ATA_REG_LBA2, c);
+        ide_write(ATA_REG_LBA2, c);                                                                             // set LBA28 address highest 8 bits
 
-        ide_write(ATA_REG_COMMAND, cmd);
+        ide_write(ATA_REG_COMMAND, cmd);                                                                // send the read/write command
         
-        ide_poll();
+        // ide_poll();
 #endif // 0        
     }
 private:
