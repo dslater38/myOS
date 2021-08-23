@@ -24,6 +24,9 @@ void outsw(uint16_t port, const uint16_t *buf, size_t size);
 void batch_outb(uint16_t *port, uint8_t *data, size_t size);
 void batch_outb2(uint32_t *iodata, size_t size);
 
+bool acquireLock(uint32_t *lock);
+bool releaseLock(uint32_t *lock);
+
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 extern void halt(void);	/* never returns */

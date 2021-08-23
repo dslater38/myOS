@@ -3,6 +3,7 @@
 #include "isr.h"
 #include <ctime>
 #include "TextFrameBuffer.h"
+#include "common.h"
 
 constexpr uint16_t	RTC_SECONDS = 0x00;
 constexpr uint16_t	RTC_MINUTES = 0x02;

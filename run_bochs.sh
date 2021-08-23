@@ -10,9 +10,9 @@ BOCHSRC=bochsrc.txt
 
 DISPLAY=${DISPLAY:-192.168.3.175:1}
 
-if [ -r /usr/local/bochs/bin/bochs ]; then
-	BOCHS=/usr/local/bochs/bin/bochs
-fi
+# if [ -r /usr/local/bochs/bin/bochs ]; then
+#	BOCHS=/usr/local/bochs/bin/bochs
+# fi
 
 if [ "$1" == "-g" -o "$2" == "-g" ]; then
 BOCHS=/usr/local/bochs-gdb/bin/bochs

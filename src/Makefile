@@ -9,9 +9,9 @@ CXXSOURCES=$(wildcard *.cpp)
 SSOURCES=$(wildcard *.s)
 OBJECTS=$(CXXSOURCES:%.cpp=%.o) $(CSOURCES:%.c=%.o) $(SSOURCES:%.s=%.o)
 
-ASFLAGS+=-g -F dwarf
+# ASFLAGS+=-g -F dwarf
 
-CPPFLAGS+=-I. -g
+CPPFLAGS+=-I. -gdwarf-3
 
 .PHONY: all
 # all: $(OBJECTS)

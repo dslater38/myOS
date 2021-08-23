@@ -6,10 +6,15 @@
 // Rewritten for JamesM's kernel development tutorials.
 //
 
-#include "common.h"
+// #include "common.h"
+
+#include <stdint.h>
 
 #ifdef __cplusplus
+#define CONSTEXPR constexpr
 extern "C" {
+#else
+#define CONSTEXPR const
 #endif
 
 typedef struct registers
@@ -52,44 +57,44 @@ const uint8_t IRQ14 = 46u;
 const uint8_t IRQ15 = 47u;
 
 
-constexpr uint16_t PIC1 = 0x20u;		/* IO base address for master PIC */
-constexpr uint16_t PIC2 = 0xA0u;		/* IO base address for slave PIC */
-constexpr uint16_t MASTER_PIC_COMMAND = PIC1;
-constexpr uint16_t MASTER_PIC_DATA = (PIC1+1);
-constexpr uint16_t SLAVE_PIC_COMMAND = PIC2;
-constexpr uint16_t SLAVE_PIC_DATA = (PIC2+1);
+CONSTEXPR uint16_t PIC1 = 0x20u;		/* IO base address for master PIC */
+CONSTEXPR uint16_t PIC2 = 0xA0u;		/* IO base address for slave PIC */
+CONSTEXPR uint16_t MASTER_PIC_COMMAND = PIC1;
+CONSTEXPR uint16_t MASTER_PIC_DATA = (PIC1+1);
+CONSTEXPR uint16_t SLAVE_PIC_COMMAND = PIC2;
+CONSTEXPR uint16_t SLAVE_PIC_DATA = (PIC2+1);
 
-constexpr uint8_t PIC_READ_IRR = 0x0Au;    /* OCW3 irq ready next CMD read */
-constexpr uint8_t PIC_READ_ISR = 0x0Bu;    /* OCW3 irq service next CMD read */
+CONSTEXPR uint8_t PIC_READ_IRR = 0x0Au;    /* OCW3 irq ready next CMD read */
+CONSTEXPR uint8_t PIC_READ_ISR = 0x0Bu;    /* OCW3 irq service next CMD read */
 
-constexpr uint8_t PIC_RESET_COMMAND = 0x20u;
+CONSTEXPR uint8_t PIC_RESET_COMMAND = 0x20u;
 
-constexpr uint8_t PIC_EOI = 0x20u;		/* End-of-interrupt command code */
+CONSTEXPR uint8_t PIC_EOI = 0x20u;		/* End-of-interrupt command code */
 
 
-constexpr uint16_t ISR_DIV_BY_ZERO = 0x00u;
-constexpr uint16_t ISR_DEBUG_TRAP = 0x01u;
-constexpr uint16_t ISR_NMI_INTERRUPT = 0x02u;
-constexpr uint16_t ISR_BREAKPOINT_TRAP = 0x03u;
-constexpr uint16_t ISR_OVERFLOW_TRAP = 0x04u;
-constexpr uint16_t ISR_BOUND_RANGE_FAULT = 0x05u;
-constexpr uint16_t ISR_INVALID_OPCODE_FAULT = 0x06u;
-constexpr uint16_t ISR_DEVICE_NOT_AVAILABLE_FAULT = 0x07u;
-constexpr uint16_t ISR_DOUBLE_FAULT_ABORT = 0x08u;
-constexpr uint16_t ISR_FPU_OVERRUN_FAULT = 0x09u;
-constexpr uint16_t ISR_TSS_INVALID_FAULT = 0x0Au;
-constexpr uint16_t ISR_SEGMENT_NOT_PRESENT_FAULT = 0x0Bu;
-constexpr uint16_t ISR_STACK_SEGMENT_FAULT = 0x0Cu;
-constexpr uint16_t ISR_GPF_FAULT = 0x0Du;
-constexpr uint16_t ISR_PAGE_FAULT = 0x0Eu;
-constexpr uint16_t ISR_RESERVED1 = 0x0Fu;
-constexpr uint16_t ISR_FPU_EXCEPTION_FAULT = 0x10u;
-constexpr uint16_t ISR_ALIGNMENT_CHECK_FAULT = 0x11u;
-constexpr uint16_t ISR_MACHINE_CHECK_ABORT = 0x12u;
-constexpr uint16_t ISR_SIMD_EXCEPTION_FAULT = 0x13u;
-constexpr uint16_t ISR_VIRTUALIZATION_FAULT = 0x14u;
-constexpr uint16_t ISR_SECURITY_EXCEPTION = 0x30u;
-constexpr uint16_t ISR_FPU_ERROR_INTERRUPT = IRQ13;
+CONSTEXPR uint16_t ISR_DIV_BY_ZERO = 0x00u;
+CONSTEXPR uint16_t ISR_DEBUG_TRAP = 0x01u;
+CONSTEXPR uint16_t ISR_NMI_INTERRUPT = 0x02u;
+CONSTEXPR uint16_t ISR_BREAKPOINT_TRAP = 0x03u;
+CONSTEXPR uint16_t ISR_OVERFLOW_TRAP = 0x04u;
+CONSTEXPR uint16_t ISR_BOUND_RANGE_FAULT = 0x05u;
+CONSTEXPR uint16_t ISR_INVALID_OPCODE_FAULT = 0x06u;
+CONSTEXPR uint16_t ISR_DEVICE_NOT_AVAILABLE_FAULT = 0x07u;
+CONSTEXPR uint16_t ISR_DOUBLE_FAULT_ABORT = 0x08u;
+CONSTEXPR uint16_t ISR_FPU_OVERRUN_FAULT = 0x09u;
+CONSTEXPR uint16_t ISR_TSS_INVALID_FAULT = 0x0Au;
+CONSTEXPR uint16_t ISR_SEGMENT_NOT_PRESENT_FAULT = 0x0Bu;
+CONSTEXPR uint16_t ISR_STACK_SEGMENT_FAULT = 0x0Cu;
+CONSTEXPR uint16_t ISR_GPF_FAULT = 0x0Du;
+CONSTEXPR uint16_t ISR_PAGE_FAULT = 0x0Eu;
+CONSTEXPR uint16_t ISR_RESERVED1 = 0x0Fu;
+CONSTEXPR uint16_t ISR_FPU_EXCEPTION_FAULT = 0x10u;
+CONSTEXPR uint16_t ISR_ALIGNMENT_CHECK_FAULT = 0x11u;
+CONSTEXPR uint16_t ISR_MACHINE_CHECK_ABORT = 0x12u;
+CONSTEXPR uint16_t ISR_SIMD_EXCEPTION_FAULT = 0x13u;
+CONSTEXPR uint16_t ISR_VIRTUALIZATION_FAULT = 0x14u;
+CONSTEXPR uint16_t ISR_SECURITY_EXCEPTION = 0x30u;
+CONSTEXPR uint16_t ISR_FPU_ERROR_INTERRUPT = IRQ13;
 
 // Enables registration of callbacks for interrupts or IRQs.
 // For IRQs, to ease confusion, use the #defines above as the

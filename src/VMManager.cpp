@@ -52,7 +52,7 @@ namespace VM {
 			const auto *pdeEntry = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
 			if( pdeEntry && (*pdeEntry & 0x01) && pteIndex < 512 )
 			{
-				constexpr uint64_t recursiveAddr = 0xFFFFFF8000000000; // 0xFFFFFFFFC0000000;
+				constexpr uint64_t recursiveAddr = 0xFFFFFF8000000000; // 0xFFFFFF8000000000;
 				return reinterpret_cast<uint64_t *>( recursiveAddr | (plme4Index << 30) | (pdpteIndex << 21) | (pdeIndex << 12) ) + pteIndex;
 			}
 			return nullptr;
@@ -412,17 +412,6 @@ namespace VM {
 						setPTEEntry(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), newFr | 0x03);
 						pteEntry = getPteEntry(vAddr);
 					}
-
-					// const auto index = PTE_64_4K::index(vAddr);
-					// if( (pdeEntry->physical[index] & 0xFFFFFFFFFFFFF000) != 0 )
-					// {
-					// 	pdeEntry->physical[index] |= 0x03;
-					// }
-					// else
-					// {
-					// 	auto newFr = frameStack.allocPage();
-					// 	pdeEntry->physical[index] |= (newFr | 0x03);
-					// }
 					invalidate_tlb(vAddr);
 					memset(reinterpret_cast <uint64_t *>(vAddr), 0, 4096);
 					success = true;

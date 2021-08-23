@@ -26,7 +26,7 @@ static std::array<uint8_t, 512> partData{};
 // uint32_t mboot_header=0;
 
 volatile int foo___ = 0;
-static void test_page_fault();
+// static void test_page_fault();
 static void reportPartition(int which);
 
 uint32_t indent=0;
@@ -34,17 +34,17 @@ uint32_t indent=0;
 void cmain (BootInformation &bootInfo, const MultiBootInfoHeader *addr);
 
 extern Frames<uint64_t> *initHeap(VM::Manager &mgr);
-void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
+// void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap);
 // uint64_t RTC_currentTime();
 void init_rct_interrupts();
 // void init_timer(uint32_t frequency);
 extern void init_keyboard_handler();
-void testVmmPageStack(const MultiBootInfoHeader *mboot_header);
+// void testVmmPageStack(const MultiBootInfoHeader *mboot_header);
 
 static void detectControllers();
 // static void detectControllersOld();
-static void dumpPageTables();
-static void accessP4Table();
+// static void dumpPageTables();
+// static void accessP4Table();
 extern const multiboot_tag *findMultiBootInfoHeaderTag(const MultiBootInfoHeader *addr, multiboot_uint32_t type);
 
 static const char *yn(uint32_t n)
@@ -62,7 +62,7 @@ extern "C"
 	extern void startup_data_end();
 	extern void report_idt_info();
 
-	extern uint64_t p3_gb_mapped_table[512];
+//	extern uint64_t p3_gb_mapped_table[512];
 
 	extern void invalidate_all_tlbs();
 
@@ -252,51 +252,51 @@ extern "C"
 
 }
 
-extern Page4K *getPage(void *vaddr);
+// extern Page4K *getPage(void *vaddr);
 
-void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap)
-{
-	const uint8_t *end = reinterpret_cast<const uint8_t *>(mmap) + mmap->size;
-	for (auto *entry = mmap->entries;
-		 reinterpret_cast<const uint8_t *>(entry) < end;
-		 entry = reinterpret_cast<const multiboot_memory_map_t *> (reinterpret_cast<const uint8_t *>(entry) + mmap->entry_size))
-	{
-		// mark anything that's not available as in use
-		// so we don't try to use these addresses.
-		if( entry->type != MULTIBOOT_MEMORY_AVAILABLE )
-		{
-			uint64_t nPages = (entry->len>>12);
-			frames->markFrames(entry->addr, nPages);
-			auto addr = entry->addr;
-			for( auto i=0ull; i<nPages; ++i, addr += 0x1000 )
-			{
-				auto *page = getPage(reinterpret_cast<void *>(addr));
-				if( page )
-				{
-					page->rw = 0; 	// mark the page as read-only
-					page->user = 0;	// only kernel access
-				}
-			}
-		}
-	}
-}
+// void mapMemory(Frames<uint64_t> *frames, const multiboot_tag_mmap *mmap)
+// {
+// 	const uint8_t *end = reinterpret_cast<const uint8_t *>(mmap) + mmap->size;
+// 	for (auto *entry = mmap->entries;
+// 		 reinterpret_cast<const uint8_t *>(entry) < end;
+// 		 entry = reinterpret_cast<const multiboot_memory_map_t *> (reinterpret_cast<const uint8_t *>(entry) + mmap->entry_size))
+// 	{
+// 		// mark anything that's not available as in use
+// 		// so we don't try to use these addresses.
+// 		if( entry->type != MULTIBOOT_MEMORY_AVAILABLE )
+// 		{
+// 			uint64_t nPages = (entry->len>>12);
+// 			frames->markFrames(entry->addr, nPages);
+// 			auto addr = entry->addr;
+// 			for( auto i=0ull; i<nPages; ++i, addr += 0x1000 )
+// 			{
+// 				auto *page = getPage(reinterpret_cast<void *>(addr));
+// 				if( page )
+// 				{
+// 					page->rw = 0; 	// mark the page as read-only
+// 					page->user = 0;	// only kernel access
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
-static void test_page_fault()
-{
-	printf("Testing Page Fault\n");
-	uint32_t *ptr = (uint32_t*)0xA0000000;
-	uint32_t do_page_fault = *ptr;
-	monitor_write_dec(do_page_fault);
-	monitor_write("After page fault! SHOULDN'T GET HERE \n");
-}
+// static void test_page_fault()
+// {
+// 	printf("Testing Page Fault\n");
+// 	uint32_t *ptr = (uint32_t*)0xA0000000;
+// 	uint32_t do_page_fault = *ptr;
+// 	monitor_write_dec(do_page_fault);
+// 	monitor_write("After page fault! SHOULDN'T GET HERE \n");
+// }
 
-static void SetGlobalPageBits()
-{
-	PTE_64_4K *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
-	printf("pte->physical[511] == 0x%016.16lx\n", pte->physical[511]);
-	pte->physical[511] |= (1<<8);
-	// make the recursive entry in plme4 global
-}
+// static void SetGlobalPageBits()
+// {
+// 	PTE_64_4K *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
+// 	printf("pte->physical[511] == 0x%016.16lx\n", pte->physical[511]);
+// 	pte->physical[511] |= (1<<8);
+// 	// make the recursive entry in plme4 global
+// }
 
 static void checkMem(uint8_t *alloc, bool init)
 {
@@ -435,261 +435,261 @@ static void detectControllers()
 	}
 }
 
-static void accessP4Table()
-{
-	const uint64_t canonicalExtendMask = 0xFFFF000000000000;
-	auto vAddrP4Table = reinterpret_cast<const uint64_t *>(canonicalExtendMask | 0x0000FFFFFFFFF000);
-	printf("Access Page: p4_table last entry: 0x%0.16lx\n", vAddrP4Table[511]);
-}
+// static void accessP4Table()
+// {
+// 	const uint64_t canonicalExtendMask = 0xFFFF000000000000;
+// 	auto vAddrP4Table = reinterpret_cast<const uint64_t *>(canonicalExtendMask | 0x0000FFFFFFFFF000);
+// 	printf("Access Page: p4_table last entry: 0x%0.16lx\n", vAddrP4Table[511]);
+// }
 
-static void dumpPageTables()
-{
-	const uint64_t canonicalExtendMask = 0xFFFF000000000000;
+// static void dumpPageTables()
+// {
+// 	const uint64_t canonicalExtendMask = 0xFFFF000000000000;
 
-	auto vAddrP4Table = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFFFFFF000);
-	auto vAddrP3Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFFFE00000);
-	auto vAddrP2Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFC0000000);
-	auto vAddrP1Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FF8000000000);
+// 	auto vAddrP4Table = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFFFFFF000);
+// 	auto vAddrP3Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFFFE00000);
+// 	auto vAddrP2Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FFFFC0000000);
+// 	auto vAddrP1Table0 = reinterpret_cast<const PageTable64<9> *>(canonicalExtendMask | 0x0000FF8000000000);
 	
-	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
-	{
-		if( (*vAddrP4Table)[i] != 0 )
-		{
-			printf("P4Table: Found non-zero entry: 0x%lx\n", (*vAddrP4Table)[i]);
-		}
-	}
+// 	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+// 	{
+// 		if( (*vAddrP4Table)[i] != 0 )
+// 		{
+// 			printf("P4Table: Found non-zero entry: 0x%lx\n", (*vAddrP4Table)[i]);
+// 		}
+// 	}
 
-	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
-	{
-		if( (*vAddrP3Table0)[i] != 0 )
-		{
-			printf("P3Table: Found non-zero entry: 0x%lx\n", (*vAddrP3Table0)[i]);
-		}
-	}
+// 	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+// 	{
+// 		if( (*vAddrP3Table0)[i] != 0 )
+// 		{
+// 			printf("P3Table: Found non-zero entry: 0x%lx\n", (*vAddrP3Table0)[i]);
+// 		}
+// 	}
 
-	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
-	{
-		if( (*vAddrP2Table0)[i] != 0 )
-		{
-			printf("P2Table: Found non-zero entry: 0x%lx\n", (*vAddrP2Table0)[i]);
-		}
-	}
+// 	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+// 	{
+// 		if( (*vAddrP2Table0)[i] != 0 )
+// 		{
+// 			printf("P2Table: Found non-zero entry: 0x%lx\n", (*vAddrP2Table0)[i]);
+// 		}
+// 	}
 
-	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
-	{
-		if( (*vAddrP1Table0)[i] != 0 )
-		{
-			printf("P1Table: Found non-zero entry: %lx\n", (*vAddrP1Table0)[i]);
-		}
-	}
+// 	for( auto i=0; i<PageTable64<9>::NUM_PAGES; ++i)
+// 	{
+// 		if( (*vAddrP1Table0)[i] != 0 )
+// 		{
+// 			printf("P1Table: Found non-zero entry: %lx\n", (*vAddrP1Table0)[i]);
+// 		}
+// 	}
 
-}
+// }
 
-uint64_t *PML4EEntryVAddr(size_t index)
-{
-	constexpr uint64_t recursiveAddr = 0xFFFFFFFFFFFFF000;
-	if( index < 512 )
-	{
-		return reinterpret_cast<uint64_t *>(recursiveAddr + index);
-	}
-	return nullptr;
-}
+// uint64_t *PML4EEntryVAddr(size_t index)
+// {
+// 	constexpr uint64_t recursiveAddr = 0xFFFFFFFFFFFFF000;
+// 	if( index < 512 )
+// 	{
+// 		return reinterpret_cast<uint64_t *>(recursiveAddr + index);
+// 	}
+// 	return nullptr;
+// }
 
-uint64_t *PDPTEEntryVAddr(size_t plme4Index, size_t pdpteIndex)
-{
-	const auto *plme4Entry = PML4EEntryVAddr(plme4Index);
-	if( plme4Entry && pdpteIndex < 512)
-	{
-		constexpr uint64_t recursiveAddr = 0xFFFFFFFFFFE00000;
-		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 12)) + pdpteIndex);
-	}
-	return nullptr;
-}
+// uint64_t *PDPTEEntryVAddr(size_t plme4Index, size_t pdpteIndex)
+// {
+// 	const auto *plme4Entry = PML4EEntryVAddr(plme4Index);
+// 	if( plme4Entry && pdpteIndex < 512)
+// 	{
+// 		constexpr uint64_t recursiveAddr = 0xFFFFFFFFFFE00000;
+// 		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 12)) + pdpteIndex);
+// 	}
+// 	return nullptr;
+// }
 
-uint64_t *PDEEEntryVAddr(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex)
-{
-	const auto *pdpteEntry = PDPTEEntryVAddr(plme4Index, pdpteIndex);
-	if( pdpteEntry && pdeIndex < 512 )
-	{
-		constexpr uint64_t recursiveAddr = 0xFFFFFFFFC0000000;
-		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 21) | (pdpteIndex<<12) ) + pdeIndex);
-	}
-	return nullptr;
-}
+// uint64_t *PDEEEntryVAddr(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex)
+// {
+// 	const auto *pdpteEntry = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+// 	if( pdpteEntry && pdeIndex < 512 )
+// 	{
+// 		constexpr uint64_t recursiveAddr = 0xFFFFFFFFC0000000;
+// 		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 21) | (pdpteIndex<<12) ) + pdeIndex);
+// 	}
+// 	return nullptr;
+// }
 
-uint64_t *PTEEntryVAddr(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex)
-{
-	const auto *pdeEntry = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
-	if( pdeEntry && pteIndex < 512 )
-	{
-		constexpr uint64_t recursiveAddr = 0xFFFFFFFFC0000000;
-		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 30) | (pdpteIndex<<21) | (pdeIndex<<12)) + pteIndex);
-	}
-	return nullptr;
-}
+// uint64_t *PTEEntryVAddr(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex)
+// {
+// 	const auto *pdeEntry = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
+// 	if( pdeEntry && pteIndex < 512 )
+// 	{
+// 		constexpr uint64_t recursiveAddr = 0xFFFFFF8000000000;
+// 		return reinterpret_cast<uint64_t *>((recursiveAddr | (plme4Index << 30) | (pdpteIndex<<21) | (pdeIndex<<12)) + pteIndex);
+// 	}
+// 	return nullptr;
+// }
 
-uint64_t getPML4EEntry(size_t index)
-{
-	const auto *vAddr = PML4EEntryVAddr(index);
-	return vAddr ? *vAddr : 0u;
-}
+// uint64_t getPML4EEntry(size_t index)
+// {
+// 	const auto *vAddr = PML4EEntryVAddr(index);
+// 	return vAddr ? *vAddr : 0u;
+// }
 
-uint64_t getPDPTEEntry(size_t plme4Index, size_t pdpteIndex)
-{
-	const auto *vAddr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
-	return vAddr ? *vAddr : 0u;
-}
+// uint64_t getPDPTEEntry(size_t plme4Index, size_t pdpteIndex)
+// {
+// 	const auto *vAddr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+// 	return vAddr ? *vAddr : 0u;
+// }
 
-uint64_t getPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex)
-{
-	const auto *vAddr = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
-	return vAddr ? *vAddr : 0u;
-}
+// uint64_t getPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex)
+// {
+// 	const auto *vAddr = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
+// 	return vAddr ? *vAddr : 0u;
+// }
 
-uint64_t getPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex)
-{
-	const auto *vAddr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
-	return vAddr ? *vAddr : 0u;
-}
+// uint64_t getPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex)
+// {
+// 	const auto *vAddr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+// 	return vAddr ? *vAddr : 0u;
+// }
 
-bool setPML4EEntry(size_t index, uint64_t val)
-{
-	auto *vAddr = PML4EEntryVAddr(index);
-	if( vAddr )
-	{
-		*vAddr = val;
-	}
-	return (vAddr != nullptr);
-}
+// bool setPML4EEntry(size_t index, uint64_t val)
+// {
+// 	auto *vAddr = PML4EEntryVAddr(index);
+// 	if( vAddr )
+// 	{
+// 		*vAddr = val;
+// 	}
+// 	return (vAddr != nullptr);
+// }
 
-bool setPDPTEEntry(size_t plme4Index, size_t pdpteIndex, uint64_t val)
-{
-	auto *vAddr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
-	if( vAddr )
-	{
-		*vAddr = val;
-	}
-	return (vAddr != nullptr);
-}
+// bool setPDPTEEntry(size_t plme4Index, size_t pdpteIndex, uint64_t val)
+// {
+// 	auto *vAddr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+// 	if( vAddr )
+// 	{
+// 		*vAddr = val;
+// 	}
+// 	return (vAddr != nullptr);
+// }
 
-bool setPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, uint64_t val)
-{
-	auto *vAddr = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
-	if( vAddr )
-	{
-		*vAddr = val;
-	}
-	return (vAddr != nullptr);
-}
+// bool setPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, uint64_t val)
+// {
+// 	auto *vAddr = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
+// 	if( vAddr )
+// 	{
+// 		*vAddr = val;
+// 	}
+// 	return (vAddr != nullptr);
+// }
 
-bool setPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t val)
-{
-	auto *vAddr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
-	if( vAddr )
-	{
-		*vAddr = val;
-	}
-	return (vAddr != nullptr);
-}
+// bool setPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t val)
+// {
+// 	auto *vAddr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+// 	if( vAddr )
+// 	{
+// 		*vAddr = val;
+// 	}
+// 	return (vAddr != nullptr);
+// }
 
-uint64_t *lookupPTEEntry(uint64_t vAddr)
-{
-	size_t plme4Index = ((vAddr >> 39) & 0x00000000000001FFu);
-	size_t pdpteIndex = ((vAddr >> 30) & 0x00000000000001FFu);
-	size_t pdeIndex = ((vAddr >> 21) & 0x00000000000001FFu);
-	size_t pteIndex = ((vAddr >> 12) & 0x00000000000001FFu);
-	return PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
-}
+// uint64_t *lookupPTEEntry(uint64_t vAddr)
+// {
+// 	size_t plme4Index = ((vAddr >> 39) & 0x00000000000001FFu);
+// 	size_t pdpteIndex = ((vAddr >> 30) & 0x00000000000001FFu);
+// 	size_t pdeIndex = ((vAddr >> 21) & 0x00000000000001FFu);
+// 	size_t pteIndex = ((vAddr >> 12) & 0x00000000000001FFu);
+// 	return PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+// }
 
-bool createPTEEntry(uint64_t vAddr)
-{
-	/*
-	size_t plme4Index = ((vAddr >> 39) & 0x00000000000001FFu);
-	size_t pdpteIndex = ((vAddr >> 30) & 0x00000000000001FFu);
-	size_t pdeIndex = ((vAddr >> 21) & 0x00000000000001FFu);
-	size_t pteIndex = ((vAddr >> 12) & 0x00000000000001FFu);
+// bool createPTEEntry(uint64_t vAddr)
+// {
+// 	/*
+// 	size_t plme4Index = ((vAddr >> 39) & 0x00000000000001FFu);
+// 	size_t pdpteIndex = ((vAddr >> 30) & 0x00000000000001FFu);
+// 	size_t pdeIndex = ((vAddr >> 21) & 0x00000000000001FFu);
+// 	size_t pteIndex = ((vAddr >> 12) & 0x00000000000001FFu);
 	
-	auto entry = getPML4EEntry(plme4Index);
-	if( entry == 0 )
-	{
-		entry = allocFrame();
-		setPML4EEntry(plme4Index, entry);
-	}
-	entry = getPDPTEEntry(plme4Index, pdpteIndex);
-	if( entry == 0 )
-	{
-		entry = allocFrame();
-		setPDPTEEntry(plme4Index, pdpteIndex, entry);
-	}
-	entry = getPDEEntry(plme4Index, pdpteIndex, pdeIndex);
-	if( entry == 0 )
-	{
-		entry = allocFrame();
-		setPDEEntry(plme4Index, pdpteIndex, pdeIndex, entry);
-	}
-	entry = getPTEEntry(plme4Index, pdpteIndex, pdeIndex, pteIndex);
-	if( entry == 0 )
-	{
-		entry = allocFrame();
-		setPTEEntry(plme4Index, pdpteIndex, pdeIndex, pteIndex, entry);
-	}
-	return true;
-	*/
-	return false;
-}
+// 	auto entry = getPML4EEntry(plme4Index);
+// 	if( entry == 0 )
+// 	{
+// 		entry = allocFrame();
+// 		setPML4EEntry(plme4Index, entry);
+// 	}
+// 	entry = getPDPTEEntry(plme4Index, pdpteIndex);
+// 	if( entry == 0 )
+// 	{
+// 		entry = allocFrame();
+// 		setPDPTEEntry(plme4Index, pdpteIndex, entry);
+// 	}
+// 	entry = getPDEEntry(plme4Index, pdpteIndex, pdeIndex);
+// 	if( entry == 0 )
+// 	{
+// 		entry = allocFrame();
+// 		setPDEEntry(plme4Index, pdpteIndex, pdeIndex, entry);
+// 	}
+// 	entry = getPTEEntry(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+// 	if( entry == 0 )
+// 	{
+// 		entry = allocFrame();
+// 		setPTEEntry(plme4Index, pdpteIndex, pdeIndex, pteIndex, entry);
+// 	}
+// 	return true;
+// 	*/
+// 	return false;
+// }
 
-void testVmmPageStack(const MultiBootInfoHeader *mboot_header)
-{
-	const auto *tag = findMultiBootInfoHeaderTag(mboot_header, MULTIBOOT_TAG_TYPE_MMAP);
-	PhysicalMemoryBlock *pHead = nullptr;
-	if( tag )
-	{
-		const auto *mmapStart = reinterpret_cast<const multiboot_tag_mmap *>(tag);
-		for( auto *mmap = mmapStart->entries;
-			 reinterpret_cast<const multiboot_uint8_t *>(mmap) < reinterpret_cast<const multiboot_uint8_t *>(mmapStart) + mmapStart->size;
-			 mmap = reinterpret_cast<const multiboot_memory_map_t *> (reinterpret_cast<const uint8_t *>(mmap) + mmapStart->entry_size) )
-		{
-			if( mmap->type == MULTIBOOT_MEMORY_AVAILABLE && mmap->addr > 0x0000000000100000)
-			{
-				auto *newBlock = New<PhysicalMemoryBlock>();
-				newBlock->start = ((mmap->addr) >> 12);
-				newBlock->len = ((mmap->len) >> 12);
-				if( !pHead )
-				{
-					pHead = newBlock;
-				}
-				else
-				{
-					auto *ptr = pHead;
-					while( ptr->next != nullptr )
-					{
-						ptr = ptr->next;
-					}
-					ptr->next = newBlock;
-				}
-			}
-		}
-	}
-	if( pHead )
-	{
-		VmmPageStack stack{pHead};
-		auto p1 = stack.allocPage();
-		auto p2 = stack.allocPage();
-		auto p3 = stack.allocPage();
-		auto p4 = stack.allocPage();
-		auto p5 = stack.allocPage();
+// void testVmmPageStack(const MultiBootInfoHeader *mboot_header)
+// {
+// 	const auto *tag = findMultiBootInfoHeaderTag(mboot_header, MULTIBOOT_TAG_TYPE_MMAP);
+// 	PhysicalMemoryBlock *pHead = nullptr;
+// 	if( tag )
+// 	{
+// 		const auto *mmapStart = reinterpret_cast<const multiboot_tag_mmap *>(tag);
+// 		for( auto *mmap = mmapStart->entries;
+// 			 reinterpret_cast<const multiboot_uint8_t *>(mmap) < reinterpret_cast<const multiboot_uint8_t *>(mmapStart) + mmapStart->size;
+// 			 mmap = reinterpret_cast<const multiboot_memory_map_t *> (reinterpret_cast<const uint8_t *>(mmap) + mmapStart->entry_size) )
+// 		{
+// 			if( mmap->type == MULTIBOOT_MEMORY_AVAILABLE && mmap->addr > 0x0000000000100000)
+// 			{
+// 				auto *newBlock = New<PhysicalMemoryBlock>();
+// 				newBlock->start = ((mmap->addr) >> 12);
+// 				newBlock->len = ((mmap->len) >> 12);
+// 				if( !pHead )
+// 				{
+// 					pHead = newBlock;
+// 				}
+// 				else
+// 				{
+// 					auto *ptr = pHead;
+// 					while( ptr->next != nullptr )
+// 					{
+// 						ptr = ptr->next;
+// 					}
+// 					ptr->next = newBlock;
+// 				}
+// 			}
+// 		}
+// 	}
+// 	if( pHead )
+// 	{
+// 		VmmPageStack stack{pHead};
+// 		auto p1 = stack.allocPage();
+// 		auto p2 = stack.allocPage();
+// 		auto p3 = stack.allocPage();
+// 		auto p4 = stack.allocPage();
+// 		auto p5 = stack.allocPage();
 
-		stack.freePage(p5);
-		stack.freePage(p1);
-		stack.freePage(p3);
-		p5 = stack.allocPage();
-		stack.freePage(p2);
-		stack.freePage(p4);
-		stack.freePage(p5);
-	}
-	// Incomming change from dan/msvc
-	// PTE_64_4K *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
-	// printf("pte->physical[511] == 0x%016.16lx\n", pte->physical[511]);
-	// pte->physical[511] |= (1<<8);
-	// // make the recursive entry in plme4 global
-}
+// 		stack.freePage(p5);
+// 		stack.freePage(p1);
+// 		stack.freePage(p3);
+// 		p5 = stack.allocPage();
+// 		stack.freePage(p2);
+// 		stack.freePage(p4);
+// 		stack.freePage(p5);
+// 	}
+// 	// Incomming change from dan/msvc
+// 	// PTE_64_4K *pte = reinterpret_cast<PTE_64_4K *>(0xfffffffffffff000);
+// 	// printf("pte->physical[511] == 0x%016.16lx\n", pte->physical[511]);
+// 	// pte->physical[511] |= (1<<8);
+// 	// // make the recursive entry in plme4 global
+// }

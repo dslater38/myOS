@@ -11,10 +11,10 @@ export LD=gcc
 export CC=clang
 export CXX=clang++
 
-export CPPFLAGS:=-I../include -D_LIBCPP_HAS_NO_BUILTIN_OPERATOR_NEW_DELETE -v
-export CFLAGS:=-std=c11 -fno-use-cxa-atexit -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -fpie -ffreestanding
-export CXXFLAGS:=-std=c++17 -fno-use-cxa-atexit -mno-sse2 -nostdlib -stdlib=libc++ -fno-rtti -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -Wno-main -fpie -ffreestanding
-export ASFLAGS=-felf64 -Xvc
+export CPPFLAGS:=-I../include -D_LIBCPP_HAS_NO_BUILTIN_OPERATOR_NEW_DELETE
+export CFLAGS:=-std=c11 -fno-use-cxa-atexit -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -gdwarf-3 -fpie -ffreestanding
+export CXXFLAGS:=-std=c++17 -fno-use-cxa-atexit -mno-sse2 -nostdlib -stdlib=libc++ -fno-rtti -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -gdwarf-3 -Wno-main -fpie -ffreestanding
+export ASFLAGS=-felf64 -Xvc -g -F dwarf -DDEBUG
 LDFLAGS=-no-pie -ffreestanding -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -Xlinker -Tlink.ld 
 
 # incomming change from dan/msvc
@@ -32,7 +32,7 @@ all : $(SUBDIRS) os.iso
 
 $(SUBDIRS):
 	@$(MAKE) -C $@ CC="$(CC)" CXX="$(CXX)" CPPFLAGS="$(CPPFLAGS)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" ASFLAGS="$(ASFLAGS)" LDFLAGS="$(LDFLAGS)"  $(MAKECMDGOALS)
-	
+
 $(OBJECTS) : $(SUBDIRS)
 
 os.iso : kernel hello.ko isofiles/boot/grub/grub.cfg

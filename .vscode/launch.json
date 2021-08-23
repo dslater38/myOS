@@ -17,15 +17,16 @@
         {
             "name": "myOS - gdbserver",
             "type": "cppdbg",
-            "request": "launch",
+            "request" : "launch",
             "symbolLoadInfo": {
                 "loadAll": true,
                 "exceptionList": ""
             },
-            "program": "${workspaceRoot}/kernel",
-            "miDebuggerServerAddress": "127.0.0.1:2000",
+            "program": "/home/slaterd/repos/myOS/kernel",
+            "miDebuggerPath": "",
+            "miDebuggerArgs": "",            
             "MIMode": "gdb",
-            
+            "filterStderr" : true,
             "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
             "environment": []
@@ -62,16 +63,7 @@
             "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": true,
-            "linux": {
-                "MIMode": "gdb"
-              },
-              "osx": {
-                "MIMode": "gdb"
-              },
-              "windows": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "c:\\mingw-w64\\x86_64-7.3.0-posix-seh-rt_v5-rev0\\mingw64\\bin\\gdb.exe"
-              }
+             "MIMode": "gdb"
         }
     ]
 }

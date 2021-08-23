@@ -1,6 +1,23 @@
 %include "mbootconst.mac"
 %include "gdtconst.mac"
 
+%ifdef DEBUG
+
+%macro ENTER 0
+	push rbp
+	mov rbp, rsp
+%endmacro
+
+%macro LEAVE 0
+	pop rbp
+%endmacro
+
+%else
+
+%define ENTER
+%define LEAVE
+
+%endif
 
 %macro PROC 1
 [global %1:function %1.__endp-%1]
