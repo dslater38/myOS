@@ -7732,5 +7732,5 @@ History:
 int main(int argc, char **argv)
 {
     void *foo = dlmalloc(456);
-    return (int)foo;
+    return (int)(size_t)foo;
 }
