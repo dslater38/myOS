@@ -112,7 +112,8 @@ namespace VM {
 			{
 				pDir->physical[index] = val;
 				invalidate_all_tlbs();
-				auto *ptr = PML4EEntryVAddr(index);
+				// auto *ptr = PML4EEntryVAddr(index);
+				auto *ptr = PDPTEEntryVAddr(index, 0);
 				memset(ptr, 0, 4096);
 				return true;
 			}
@@ -126,7 +127,8 @@ namespace VM {
 			{
 				pDir->physical[pdpteIndex] = val;
 				invalidate_all_tlbs();	
-				auto *ptr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+				// auto *ptr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+				auto *ptr = PDEEEntryVAddr(plme4Index, pdpteIndex, 0);
 				memset(ptr, 0, 4096);
 				
 				return true;
@@ -161,7 +163,8 @@ namespace VM {
 				// can only write the page if it is present and writable.
 				if( (val & 0x03) == 0x03 )
 				{
-					auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
+					// auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
+					auto ptr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
 					memset(ptr, 0, 4096);
 				}
 				return true;
