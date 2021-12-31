@@ -306,7 +306,8 @@ namespace VM {
 				}
 			}
 		}
-		uint64_t stackBaseVAddr = 0x00000000C0200000;
+		uint64_t frameBaseAddr = 0x00000000C0200000;
+		uint64_t stackBaseVAddr = 0xFFFF8000C0200000;
 #if 0		
 		auto stackBaseVAddr = ((placement_address+4095) & 0xFFFFFFFFFFFFF000);	// the page stacks virtual addresses start at the next page boundary after placement_address
 		// At this point, we still have mappings in our page table from placement_address up to 2MB
@@ -322,8 +323,8 @@ namespace VM {
 			invalidate_all_tlbs();
 		}
 #endif
-		frameStack.initStack(stackBaseVAddr, *this);
-		stackBaseVAddr = ((stackBaseVAddr + 4095) & 0xFFFFFFFFFFFFF000);
+		frameStack.initStack(frameBaseAddr, *this);
+		frameBaseAddr = ((frameBaseAddr + 4095) & 0xFFFFFFFFFFFFF000);
 		const auto nPages = (((KHEAP_INITIAL_SIZE + 4095) & 0xFFFFFFFFFFFFF000))>>12;
 		if( allocPages(stackBaseVAddr, nPages, true, true ) )
 		{
