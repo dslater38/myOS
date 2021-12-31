@@ -83,6 +83,7 @@ extern "C"
 			PANIC (buffer);
 		}
 
+		mboot_header = reinterpret_cast<const MultiBootInfoHeader *>(reinterpret_cast<uint64_t>(mboot_header) | 0xFFFF800000000000);
 
 		if(mboot_header && placement_address < reinterpret_cast<uint64_t>(mboot_header))
 		{
