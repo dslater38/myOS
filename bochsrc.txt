@@ -21,8 +21,8 @@ boot: cdrom
 log: bochsout.txt
 
 # display_library: win32
-# display_library: x, options="gui_debug"
-display_library: x
+display_library: x, options="gui_debug"
+# display_library: x
 # display_library: term
 
 mouse: enabled=0

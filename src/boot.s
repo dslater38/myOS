@@ -26,9 +26,9 @@ section .text
 %define USERDATA32 (entries.user_data_32-entries)
 %define USERCODE16 (entries.user_code_16-entries)
 %define USERDATA16 (entries.user_data_16-entries)
-; %define VM_BASE 0xFFFF800000000000
+%define VM_BASE 0xFFFF800000000000
 ; %define VM_BASE 0x0000000000000000
-%define VM_BASE 0x00000000C0000000
+;%define VM_BASE 0x00000000C0000000
 
 
 section .multiboot.text
@@ -40,7 +40,7 @@ start:
 	cli
 	cmp eax,MULTIBOOT2_BOOTLOADER_MAGIC
 	jnz  .error
-	mov esp, kernel_stack	; setup a stack
+;	mov esp, kernel_stack	; setup a stack
 	mov edi, eax	; save magic value into edi - will become rdi in x64 == first argument
 	mov esi, ebx	; save multiboot header pointer in esi - will become rsi on x64 == second argument
 .load_p4_table:
@@ -76,16 +76,16 @@ start:
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
-	mov ebp, start
-	push ebp				; set up a fake initial stack frame 
-	push 0					; make it look like a 64-bit frame
-	mov ebp, esp			; that looks like a call to start
-	push esi
-	push 0
-	push edi
-	push 0
+;	mov ebp, start
+;	push ebp				; set up a fake initial stack frame 
+;	push 0					; make it look like a 64-bit frame
+;	mov ebp, esp			; that looks like a call to start
+;	push esi
+;	push 0
+;	push edi
+;	push 0
 .jmp_start64:
-	jmp CODE64:start64   ; CODE is the offset into our GDT table for the 64-bit code segment: Far jump!
+	jmp CODE64:tramp64   ; CODE is the offset into our GDT table for the 64-bit code segment: Far jump!
 .loop:
 	hlt				; should never get here
 .error:
@@ -93,6 +93,18 @@ start:
 	jmp .loop
 	pop ebp			; undo the 2 pushes at the start
 	pop ebp			; first pop is high-order DWORD == 0 - discard
+
+[BITS 64]
+align 16
+tramp64:
+	mov rsp, kernel_stack
+	mov rbp, tramp64
+	push rbp
+	mov rbp, rsp
+	push rsi
+	push rdi
+	mov r10, start64
+	jmp r10
 
 section .text
 
@@ -183,38 +195,45 @@ gdt:
 align 0x1000
 
 page_table:
-p4_table:						; PML4E
+p4_table:								; PML4E
 	dq (p3_table + 3 - VM_BASE)			; pointer to PDPTE table with rw & present bits set
-	TIMES 255 dq 0				; write 254 null entries to fill the table.
-	dq (p3_table.next + 3 - VM_BASE)		; pointer to PDPTE table for high memory with rw & present bits set
-	TIMES 253 dq 0				; write 254 null entries to fill the table.
-	dq 387						; 1GB huge page maps the first 1GB of memory. 0xFFFFFFFF80000000 linear => 0x0000000000000000 physical
+	TIMES 255 dq 0						; write 254 null entries to fill the table.
+	dq (p3_table.next + 3 - VM_BASE)	; pointer to PDPTE table for high memory with rw & present bits set
+	TIMES 253 dq 0						; write 254 null entries to fill the table.
+	dq 0x0000000000000000; dq 387		; 1GB huge page maps the first 1GB of memory. 0xFFFFFFFF80000000 linear => 0x0000000000000000 physical
 	dq (p4_table + 3 - VM_BASE)			; write final recursive entry. Constructing appropriate virtual addresses will give us access to the page tables
-p3_table:						; PDPTE
+p3_table:								; PDPTE
 	dq (p2_table + 3 - VM_BASE)			; pointer to PDE table with rw & present bits set.
 	dq 0x0000000000000000
 	dq 0x0000000000000000
 	dq (p2_table + 0x03 - VM_BASE)
-	TIMES 508 dq 0				; write 511 null entries to fill the table.
+	TIMES 508 dq 0						; write 511 null entries to fill the table.
 .next:
-	; dq (p2_table.next + 3 - VM_BASE)		; pointer to PDE table with rw & present bits set.
-	dq (p2_table + 3 - VM_BASE)		; pointer to PDE table with rw & present bits set.
-	TIMES 511 dq 0				; write 511 null entries to fill the table.
-p2_table:						; PDE 
+	; dq (p2_table.next + 3 - VM_BASE)	; pointer to PDE table with rw & present bits set.
+	dq (p2_table + 3 - VM_BASE)			; pointer to PDE table with rw & present bits set.
+	TIMES 511 dq 0						; write 511 null entries to fill the table.
+p2_table:								; PDE 
 	dq (p1_table + 3 - VM_BASE)			; pointer to the PTE table with rw & present bits set
-	TIMES 511 dq 0				; write 511 null entries for a total of 512 entries
+	dq (p1_table + 0x1003 - VM_BASE)			; pointer to the PTE table with rw & present bits set
+	TIMES 510 dq 0						; write 511 null entries for a total of 512 entries
 ;.next:
-;	dq (p1_table + 3 - VM_BASE)		; pointer to the High address PTE table with rw & present bits set
-;	TIMES 511 dq 0				; write 511 null entries for a total of 512 entries
+;	dq (p1_table + 3 - VM_BASE)			; pointer to the High address PTE table with rw & present bits set
+;	TIMES 511 dq 0						; write 511 null entries for a total of 512 entries
 ;.next2:
 ;	dq (p1_table + 3 - VM_BASE)			; pointer to the PTE table with rw & present bits set
-;	TIMES 511 dq 0				; write 511 null entries for a total of 512 entries
-p1_table:						; PTE 
-	%assign p 0x03				; set the rw & present bits (0x03) 
-	%rep 512					; write 511 of 512 entries to the PTE table
-	dq p						; write page entry
-	%assign p p+ 0x00001000		; increment page entry virtual ( and physical ) address by page size (4K)
-	%endrep						; end of loop
+;	TIMES 511 dq 0						; write 511 null entries for a total of 512 entries
+p1_table:								; PTE 
+	%assign p 0x03						; set the rw & present bits (0x03) 
+	%rep 512							; write 511 of 512 entries to the PTE table
+	dq p								; write page entry
+	%assign p p + 0x00001000			; increment page entry virtual ( and physical ) address by page size (4K)
+	%endrep								; end of loop
+p1_table.next:
+	%assign p 0x00200003				; set the rw & present bits (0x03) 
+	%rep 512							; write 511 of 512 entries to the PTE table
+	dq p								; write page entry
+	%assign p p + 0x00001000			; increment page entry virtual ( and physical ) address by page size (4K)
+	%endrep								; end of loop
 page_table.end:
 
 ; From dan/msvc branch - older implementation.

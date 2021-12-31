@@ -1,7 +1,8 @@
 #include "VMManager.h"
 #include "PageDirectory.h"
 
-constexpr uint64_t VM_BASE = 0x00000000C0000000;
+// constexpr uint64_t VM_BASE = 0x00000000C0000000;
+constexpr uint64_t VM_BASE = 0xFFFF800000000000;
 
 extern "C"
 {
@@ -251,8 +252,10 @@ namespace VM {
 		//lowMemFrameStack.initStack();
 		
 
-		const uint64_t kernelStartFrame = ((reinterpret_cast<uint64_t>(&kernel_begin) - VM_BASE) >> 12);
-		uint64_t kernelEndFrame = (0x0000000000200000>>12); // (( (placement_address+4095) - VM_BASE) >> 12);
+		const uint64_t kernelStartFrame = (VM::Manager::getPhysicalAddress(reinterpret_cast<uint64_t>(&kernel_begin)) >> 12);
+		// uint64_t kernelEndFrame = (0x0000000000200000>>12); // (( (placement_address+4095) - VM_BASE) >> 12);
+// 		uint64_t kernelEndFrame = (( (placement_address+4095) - VM_BASE) >> 12);
+		const uint64_t kernelEndFrame = (VM::Manager::getPhysicalAddress(placement_address+4095)>>12);
 		auto kernelLen = kernelEndFrame - kernelStartFrame;
 		// now, we need to trim the kernel block out of the PhysicalMemoryBlock blocks so we don't allocate
 		// kernel space 
@@ -334,9 +337,54 @@ namespace VM {
 		return nullptr;
 	}
 	
+	bool Manager::clearPage(uint64_t vAddr, uint64_t &frame)
+	{
+		auto success = false;
+		auto *pmle4Entry = getPlme4Entry(vAddr);
+		if( pmle4Entry )
+		{
+			auto *pdptEntry = getPdpteEntry(vAddr);
+			if( pdptEntry )
+			{
+				auto *pdeEntry = getPdeEntry(vAddr);
+				if( pdeEntry )
+				{
+					auto *pteEntry = getPteEntry(vAddr);
+					if(pteEntry)
+					{
+						uint64_t tmp = 0;
+						auto success = getPTEFrame(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), tmp);
+						if( success )
+						{
+							setPTEEntry(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), 0x00 | 0x00);
+							frame = tmp;
+							return true;
+						}
+					}
+				}
+			}			
+		}
+		return false;
+	}
+
 	bool Manager::unMapPage(uint64_t vAddr)
 	{
-
+		uint64_t frame = 0;
+		auto success = clearPage(vAddr, frame);
+		if(success)
+		{
+			if( frame < 1024 * 1024 )
+			{
+				lowMemFrameStack.freePage(frame);
+			}
+			else
+			{
+				frameStack.freePage(frame);
+			}
+			invalidate_tlb(vAddr);
+		}
+		return success;
+#if 0		
 		auto success = false;
 		auto *pmle4Entry = getPlme4Entry(vAddr);
 		if( pmle4Entry )
@@ -371,11 +419,11 @@ namespace VM {
 			}			
 		}
 		return false;
+#endif // 0		
 	}
 	
 	bool Manager::mapPage(uint64_t vAddr, uint64_t flags)
 	{
-
 		auto success = false;
 		auto *pmle4Entry = getPlme4Entry(vAddr);
 		if( !pmle4Entry )
@@ -420,6 +468,33 @@ namespace VM {
 		}
 		
 		return success;
+	}
+
+	uint64_t Manager::getPhysicalAddress(uint64_t vAddr)
+	{
+		uint64_t frame = 0;
+		auto *pmle4Entry = getPlme4Entry(vAddr);
+		if( pmle4Entry )
+		{			
+			auto *pdptEntry = getPdpteEntry(vAddr);
+			if( pdptEntry )
+			{
+				auto *pdeEntry = getPdeEntry(vAddr);
+				if( pdeEntry )
+				{
+					const auto index1 = PML4E_4K::index(vAddr);
+					const auto index2 = PDPTE_64_4K::index(vAddr);
+					const auto index3 = PDE_64_4K::index(vAddr);
+					const auto index4 = PTE_64_4K::index(vAddr);
+					uint64_t val = 0;
+					if( getPTEFrame(index1, index2, index3, index4, val) )
+					{
+						frame = val;
+					}
+				}
+			}
+		}
+		return frame;
 	}
 	
 	bool Manager::allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable)
