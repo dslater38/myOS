@@ -99,22 +99,23 @@ extern "C"
 		set_foreground_color((uint8_t)TextColors::GREEN);
 		set_background_color((uint8_t)TextColors::BLACK);
 
-		printf("Hello World from 64-bit long mode!!!!!\n");
-
 		auto success = init_serial(2, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
 		if (success == SUCCESS)
 		{
 			printf("Initialized COM2\n");
 		}
 
-		debug_out("Startup Data Block: start 0x%016.16lx, end: 0x%016.16lx\n",(uint64_t)&startup_data_start, (uint64_t)&startup_data_end);
-		report_idt_info();
-		
 		success = init_serial(1, BAUD_115200, BITS_8, PARITY_NONE, NO_STOP_BITS) ;
 		if( success == SUCCESS )
 		{
 			printf("Initialized COM1 port\n");
 		}
+
+		printf("Hello World from 64-bit long mode!!!!!\n");
+
+		debug_out("Startup Data Block: start 0x%016.16lx, end: 0x%016.16lx\n",(uint64_t)&startup_data_start, (uint64_t)&startup_data_end);
+		report_idt_info();
+		
 
 		// process the mboot header.
 		BootInformation bootInfo{};
