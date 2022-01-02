@@ -30,7 +30,9 @@ PROC cpuid
 ENDP
 PROC invalidate_tlb
 	ENTER
-	invlpg [rdi]
+	mov rax, cr3
+	mov cr3, rax
+;	invlpg [rdi]
 	LEAVE
 	ret
 ENDP

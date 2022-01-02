@@ -9,6 +9,8 @@
 #include "PageT.h"
 #include "kheap.h"
 
+constexpr uint64_t VM_BASE = 0xFFFF800000000000;
+
 namespace VM {
 
 	class Manager

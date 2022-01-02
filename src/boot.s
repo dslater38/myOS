@@ -36,7 +36,8 @@ section .multiboot.text
 ; on entry, ebx holds the multi-boot header pointer
 ; eax holds the magic value
 align 16
-start:
+; start:
+PROC start
 	cli
 	cmp eax,MULTIBOOT2_BOOTLOADER_MAGIC
 	jnz  .error
@@ -93,10 +94,11 @@ start:
 	jmp .loop
 	pop ebp			; undo the 2 pushes at the start
 	pop ebp			; first pop is high-order DWORD == 0 - discard
+ENDP
 
 [BITS 64]
 align 16
-tramp64:
+PROC tramp64
 	mov rsp, kernel_stack
 	mov rbp, tramp64
 	push rbp
@@ -105,13 +107,20 @@ tramp64:
 	push rdi
 	mov r10, start64
 	jmp r10
+ENDP
 
 section .text
 
 [BITS 64]
 align 16
-start64:
-	push start.loop	; setup fake return address - allows debugger to walk up the stack
+PROC start64
+	mov rax, gdt
+	lgdt [rax]      ; Load the GDT pointer's higher-half virtual address
+	mov rax, p4_table	; zero-out the first entry in p4_table to disable identity mapping
+	mov qword [rax], 0x00000000
+	mov rax, cr3		; reload the page table
+	mov cr3, rax
+	push start		; setup fake return address - allows debugger to walk up the stack
 	mov rbp, rsp
 	and edi, edi	; 32-bit magic value is in edi. Make sure high order DWORD of rdi is cleared
 	and esi, esi	; multiboot header pointer was put in esi. It's < 32 bits, make sure upper DWORD of rsi is cleared.
@@ -127,7 +136,7 @@ start64:
 	hlt				; should never get here
 	jmp .loop
 	pop rbp			; will never get here
-
+ENDP
 
 section .multiboot.data
 ;
@@ -198,23 +207,25 @@ page_table:
 p4_table:								; PML4E
 	dq (p3_table + 3 - VM_BASE)			; pointer to PDPTE table with rw & present bits set
 	TIMES 255 dq 0						; write 254 null entries to fill the table.
-	dq (p3_table.next + 3 - VM_BASE)	; pointer to PDPTE table for high memory with rw & present bits set
-	TIMES 253 dq 0						; write 254 null entries to fill the table.
-	dq 0x0000000000000000; dq 387		; 1GB huge page maps the first 1GB of memory. 0xFFFFFFFF80000000 linear => 0x0000000000000000 physical
+	dq (p3_table + 3 - VM_BASE)			; pointer to PDPTE table for high memory with rw & present bits set
+;;	TIMES 253 dq 0						; write 254 null entries to fill the table.
+	TIMES 254 dq 0						; write 254 null entries to fill the table.
+;;	dq 0x0000000000000000; dq 387		; 1GB huge page maps the first 1GB of memory. 0xFFFFFFFF80000000 linear => 0x0000000000000000 physical
 	dq (p4_table + 3 - VM_BASE)			; write final recursive entry. Constructing appropriate virtual addresses will give us access to the page tables
 p3_table:								; PDPTE
 	dq (p2_table + 3 - VM_BASE)			; pointer to PDE table with rw & present bits set.
-	dq 0x0000000000000000
-	dq 0x0000000000000000
-	dq (p2_table + 0x03 - VM_BASE)
-	TIMES 508 dq 0						; write 511 null entries to fill the table.
-.next:
-	; dq (p2_table.next + 3 - VM_BASE)	; pointer to PDE table with rw & present bits set.
-	dq (p2_table + 3 - VM_BASE)			; pointer to PDE table with rw & present bits set.
 	TIMES 511 dq 0						; write 511 null entries to fill the table.
+;;	dq 0x0000000000000000
+;;	dq 0x0000000000000000
+;;	dq (p2_table + 0x03 - VM_BASE)
+;;	TIMES 508 dq 0						; write 511 null entries to fill the table.
+;;.next:
+;;	; dq (p2_table.next + 3 - VM_BASE)	; pointer to PDE table with rw & present bits set.
+;;	dq (p2_table + 3 - VM_BASE)			; pointer to PDE table with rw & present bits set.
+;;	TIMES 511 dq 0						; write 511 null entries to fill the table.
 p2_table:								; PDE 
 	dq (p1_table + 3 - VM_BASE)			; pointer to the PTE table with rw & present bits set
-	dq (p1_table + 0x1003 - VM_BASE)			; pointer to the PTE table with rw & present bits set
+	dq (p1_table.next + 3 - VM_BASE)	; pointer to the PTE table with rw & present bits set
 	TIMES 510 dq 0						; write 511 null entries for a total of 512 entries
 ;.next:
 ;	dq (p1_table + 3 - VM_BASE)			; pointer to the High address PTE table with rw & present bits set

@@ -21,6 +21,7 @@
 #include "MultiBootInfoHeader.h"
 #include "BootInformation.h"
 #include "elf/elf.h"
+#include "VMManager.h"
 /*  Macros. */
 
 /*  Some screen stuff. */
@@ -325,7 +326,7 @@ static void draw_line(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color
 
 static void set_pixel_color(const multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color)
 {
-	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
+	void *fb = reinterpret_cast<void *>(static_cast<uint64_t>(tagfb->common.framebuffer_addr) + VM_BASE);
 	
 	for (auto i = 0; i < tagfb->common.framebuffer_width && i < tagfb->common.framebuffer_height; i++)
 	{

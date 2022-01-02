@@ -2,7 +2,6 @@
 #include "PageDirectory.h"
 
 // constexpr uint64_t VM_BASE = 0x00000000C0000000;
-constexpr uint64_t VM_BASE = 0xFFFF800000000000;
 
 extern "C"
 {
@@ -108,7 +107,7 @@ namespace VM {
 		bool setPML4EEntry(size_t index, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast<PML4E_4K *>(PML4EEntryVAddr(0));
-			if( pDir && val < 512 )
+			if( pDir && index < 512 )
 			{
 				pDir->physical[index] = val;
 				invalidate_all_tlbs();
@@ -123,7 +122,7 @@ namespace VM {
 		bool setPDPTEEntry(size_t plme4Index, size_t pdpteIndex, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast<PDPTE_64_4K *>(PDPTEEntryVAddr(plme4Index, 0));
-			if( pDir )
+			if( pDir && pdpteIndex < 512)
 			{
 				pDir->physical[pdpteIndex] = val;
 				invalidate_all_tlbs();	
@@ -139,7 +138,7 @@ namespace VM {
 		bool setPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast <PDE_64_4K *>(PDEEEntryVAddr(plme4Index, pdpteIndex, 0));
-			if( pDir )
+			if( pDir && pdeIndex < 512)
 			{
 				pDir->physical[pdeIndex] = val;
 				invalidate_all_tlbs();
@@ -156,17 +155,17 @@ namespace VM {
 		bool setPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast <PTE_64_4K *>(PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, 0));
-			if( pDir )
+			if( pDir && pteIndex < 512)
 			{
 				pDir->physical[pteIndex] = val;
 				invalidate_all_tlbs();
 				// can only write the page if it is present and writable.
-				if( (val & 0x03) == 0x03 )
-				{
-					// auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
-					auto ptr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
-					memset(ptr, 0, 4096);
-				}
+				// if( (val & 0x03) == 0x03 )
+				// {
+				// 	// auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
+				// 	auto ptr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+				// 	memset(ptr, 0, 4096);
+				// }
 				return true;
 			}
 			return false;
@@ -175,7 +174,7 @@ namespace VM {
 		bool getPTEFrame(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t &val)
 		{
 			auto *pDir = reinterpret_cast <PTE_64_4K *>(PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, 0));
-			if( pDir )
+			if( pDir && pteIndex < 512 )
 			{
 				val = ( pDir->physical[pteIndex] & 0xFFFFFFFFFFFFF000 );
 				return true;
@@ -309,8 +308,9 @@ namespace VM {
 				}
 			}
 		}
-		uint64_t frameBaseAddr = 0x00000000C0200000;
-		uint64_t stackBaseVAddr = 0xFFFF8000C0200000;
+		// uint64_t frameBaseAddr = 0x00000000C0200000;
+		// uint64_t stackBaseVAddr = 0xFFFF8000C0200000;
+		uint64_t stackBaseVAddr = 0xFFFFFF0000000000;
 #if 0		
 		auto stackBaseVAddr = ((placement_address+4095) & 0xFFFFFFFFFFFFF000);	// the page stacks virtual addresses start at the next page boundary after placement_address
 		// At this point, we still have mappings in our page table from placement_address up to 2MB
@@ -326,8 +326,8 @@ namespace VM {
 			invalidate_all_tlbs();
 		}
 #endif
-		frameStack.initStack(frameBaseAddr, *this);
-		frameBaseAddr = ((frameBaseAddr + 4095) & 0xFFFFFFFFFFFFF000);
+		frameStack.initStack(stackBaseVAddr, *this);
+		stackBaseVAddr = ((stackBaseVAddr + 4095) & 0xFFFFFFFFFFFFF000);
 		const auto nPages = (((KHEAP_INITIAL_SIZE + 4095) & 0xFFFFFFFFFFFFF000))>>12;
 		if( allocPages(stackBaseVAddr, nPages, true, true ) )
 		{
@@ -460,8 +460,12 @@ namespace VM {
 					auto *pteEntry = getPteEntry(vAddr);
 					if(!pteEntry)
 					{
-						auto newFr = frameStack.allocPage();						
-						setPTEEntry(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), newFr | 0x03);
+						auto newFr = frameStack.allocPage();
+						auto index4 = PML4E_4K::index(vAddr);
+						auto index3 = PDPTE_64_4K::index(vAddr);
+						auto index2 = PDE_64_4K::index(vAddr);
+						auto index1 = PTE_64_4K::index(vAddr);
+						setPTEEntry(index4, index3, index2, index1, newFr | 0x03);
 						pteEntry = getPteEntry(vAddr);
 					}
 					invalidate_tlb(vAddr);
