@@ -35,7 +35,7 @@ hello.o : hello.cpp
 
 hello.ko : $(HELLO_OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^ 
-#	$(LD) -Xlinker --defsym="VM_BASE=0xFFFFFFFF80200000" -Xlinker --defsym="MOD_ENTRY=hello" $(LDFLAGS) -o $@ $^ ../kernel
+	$(LD) -Xlinker --defsym="VM_BASE=0xFFFF800000200000" -Xlinker --defsym="MOD_ENTRY=hello" $(LDFLAGS) -o $@ $^ ../kernel
 	nm $@ | awk '{ print $$1" "$$3 }' > $@.sym
 
 .s.o:

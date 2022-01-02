@@ -26,9 +26,6 @@ section .text
 %define USERDATA32 (entries.user_data_32-entries)
 %define USERCODE16 (entries.user_code_16-entries)
 %define USERDATA16 (entries.user_data_16-entries)
-%define VM_BASE 0xFFFF800000000000
-; %define VM_BASE 0x0000000000000000
-;%define VM_BASE 0x00000000C0000000
 
 
 section .multiboot.text
@@ -208,7 +205,7 @@ p2_table:								; PDE
 	dq (p1_table + 3 - VM_BASE)			; 2 level 1 entries to map 4MB of physical memory
 	dq (p1_table.next + 3 - VM_BASE)	; 
 	TIMES 510 dq 0						; write 510 null entries for a total of 512 entries
-p1_table:								; PTE 2 PTE's to map the first 4 MP of physical memory to VM_BASE (0xFFFF800000000000)
+p1_table:								; PTE 2 PTE's to map the first 4 MB of physical memory to VM_BASE (0xFFFF800000000000)
 	%assign p 0x03						; set the rw & present bits (0x03) 
 	%rep 512							; write 511 of 512 entries to the PTE table
 	dq p								; write page entry

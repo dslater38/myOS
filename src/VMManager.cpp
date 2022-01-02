@@ -1,8 +1,6 @@
 #include "VMManager.h"
 #include "PageDirectory.h"
 
-// constexpr uint64_t VM_BASE = 0x00000000C0000000;
-
 extern "C"
 {
 	extern void (*kernel_begin)();
