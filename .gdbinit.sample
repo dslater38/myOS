@@ -1,0 +1,9 @@
+directory /home/slaterd/repos/myOS/src
+
+define show_p4
+    set $p4phys=(uint64_t)(uint64_t *)($cr3)
+    print $p4phys
+end
+
+
+set output-radix 16
