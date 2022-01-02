@@ -18,3 +18,10 @@ kdebug.log
 *.ko.sym
 debugger.out
 *.log
+*.ds.*
+GPATH
+GRTAGS
+GTAGS
+*.old
+
+

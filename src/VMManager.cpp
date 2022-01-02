@@ -1,7 +1,7 @@
 #include "VMManager.h"
 #include "PageDirectory.h"
 
-constexpr uint64_t VM_BASE = 0x00000000C0000000;
+// constexpr uint64_t VM_BASE = 0x00000000C0000000;
 
 extern "C"
 {
@@ -52,7 +52,7 @@ namespace VM {
 			const auto *pdeEntry = PDEEEntryVAddr(plme4Index, pdpteIndex, pdeIndex);
 			if( pdeEntry && (*pdeEntry & 0x01) && pteIndex < 512 )
 			{
-				constexpr uint64_t recursiveAddr = 0xFFFFFF8000000000; // 0xFFFFFFFFC0000000;
+				constexpr uint64_t recursiveAddr = 0xFFFFFF8000000000; // 0xFFFFFF8000000000;
 				return reinterpret_cast<uint64_t *>( recursiveAddr | (plme4Index << 30) | (pdpteIndex << 21) | (pdeIndex << 12) ) + pteIndex;
 			}
 			return nullptr;
@@ -107,11 +107,12 @@ namespace VM {
 		bool setPML4EEntry(size_t index, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast<PML4E_4K *>(PML4EEntryVAddr(0));
-			if( pDir && val < 512 )
+			if( pDir && index < 512 )
 			{
 				pDir->physical[index] = val;
 				invalidate_all_tlbs();
-				auto *ptr = PML4EEntryVAddr(index);
+				// auto *ptr = PML4EEntryVAddr(index);
+				auto *ptr = PDPTEEntryVAddr(index, 0);
 				memset(ptr, 0, 4096);
 				return true;
 			}
@@ -121,11 +122,12 @@ namespace VM {
 		bool setPDPTEEntry(size_t plme4Index, size_t pdpteIndex, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast<PDPTE_64_4K *>(PDPTEEntryVAddr(plme4Index, 0));
-			if( pDir )
+			if( pDir && pdpteIndex < 512)
 			{
 				pDir->physical[pdpteIndex] = val;
 				invalidate_all_tlbs();	
-				auto *ptr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+				// auto *ptr = PDPTEEntryVAddr(plme4Index, pdpteIndex);
+				auto *ptr = PDEEEntryVAddr(plme4Index, pdpteIndex, 0);
 				memset(ptr, 0, 4096);
 				
 				return true;
@@ -136,7 +138,7 @@ namespace VM {
 		bool setPDEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast <PDE_64_4K *>(PDEEEntryVAddr(plme4Index, pdpteIndex, 0));
-			if( pDir )
+			if( pDir && pdeIndex < 512)
 			{
 				pDir->physical[pdeIndex] = val;
 				invalidate_all_tlbs();
@@ -153,16 +155,17 @@ namespace VM {
 		bool setPTEEntry(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t val)
 		{
 			auto *pDir = reinterpret_cast <PTE_64_4K *>(PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, 0));
-			if( pDir )
+			if( pDir && pteIndex < 512)
 			{
 				pDir->physical[pteIndex] = val;
 				invalidate_all_tlbs();
 				// can only write the page if it is present and writable.
-				if( (val & 0x03) == 0x03 )
-				{
-					auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
-					memset(ptr, 0, 4096);
-				}
+				// if( (val & 0x03) == 0x03 )
+				// {
+				// 	// auto ptr = reinterpret_cast<uint64_t *>((plme4Index << 39) | (pdpteIndex << 30) | (pdeIndex << 21) | (pteIndex << 12));
+				// 	auto ptr = PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, pteIndex);
+				// 	memset(ptr, 0, 4096);
+				// }
 				return true;
 			}
 			return false;
@@ -171,7 +174,7 @@ namespace VM {
 		bool getPTEFrame(size_t plme4Index, size_t pdpteIndex, size_t pdeIndex, size_t pteIndex, uint64_t &val)
 		{
 			auto *pDir = reinterpret_cast <PTE_64_4K *>(PTEEntryVAddr(plme4Index, pdpteIndex, pdeIndex, 0));
-			if( pDir )
+			if( pDir && pteIndex < 512 )
 			{
 				val = ( pDir->physical[pteIndex] & 0xFFFFFFFFFFFFF000 );
 				return true;
@@ -251,8 +254,10 @@ namespace VM {
 		//lowMemFrameStack.initStack();
 		
 
-		const uint64_t kernelStartFrame = ((reinterpret_cast<uint64_t>(&kernel_begin) - VM_BASE) >> 12);
-		uint64_t kernelEndFrame = (0x0000000000200000>>12); // (( (placement_address+4095) - VM_BASE) >> 12);
+		const uint64_t kernelStartFrame = (VM::Manager::getPhysicalAddress(reinterpret_cast<uint64_t>(&kernel_begin)) >> 12);
+		// uint64_t kernelEndFrame = (0x0000000000200000>>12); // (( (placement_address+4095) - VM_BASE) >> 12);
+// 		uint64_t kernelEndFrame = (( (placement_address+4095) - VM_BASE) >> 12);
+		const uint64_t kernelEndFrame = (VM::Manager::getPhysicalAddress(placement_address+4095)>>12);
 		auto kernelLen = kernelEndFrame - kernelStartFrame;
 		// now, we need to trim the kernel block out of the PhysicalMemoryBlock blocks so we don't allocate
 		// kernel space 
@@ -303,7 +308,9 @@ namespace VM {
 				}
 			}
 		}
-		uint64_t stackBaseVAddr = 0x00000000C0200000;
+		// uint64_t frameBaseAddr = 0x00000000C0200000;
+		// uint64_t stackBaseVAddr = 0xFFFF8000C0200000;
+		uint64_t stackBaseVAddr = 0xFFFFFF0000000000;
 #if 0		
 		auto stackBaseVAddr = ((placement_address+4095) & 0xFFFFFFFFFFFFF000);	// the page stacks virtual addresses start at the next page boundary after placement_address
 		// At this point, we still have mappings in our page table from placement_address up to 2MB
@@ -334,9 +341,54 @@ namespace VM {
 		return nullptr;
 	}
 	
+	bool Manager::clearPage(uint64_t vAddr, uint64_t &frame)
+	{
+		auto success = false;
+		auto *pmle4Entry = getPlme4Entry(vAddr);
+		if( pmle4Entry )
+		{
+			auto *pdptEntry = getPdpteEntry(vAddr);
+			if( pdptEntry )
+			{
+				auto *pdeEntry = getPdeEntry(vAddr);
+				if( pdeEntry )
+				{
+					auto *pteEntry = getPteEntry(vAddr);
+					if(pteEntry)
+					{
+						uint64_t tmp = 0;
+						auto success = getPTEFrame(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), tmp);
+						if( success )
+						{
+							setPTEEntry(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), 0x00 | 0x00);
+							frame = tmp;
+							return true;
+						}
+					}
+				}
+			}			
+		}
+		return false;
+	}
+
 	bool Manager::unMapPage(uint64_t vAddr)
 	{
-
+		uint64_t frame = 0;
+		auto success = clearPage(vAddr, frame);
+		if(success)
+		{
+			if( frame < 1024 * 1024 )
+			{
+				lowMemFrameStack.freePage(frame);
+			}
+			else
+			{
+				frameStack.freePage(frame);
+			}
+			invalidate_tlb(vAddr);
+		}
+		return success;
+#if 0		
 		auto success = false;
 		auto *pmle4Entry = getPlme4Entry(vAddr);
 		if( pmle4Entry )
@@ -371,11 +423,11 @@ namespace VM {
 			}			
 		}
 		return false;
+#endif // 0		
 	}
 	
 	bool Manager::mapPage(uint64_t vAddr, uint64_t flags)
 	{
-
 		auto success = false;
 		auto *pmle4Entry = getPlme4Entry(vAddr);
 		if( !pmle4Entry )
@@ -408,21 +460,14 @@ namespace VM {
 					auto *pteEntry = getPteEntry(vAddr);
 					if(!pteEntry)
 					{
-						auto newFr = frameStack.allocPage();						
-						setPTEEntry(PML4E_4K::index(vAddr), PDPTE_64_4K::index(vAddr), PDE_64_4K::index(vAddr), PTE_64_4K::index(vAddr), newFr | 0x03);
+						auto newFr = frameStack.allocPage();
+						auto index4 = PML4E_4K::index(vAddr);
+						auto index3 = PDPTE_64_4K::index(vAddr);
+						auto index2 = PDE_64_4K::index(vAddr);
+						auto index1 = PTE_64_4K::index(vAddr);
+						setPTEEntry(index4, index3, index2, index1, newFr | 0x03);
 						pteEntry = getPteEntry(vAddr);
 					}
-
-					// const auto index = PTE_64_4K::index(vAddr);
-					// if( (pdeEntry->physical[index] & 0xFFFFFFFFFFFFF000) != 0 )
-					// {
-					// 	pdeEntry->physical[index] |= 0x03;
-					// }
-					// else
-					// {
-					// 	auto newFr = frameStack.allocPage();
-					// 	pdeEntry->physical[index] |= (newFr | 0x03);
-					// }
 					invalidate_tlb(vAddr);
 					memset(reinterpret_cast <uint64_t *>(vAddr), 0, 4096);
 					success = true;
@@ -431,6 +476,33 @@ namespace VM {
 		}
 		
 		return success;
+	}
+
+	uint64_t Manager::getPhysicalAddress(uint64_t vAddr)
+	{
+		uint64_t frame = 0;
+		auto *pmle4Entry = getPlme4Entry(vAddr);
+		if( pmle4Entry )
+		{			
+			auto *pdptEntry = getPdpteEntry(vAddr);
+			if( pdptEntry )
+			{
+				auto *pdeEntry = getPdeEntry(vAddr);
+				if( pdeEntry )
+				{
+					const auto index1 = PML4E_4K::index(vAddr);
+					const auto index2 = PDPTE_64_4K::index(vAddr);
+					const auto index3 = PDE_64_4K::index(vAddr);
+					const auto index4 = PTE_64_4K::index(vAddr);
+					uint64_t val = 0;
+					if( getPTEFrame(index1, index2, index3, index4, val) )
+					{
+						frame = val;
+					}
+				}
+			}
+		}
+		return frame;
 	}
 	
 	bool Manager::allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable)

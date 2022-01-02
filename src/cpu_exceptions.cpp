@@ -1,29 +1,29 @@
 #include "isr.h"
 #include "vesavga.h"
 
-void divide_by_zero_fault(registers64_t);
-void debug_trap(registers64_t);
-void NMI_interrupt(registers64_t);
-void breakpoint_trap(registers64_t);
-void overflow_trap(registers64_t);
-void bound_range_fault(registers64_t);
-void invalid_opcode_fault(registers64_t);
-void device_not_available_fault(registers64_t);
-void double_fault_abort(registers64_t);
-void fpu_overrun_fault(registers64_t);
-void TSS_invalid_fault(registers64_t);
-void segment_not_present_fault(registers64_t);
-void stack_segment_fault(registers64_t);
-void general_protection_fault(registers64_t);
-void page_fault(registers64_t);
-void reserved(registers64_t);
-void FPU_exception_fault(registers64_t);
-void alignment_check_fault(registers64_t);
-void machine_check_abort(registers64_t);
-void SIMD_exception_fault(registers64_t);
-void virtualization_fault(registers64_t);
-void security_exception(registers64_t);
-void FPU_error_interrupt(registers64_t);
+static void divide_by_zero_fault(registers64_t);
+static void debug_trap(registers64_t);
+static void NMI_interrupt(registers64_t);
+static void breakpoint_trap(registers64_t);
+static void overflow_trap(registers64_t);
+static void bound_range_fault(registers64_t);
+static void invalid_opcode_fault(registers64_t);
+static void device_not_available_fault(registers64_t);
+static void double_fault_abort(registers64_t);
+static void fpu_overrun_fault(registers64_t);
+static void TSS_invalid_fault(registers64_t);
+static void segment_not_present_fault(registers64_t);
+static void stack_segment_fault(registers64_t);
+static void general_protection_fault(registers64_t);
+static void page_fault(registers64_t);
+static void reserved(registers64_t);
+static void FPU_exception_fault(registers64_t);
+static void alignment_check_fault(registers64_t);
+static void machine_check_abort(registers64_t);
+static void SIMD_exception_fault(registers64_t);
+static void virtualization_fault(registers64_t);
+static void security_exception(registers64_t);
+static void FPU_error_interrupt(registers64_t);
 
 struct IsrDesc
 {
@@ -65,74 +65,74 @@ void install_processor_handlers()
 }
 
 
-void divide_by_zero_fault(registers64_t)
+static void divide_by_zero_fault(registers64_t)
 {
     PANIC("Divide By Zero.");
 }
 
-void debug_trap(registers64_t)
+static void debug_trap(registers64_t)
 {
     PANIC("Debug Trap.");
 }
 
-void NMI_interrupt(registers64_t)
+static void NMI_interrupt(registers64_t)
 {
     PANIC("NMI Interrupt.");
 }
 
-void breakpoint_trap(registers64_t)
+static void breakpoint_trap(registers64_t)
 {
     PANIC("Breakpoint Trap.");
 }
 
 
-void overflow_trap(registers64_t)
+static void overflow_trap(registers64_t)
 {
     PANIC("Overflow Trap.");
 }
 
 
-void bound_range_fault(registers64_t)
+static void bound_range_fault(registers64_t)
 {
     PANIC("Bound Range Fault.");
 }
 
-void invalid_opcode_fault(registers64_t)
+static void invalid_opcode_fault(registers64_t regs)
 {
-    PANIC("Invalid Opcode Fault.");
+    PANIC1("Invalid Opcode Fault, RIP 0x%016.16lx", regs.rip);
 }
 
-void device_not_available_fault(registers64_t)
+static void device_not_available_fault(registers64_t)
 {
     PANIC("FPU Device Not Available Fault.");
 }
 
-void double_fault_abort(registers64_t)
+static void double_fault_abort(registers64_t)
 {
     PANIC("Double Fault.");
 }
 
-void fpu_overrun_fault(registers64_t)
+static void fpu_overrun_fault(registers64_t)
 {
     PANIC("FPU Overrun Fault.");
 }
 
-void TSS_invalid_fault(registers64_t)
+static void TSS_invalid_fault(registers64_t)
 {
     PANIC("Invalid TSS Fault.");
 }
 
-void segment_not_present_fault(registers64_t)
+static void segment_not_present_fault(registers64_t)
 {
     PANIC("Segment Not Presetn Fault.");
 }
 
-void stack_segment_fault(registers64_t)
+static void stack_segment_fault(registers64_t)
 {
     PANIC("Stack Segment Fault.");
 }
 
-void general_protection_fault(registers64_t regs)
+static void general_protection_fault(registers64_t regs)
 {
     if( regs.err_code != 0)
     {
@@ -168,7 +168,7 @@ void general_protection_fault(registers64_t regs)
     PANIC1("General Protection Fault, RIP 0x%016.16lx", regs.rip);
 }
 
-void page_fault(registers64_t regs)
+static void page_fault(registers64_t regs)
 {
     // Output an error message.
     //monitor_write("Page fault! ( ");
@@ -187,7 +187,7 @@ void page_fault(registers64_t regs)
     int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
 
     // Output an error message.
-    printf("Page fault! at 0x%016.16lX executing: 0x%016.16lX\n\t( %s %s %s %s )\n", 
+    printf("Page fault! at 0x%016.16lX executing: 0x%016.16lX\n\t( %s %s %s %s %s )\n", 
         faulting_address,
         regs.rip,
         present ? "present" : "absent",
@@ -201,43 +201,43 @@ void page_fault(registers64_t regs)
 
 }
 
-void reserved(registers64_t)
+static void reserved(registers64_t)
 {
     PANIC("Reserved 1.");
 }
 
-void FPU_exception_fault(registers64_t)
+static void FPU_exception_fault(registers64_t)
 {
     PANIC("FPU Exception Fault");
 }
 
-void alignment_check_fault(registers64_t)
+static void alignment_check_fault(registers64_t)
 {
     PANIC("Alignment Check Fault.");
 }
 
-void machine_check_abort(registers64_t)
+static void machine_check_abort(registers64_t)
 {
     PANIC("Machine Check Abort.");
 }
 
-void SIMD_exception_fault(registers64_t)
+static void SIMD_exception_fault(registers64_t)
 {
     PANIC("SIMD Exception Fault.");
 }
 
-void virtualization_fault(registers64_t)
+static void virtualization_fault(registers64_t)
 {
     PANIC("Virtualization Fault.");
 }
 
-void security_exception(registers64_t)
+static void security_exception(registers64_t)
 {
     PANIC("Security Exception.");
 }
 
 
-void FPU_error_interrupt(registers64_t)
+static void FPU_error_interrupt(registers64_t)
 {
     PANIC("FPU Error Interrupt.");
 }

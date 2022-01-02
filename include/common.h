@@ -24,6 +24,9 @@ void outsw(uint16_t port, const uint16_t *buf, size_t size);
 void batch_outb(uint16_t *port, uint8_t *data, size_t size);
 void batch_outb2(uint32_t *iodata, size_t size);
 
+bool acquireLock(uint32_t *lock);
+bool releaseLock(uint32_t *lock);
+
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 extern void halt(void);	/* never returns */
@@ -82,7 +85,8 @@ void panic_assert(const char *file, uint32_t line, const char *desc);
 #define PANIC(msg) panic(msg, __FILE__, __LINE__);
 #define ASSERT(b) ((b) ? (void)0 : panic_assert(__FILE__, __LINE__, #b))
 
-#define PAGE_ALIGN(a) if( (a & 0xFFFFF000) != 0 ) { a = ((a & 0xFFFFF000) + 0x1000); }
+// #define PAGE_ALIGN(a) if( (a & 0xFFFFF000) != 0 ) { a = ((a & 0xFFFFF000) + 0x1000); }
+#define PAGE_ALIGN(a) if( (a & 0x00000000000001FF) != 0 ) { a = ((a & ~(0x00000000000001FF)) + 0x1000); }
 
 #ifdef __cplusplus
 }

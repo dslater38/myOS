@@ -4,7 +4,10 @@
 /*            tutorials: http://www.osdever.net/bkerndev/index.php. */
 
 OUTPUT_FORMAT(elf64-x86-64)
-ENTRY(MOD_ENTRY)
+ENTRY(hello)
+
+/* VM_BASE = 0xFFFFFFFF80200000; */
+VM_BASE = 0xFFFF800000200000;
 
 SECTIONS
 {	

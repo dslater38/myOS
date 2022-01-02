@@ -21,6 +21,7 @@
 #include "MultiBootInfoHeader.h"
 #include "BootInformation.h"
 #include "elf/elf.h"
+#include "VMManager.h"
 /*  Macros. */
 
 /*  Some screen stuff. */
@@ -177,7 +178,8 @@ extern bool allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bo
 static errval_t ElfAllocatorFn(void * /* state */ , genvaddr_t base, size_t size, uint32_t flags, void **ret)
 {
 	size_t numPages = (size + 4095) / 4096;
-	auto success = allocPages(base, numPages, true, true);
+//	auto success = allocPages(base, numPages, true, true);
+	auto success = true;
 	if (success && ret)
 	{
 		*ret = reinterpret_cast<void *>(base);
@@ -191,12 +193,17 @@ static void print_module(const multiboot_tag_module *module)
 {
 	printf ("Module at 0x%08.8x-0x%08.8x. Command line %s\n",
 		  module->mod_start, module->mod_end, module->cmdline);
-//	genvaddr_t entry = 0;
-//	auto success = elf_load(EM_X86_64, ElfAllocatorFn, nullptr, module->mod_start, module->mod_end - module->mod_start, &entry);
-//	if (success == 0)
-//	{
-//		printf("elf_load() loaded module. Entry Address is : 0x%016.16lx\n", entry);
-//	}
+	genvaddr_t entry = 0;
+	auto success = elf_load(EM_X86_64, ElfAllocatorFn, nullptr, (module->mod_start | 0xFFFF800000000000), module->mod_end - module->mod_start, &entry);
+	if (success == 0)
+	{
+		printf("elf_load() loaded module. Entry Address is : 0x%016.16lx\n", entry);
+			typedef int (*PrintfT)( const char* format, ... );
+			typedef void (*HelloT)(PrintfT);
+			auto fn = reinterpret_cast<HelloT>(entry);
+			(*fn)(printf);
+
+	}
 
 }
 
@@ -319,7 +326,7 @@ static void draw_line(multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color
 
 static void set_pixel_color(const multiboot_tag_framebuffer *tagfb, multiboot_uint32_t color)
 {
-	void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
+	void *fb = reinterpret_cast<void *>(static_cast<uint64_t>(tagfb->common.framebuffer_addr) + VM_BASE);
 	
 	for (auto i = 0; i < tagfb->common.framebuffer_width && i < tagfb->common.framebuffer_height; i++)
 	{

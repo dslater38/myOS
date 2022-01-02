@@ -26,9 +26,9 @@ section .text
 %define USERDATA32 (entries.user_data_32-entries)
 %define USERCODE16 (entries.user_code_16-entries)
 %define USERDATA16 (entries.user_data_16-entries)
-; %define VM_BASE 0xFFFF800000000000
+%define VM_BASE 0xFFFF800000000000
 ; %define VM_BASE 0x0000000000000000
-%define VM_BASE 0x00000000C0000000
+;%define VM_BASE 0x00000000C0000000
 
 
 section .multiboot.text
@@ -36,11 +36,12 @@ section .multiboot.text
 ; on entry, ebx holds the multi-boot header pointer
 ; eax holds the magic value
 align 16
-start:
+; start:
+PROC start
 	cli
 	cmp eax,MULTIBOOT2_BOOTLOADER_MAGIC
 	jnz  .error
-	mov esp, kernel_stack	; setup a stack
+;	mov esp, kernel_stack	; setup a stack
 	mov edi, eax	; save magic value into edi - will become rdi in x64 == first argument
 	mov esi, ebx	; save multiboot header pointer in esi - will become rsi on x64 == second argument
 .load_p4_table:
@@ -60,7 +61,6 @@ start:
 	rdmsr
 	or eax, 1 << 8
 	wrmsr
-
 	; enable paging
 .enable_paging:
 	mov eax, cr0
@@ -68,24 +68,16 @@ start:
 	or eax, 1 << 16
 	mov cr0, eax
 .gdt_flush:
-	mov eax, (gdt - VM_BASE)
-	lgdt [eax]        	; Load the new GDT pointer
+	mov eax, (gdt - VM_BASE); We're running 32-bit code. Need to initially load the physical address of gdt
+	lgdt [eax]        		; Load the new GDT pointer. Currently, we have the first 4 MB identity mapped
 	mov ax, DATA64  		; this is the offset into the GDT for our 64-bit data segment
-	mov ds, ax        	; Load all data segment selectors
+	mov ds, ax        		; Load all data segment selectors
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
-	mov ebp, start
-	push ebp				; set up a fake initial stack frame 
-	push 0					; make it look like a 64-bit frame
-	mov ebp, esp			; that looks like a call to start
-	push esi
-	push 0
-	push edi
-	push 0
 .jmp_start64:
-	jmp CODE64:start64   ; CODE is the offset into our GDT table for the 64-bit code segment: Far jump!
+	jmp CODE64:tramp64   ; CODE is the offset into our GDT table for the 64-bit code segment: Far jump!
 .loop:
 	hlt				; should never get here
 .error:
@@ -93,13 +85,33 @@ start:
 	jmp .loop
 	pop ebp			; undo the 2 pushes at the start
 	pop ebp			; first pop is high-order DWORD == 0 - discard
+ENDP
+
+[BITS 64]
+align 16
+PROC tramp64
+	mov rsp, kernel_stack
+	mov rbp, tramp64
+	push rbp
+	mov rbp, rsp
+	push rsi
+	push rdi
+	mov r10, start64
+	jmp r10
+ENDP
 
 section .text
 
 [BITS 64]
 align 16
-start64:
-	push start.loop	; setup fake return address - allows debugger to walk up the stack
+PROC start64
+	mov rax, gdt				; Now that we're in long mode, reload our GDT with the full
+	lgdt [rax]      			; 64-bit higher-half virtual address
+	mov rax, p4_table			; Now that the GDT is reloaded, we no longer need the identity mapping
+	mov qword [rax], 0x00000000	; so, zero out the first entry of the PML4# table
+	mov rax, cr3				; and reload the page tables.
+	mov cr3, rax				; At this point, only virtual addresses above VM_BASE (0xFFFF800000000000) should be valid.
+	push start					; setup fake return address - allows debugger to walk up the stack
 	mov rbp, rsp
 	and edi, edi	; 32-bit magic value is in edi. Make sure high order DWORD of rdi is cleared
 	and esi, esi	; multiboot header pointer was put in esi. It's < 32 bits, make sure upper DWORD of rsi is cleared.
@@ -115,7 +127,7 @@ start64:
 	hlt				; should never get here
 	jmp .loop
 	pop rbp			; will never get here
-
+ENDP
 
 section .multiboot.data
 ;
@@ -183,65 +195,31 @@ gdt:
 align 0x1000
 
 page_table:
-p4_table:						; PML4E
-	dq (p3_table + 3 - VM_BASE)			; pointer to PDPTE table with rw & present bits set
-	TIMES 255 dq 0				; write 254 null entries to fill the table.
-	dq (p3_table.next + 3 - VM_BASE)		; pointer to PDPTE table for high memory with rw & present bits set
-	TIMES 253 dq 0				; write 254 null entries to fill the table.
-	dq 387						; 1GB huge page maps the first 1GB of memory. 0xFFFFFFFF80000000 linear => 0x0000000000000000 physical
+p4_table:								; PML4E
+	dq (p3_table + 3 - VM_BASE)			; level 3 entry for identity mapping. This aliases the higher-half kernel's physical memory
+	TIMES 255 dq 0						; write 254 null entries to fill the table.
+	dq (p3_table + 3 - VM_BASE)			; level 3 entry for the higher-half kernel. We map 4 MB at VM_BASE (0xFFFF800000000000)
+	TIMES 254 dq 0						; write 254 null entries to fill the table.
 	dq (p4_table + 3 - VM_BASE)			; write final recursive entry. Constructing appropriate virtual addresses will give us access to the page tables
-p3_table:						; PDPTE
-	dq (p2_table + 3 - VM_BASE)			; pointer to PDE table with rw & present bits set.
-	dq 0x0000000000000000
-	dq 0x0000000000000000
-	dq (p2_table + 0x03 - VM_BASE)
-	TIMES 508 dq 0				; write 511 null entries to fill the table.
-.next:
-	; dq (p2_table.next + 3 - VM_BASE)		; pointer to PDE table with rw & present bits set.
-	dq (p2_table + 3 - VM_BASE)		; pointer to PDE table with rw & present bits set.
-	TIMES 511 dq 0				; write 511 null entries to fill the table.
-p2_table:						; PDE 
-	dq (p1_table + 3 - VM_BASE)			; pointer to the PTE table with rw & present bits set
-	TIMES 511 dq 0				; write 511 null entries for a total of 512 entries
-;.next:
-;	dq (p1_table + 3 - VM_BASE)		; pointer to the High address PTE table with rw & present bits set
-;	TIMES 511 dq 0				; write 511 null entries for a total of 512 entries
-;.next2:
-;	dq (p1_table + 3 - VM_BASE)			; pointer to the PTE table with rw & present bits set
-;	TIMES 511 dq 0				; write 511 null entries for a total of 512 entries
-p1_table:						; PTE 
-	%assign p 0x03				; set the rw & present bits (0x03) 
-	%rep 512					; write 511 of 512 entries to the PTE table
-	dq p						; write page entry
-	%assign p p+ 0x00001000		; increment page entry virtual ( and physical ) address by page size (4K)
-	%endrep						; end of loop
+p3_table:								; PDPTE
+	dq (p2_table + 3 - VM_BASE)			; level 2 entry
+	TIMES 511 dq 0						; write 511 null entries to fill the table.
+p2_table:								; PDE 
+	dq (p1_table + 3 - VM_BASE)			; 2 level 1 entries to map 4MB of physical memory
+	dq (p1_table.next + 3 - VM_BASE)	; 
+	TIMES 510 dq 0						; write 510 null entries for a total of 512 entries
+p1_table:								; PTE 2 PTE's to map the first 4 MP of physical memory to VM_BASE (0xFFFF800000000000)
+	%assign p 0x03						; set the rw & present bits (0x03) 
+	%rep 512							; write 511 of 512 entries to the PTE table
+	dq p								; write page entry
+	%assign p p + 0x00001000			; increment page entry virtual ( and physical ) address by page size (4K)
+	%endrep								; end of loop
+p1_table.next:
+	%assign p 0x00200003				; set the rw & present bits (0x03) 
+	%rep 512							; write 511 of 512 entries to the PTE table
+	dq p								; write page entry
+	%assign p p + 0x00001000			; increment page entry virtual ( and physical ) address by page size (4K)
+	%endrep								; end of loop
 page_table.end:
-
-; From dan/msvc branch - older implementation.
-; p4_table:							; PML4E
-; 	dq (p3_table + 3)				; pointer to PDPTE table with rw & present bits set
-; 	TIMES 510 dq 0					; write 510 null entries to fill the table.
-; 	dq (p4_table + 3)				; write recursive entry
-; p3_table:							; PDPTE
-; 	dq (p2_table + 3)				; pointer to PDE table with rw & present bits set.
-; 	TIMES 511 dq 0					; write 511 null entries to fill the table.
-; p2_table:							; PDE 
-; 	dq (p1_table + 0x0003)			; pointer to the first PTE table with rw & present bits set
-; 	dq (p1_table + 0x1003)			; pointer to the second PTE table with rw & present bits set
-; 	dq (p1_table + 0x2003)			; pointer to the third PTE table with rw & present bits set
-; 	dq (p1_table + 0x3003)			; pointer to the forth PTE table with rw & present bits set
-; 	TIMES 508 dq 0					; write 511 null entries for a total of 512 entries
-; p1_table:							; PTE 
-; 	%assign p 0x0000000000000003	; set the rw & present bits (0x03) 
-; 	%rep 2048						; write 2048 entries to 4 PTE tables to cover 8 MB physical RAM
-; 	dq p							; write page entry
-; 	%assign p p + 0x0000000000001000; increment page entry virtual ( and physical ) address by page size (4K)
-; 	%endrep							; end of loop
-; p3_gb_mapped_table:
-; 	%assign p 0x0000000000000183	; set the rw, present, and global bits (0x03) 
-; 	%rep 512						; write 512 entries 1GB page entries to the table. set the global,rw,present & huge bits
-; 	dq p							; write page entry
-; 	%assign p p + 0x0000000040000000; increment page entry virtual ( and physical ) address by page size (1GB) for first 512 GB of RAM
-; 	%endrep							; end of loop
 
 startup_data_end:
