@@ -93,8 +93,8 @@ PROC tramp64
 	mov rbp, rsp
 	push rsi
 	push rdi
-	mov r10, start64
-	jmp r10
+	mov rax, start64
+	jmp rax
 ENDP
 
 section .text
@@ -213,10 +213,12 @@ p1_table:								; PTE 2 PTE's to map the first 4 MB of physical memory to VM_BA
 	%endrep								; end of loop
 p1_table.next:
 	%assign p 0x00200003				; set the rw & present bits (0x03) 
-	%rep 512							; write 511 of 512 entries to the PTE table
+	%rep 510							; write 511 of 512 entries to the PTE table
 	dq p								; write page entry
 	%assign p p + 0x00001000			; increment page entry virtual ( and physical ) address by page size (4K)
 	%endrep								; end of loop
+	dq 0x0000000000000000				; location where we'll write physical addresses of page tables.
+	dq (p1_table.next + 3 - VM_BASE)	; pointer back to this page table
 page_table.end:
 
 startup_data_end:

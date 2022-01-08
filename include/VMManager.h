@@ -8,6 +8,7 @@
 #include "NewObj.h"
 #include "PageT.h"
 #include "kheap.h"
+#include "PageDirectory.h"
 
 namespace VM {
 
@@ -23,6 +24,10 @@ namespace VM {
 		bool freePages(uint64_t startAddress, size_t numPages);
 		heap_t	*getKernelHeap() { return kernelHeap; }
 		static uint64_t getPhysicalAddress(uint64_t vAddr);
+		static PML4E_4K	*getPML4_Table();
+		static PDPTE_64_4K *getPDPT_Table(uint64_t vAddr);
+		static PDE_64_4K *getPD_Table(uint64_t vAddr);
+		static PTE_64_4K *getPT_Table(uint64_t vAddr);
 	private:
 		static Page4K *getPageEntry(uint64_t vAddr);
 		bool	createHeap();

@@ -43,6 +43,12 @@ PROC invalidate_all_tlbs
 	LEAVE
 	ret
 ENDP
+PROC pml4_addr
+	ENTER
+	mov rax, cr3
+	LEAVE
+	ret
+ENDP
 PROC outb
 	ENTER
 	mov rdx, rdi
@@ -205,7 +211,7 @@ PROC acquireLock
 	jz .exit
 	lock bts dword [rdi], 0
 	jc .spin
-	mov rax, 1
+	inc rax
 .exit
 	LEAVE
 	ret
@@ -221,7 +227,7 @@ PROC releaseLock
 	test rdi, rdi
 	jz .exit
 	mov dword [rdi], 0
-	mov rax, 1
+	inc rax
 .exit:	
 	LEAVE
 	ret

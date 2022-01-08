@@ -8,7 +8,7 @@ extern "C"
 	extern uint64_t placement_address;
 	extern void invalidate_all_tlbs();
 	extern void invalidate_tlb(uint64_t);
-	
+	extern uint64_t pml4_addr();
 }
 
 namespace VM {
@@ -503,6 +503,61 @@ namespace VM {
 		return frame;
 	}
 	
+	uint64_t *const PTE_ENTRY = reinterpret_cast<uint64_t *>(0xFFFF8000003FFFF0);
+	uint64_t *const CurrentPageTable = reinterpret_cast<uint64_t *>(0xFFFF8000003FE000);
+	PML4E_4K *Manager::getPML4_Table()
+	{
+		auto cr3 = pml4_addr();
+		*PTE_ENTRY = ( cr3 | 0x03 );
+		invalidate_tlb(reinterpret_cast<uint64_t>(PTE_ENTRY) & 0xFFFFFFFFFFFFF000ull );
+		return reinterpret_cast<PML4E_4K *>(CurrentPageTable);
+	}
+
+	PDPTE_64_4K *Manager::getPDPT_Table(uint64_t vAddr)
+	{
+		PDPTE_64_4K *ptr = nullptr;
+		auto *pml4 = getPML4_Table();
+		if(pml4)
+		{
+			auto index = PML4E_4K::index(vAddr);
+			auto physAddr = (pml4->physical[index] & 0xFFFFFFFFFFFFF000ull);
+			*PTE_ENTRY = ( physAddr | 0x03 );
+			invalidate_tlb(reinterpret_cast<uint64_t>(PTE_ENTRY) & 0xFFFFFFFFFFFFF000ull );
+			ptr = reinterpret_cast<PDPTE_64_4K *>(CurrentPageTable);
+		}
+		return ptr;
+	}
+
+	PDE_64_4K *Manager::getPD_Table(uint64_t vAddr)
+	{
+		PDE_64_4K *ptr = nullptr;
+		auto *pdpt = getPDPT_Table(vAddr);
+		if(pdpt)
+		{
+			auto index = PDPTE_64_4K::index(vAddr);
+			auto physAddr = (pdpt->physical[index] & 0xFFFFFFFFFFFFF000ull);
+			*PTE_ENTRY = ( physAddr | 0x03 );
+			invalidate_tlb(reinterpret_cast<uint64_t>(PTE_ENTRY) & 0xFFFFFFFFFFFFF000ull );
+			ptr = reinterpret_cast<PDE_64_4K *>(CurrentPageTable);
+		}
+		return ptr;
+	}
+
+	PTE_64_4K *Manager::getPT_Table(uint64_t vAddr)
+	{
+		PTE_64_4K *ptr = nullptr;
+		auto *pd = getPD_Table(vAddr);
+		if(pd)
+		{
+			auto index = PDE_64_4K::index(vAddr);
+			auto physAddr = (pd->physical[index] & 0xFFFFFFFFFFFFF000ull);
+			*PTE_ENTRY = ( physAddr | 0x03 );
+			invalidate_tlb(reinterpret_cast<uint64_t>(PTE_ENTRY) & 0xFFFFFFFFFFFFF000ull );
+			ptr = reinterpret_cast<PTE_64_4K *>(CurrentPageTable);
+		}
+		return ptr;
+	}
+
 	bool Manager::allocPages(uint64_t startAddress, size_t numPages, bool isKernel, bool isWritable)
 	{
 		for( auto i = 0u; i < numPages; ++i )

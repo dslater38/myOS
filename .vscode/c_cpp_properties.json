@@ -8,8 +8,8 @@
                 "D:\\Software\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.28.29333\\include",
                 "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.18362.0\\ucrt"
             ],
-            "defines": [],
-            "compilerPath": "clang",
+            "defines": ["VM_BASE=0xFFFF800000000000"],
+            "compilerPath": "/usr/bin/clang++",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64"

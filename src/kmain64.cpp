@@ -135,6 +135,10 @@ extern "C"
 		// VM::Manager mgr {reinterpret_cast <const multiboot_tag_mmap *>(tag)};
 		VM::Manager mgr{bootInfo.mmap};
 		
+		auto *pml4 = mgr.getPML4_Table();
+
+		printf("PML4E Entry 256 == 0x%08.8x\n", pml4->physical[256]);
+
 		
 		auto *frames = initHeap(mgr);
 		printf("Heap Initialized...\n");

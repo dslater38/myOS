@@ -77,7 +77,7 @@ private:
 	void copy_cur_line();
 private:
 	uint16_t back_buffer [VIDEO_MEM_COUNT] = {0};
-	uint16_t *video_memory{reinterpret_cast<uint16_t *>(0xFFFF8000000B8000)};
+	uint16_t *video_memory{reinterpret_cast<uint16_t *>(VM_BASE + 0x00000000000B8000)};
 	TextColors backColor{TextColors::BLACK};
 	TextColors foreColor {TextColors::GREEN};	
 	uint32_t cur_line = 0;

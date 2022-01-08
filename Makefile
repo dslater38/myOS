@@ -19,15 +19,6 @@ export CXXFLAGS:=-std=c++17 -fno-use-cxa-atexit -mno-sse2 -nostdlib -stdlib=libc
 export ASFLAGS=-felf64 -Xvc -gdwarf -DDEBUG -DVM_BASE=$(VM_BASE)
 LDFLAGS=-no-pie -ffreestanding -nostdlib -fno-exceptions -fno-threadsafe-statics -fno-rtti -mno-red-zone -Xlinker -Tlink.ld -Xlinker --no-relax -Xlinker --defsym="VM_BASE=$(VM_BASE)"
 
-# incomming change from dan/msvc
-# export CPPFLAGS:=-I../include
-# export CFLAGS:=-std=c11 -mno-sse2 -nostdlib -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g
-# export CXXFLAGS:=-std=c++17 -mno-sse2 -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone -mno-mmx -mno-sse -mno-sse2 -O0 -g -ggdb3 -Wno-main
-# export ASFLAGS=-felf64 -g -F stabs
-# LDFLAGS=-no-pie -ffreestanding -nostdlib -fno-exceptions -fno-threadsafe-statics -mno-red-zone  -Xlinker -Tlink.ld -lgcc
-
-
-
 .PHONY: all $(SUBDIRS) clean
 
 all : $(SUBDIRS) os.iso
